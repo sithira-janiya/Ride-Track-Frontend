@@ -1,6 +1,6 @@
 import { Redirect } from 'expo-router';
 
-import { RoleTabs } from '@/components/role-tabs';
+import { RoleTabs } from '@/components/navigation/role-tabs';
 import { useTransportStore } from '@/store/transport-store';
 
 export default function PassengerTabsLayout() {

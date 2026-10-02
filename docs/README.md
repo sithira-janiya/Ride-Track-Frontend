@@ -2,19 +2,31 @@
 
 Project documentation for RideTrack, a React Native app for live bus and train tracking and QR ticketing in Sri Lanka. Setup and run instructions are in the root [Readme.md](../Readme.md).
 
+### project: what we build and who builds it
+
 | Doc | What it covers |
 |---|---|
-| [UI-GUIDE.md](UI-GUIDE.md) | Shared theme, components and navigation shell |
-| [MEMBERS.md](MEMBERS.md) | Features and tasks per team member |
-| [TASKS.md](TASKS.md) | Project task list and status |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, role flows, connection points |
-| [TECH-INFO.md](TECH-INFO.md) | Tech stack, justification, environment, scripts |
-| [DATA-MODEL.md](DATA-MODEL.md) | Firestore collections, relationships, security rules |
-| [SCREENS.md](SCREENS.md) | All 42 screens with owner, file and CRUD operations |
-| [TESTING.md](TESTING.md) | Functional and integration test cases, defect log |
-| [USABILITY-TESTING.md](USABILITY-TESTING.md) | Usability test plan and results |
-| [TRACEABILITY.md](TRACEABILITY.md) | Requirements mapped to screens and tests |
-| [GIT-WORKFLOW.md](GIT-WORKFLOW.md) | main / dev / feature branches, commits, pull requests, secrets |
+| [TASKS.md](project/TASKS.md) | Project task list, status and update log |
+| [MEMBERS.md](project/MEMBERS.md) | Features and tasks per team member |
+| [SCREENS.md](project/SCREENS.md) | All 42 screens with owner, file and CRUD operations |
+| [TRACEABILITY.md](project/TRACEABILITY.md) | Requirements mapped to screens and tests |
+
+### design: how it is built
+
+| Doc | What it covers |
+|---|---|
+| [ARCHITECTURE.md](design/ARCHITECTURE.md) | System design, folder structure, role flows, connection points |
+| [DATA-MODEL.md](design/DATA-MODEL.md) | Firestore collections, relationships, security rules |
+| [UI-GUIDE.md](design/UI-GUIDE.md) | Shared theme, components and navigation shell |
+| [TECH-INFO.md](design/TECH-INFO.md) | Tech stack, justification, environment, scripts |
+
+### process: how we work and check quality
+
+| Doc | What it covers |
+|---|---|
+| [GIT-WORKFLOW.md](process/GIT-WORKFLOW.md) | main / dev / feature branches, commits, pull requests, secrets |
+| [TESTING.md](process/TESTING.md) | Functional and integration test cases, defect log |
+| [USABILITY-TESTING.md](process/USABILITY-TESTING.md) | Usability test plan and results |
 
 ## Team
 
@@ -22,6 +34,6 @@ Silva D S J (leader), Rajapaksha M.P.K, Herath H.M.S.G, Fernando H L R D. Group 
 
 ## Keeping docs current
 
-- Tick tasks in [MEMBERS.md](MEMBERS.md) and [TASKS.md](TASKS.md) in the same pull request as the work.
+- Tick tasks in [MEMBERS.md](project/MEMBERS.md) and [TASKS.md](project/TASKS.md) in the same pull request as the work.
 - Update the matching doc when code changes screens, data or setup.
 - Record test and usability results only after they really happen.

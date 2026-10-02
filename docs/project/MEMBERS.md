@@ -21,7 +21,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Shared theme and navigation shell
 - [x] Create GitHub repo with `main` and `dev` branches
 - [x] Add `.env.example`
-- [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
+- [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
 - [x] Select Transport (first screen, saved choice, redirect on first launch)
 - [ ] Home (starter built with current transport and Change button; nearby vehicles, saved routes, alerts to add)
 - [ ] Search with recent searches (create/delete), filtered by chosen transport

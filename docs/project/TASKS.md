@@ -17,10 +17,10 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 ## Phase 3: Testing
 
-- [ ] Functional test cases run per area, results in [TESTING.md](TESTING.md) (All)
+- [ ] Functional test cases run per area, results in [TESTING.md](../process/TESTING.md) (All)
 - [ ] Traceability matrix completed ([TRACEABILITY.md](TRACEABILITY.md)) (H)
 - [ ] Integration: ticket scan, incident report, alert delivery (All)
-- [ ] Usability test with 5 or more participants ([USABILITY-TESTING.md](USABILITY-TESTING.md)) (S)
+- [ ] Usability test with 5 or more participants ([USABILITY-TESTING.md](../process/USABILITY-TESTING.md)) (S)
 - [ ] Defects and usability issues logged with fixes (All)
 - [ ] Verify every screen has at least 2 working CRUD operations (All)
 
@@ -63,10 +63,10 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 - [x] Expo + TypeScript project scaffolded (S)
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
-- [x] Shared theme and role navigation shell, see [UI-GUIDE.md](UI-GUIDE.md) (S)
+- [x] Shared theme and role navigation shell, see [UI-GUIDE.md](../design/UI-GUIDE.md) (S)
 - [ ] Align theme tokens with the Figma hi-fi prototype (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
-- [x] Branch protection on `main` and `dev`, pull requests required (S), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
+- [x] Branch protection on `main` and `dev`, pull requests required (S), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
 - [ ] Firebase project, Auth, Firestore rules (F)
 - [x] `.env.example` added (S)
 - [ ] Seed script (F)

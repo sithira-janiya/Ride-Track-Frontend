@@ -48,7 +48,7 @@ Open a pull request from your branch **into `dev`**.
 ## Pull requests
 
 - Target `dev`, never `main`.
-- Title follows the commit format; the description names the screen and links the task in [MEMBERS.md](MEMBERS.md).
+- Title follows the commit format; the description names the screen and links the task in [MEMBERS.md](../project/MEMBERS.md).
 - At least one teammate reviews and runs the app before merging.
 - Tick the task in MEMBERS.md and TASKS.md in the same PR.
 - Delete the feature branch after it is merged.
