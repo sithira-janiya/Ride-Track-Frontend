@@ -27,6 +27,7 @@ Usability testing on the **working app** with at least **5 participants** (real 
 
 | ID | Role | Task | Success criterion | Requirement |
 |---|---|---|---|---|
+| T0 | Passenger | Choose bus or train when first opening the app | Reaches Home showing the chosen type | FR3 |
 | T1 | Passenger | Find a bus from A to B and open its details | Reaches Transport Details | FR3, FR4 |
 | T2 | Passenger | Track the vehicle live | Opens Live Tracking | FR7 |
 | T3 | Passenger | Buy a ticket and find it in My Tickets | Digital Ticket shown | FR1, FR2 |

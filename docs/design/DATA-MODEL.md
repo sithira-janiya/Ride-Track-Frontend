@@ -36,6 +36,7 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 ### `schedules/{id}`
 | Field | Type |
 |---|---|
+| type | `bus` \| `train` (copied from the route, so passengers can filter by it) |
 | routeId | string |
 | vehicleId | string |
 | conductorId | string |
@@ -71,6 +72,10 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 | routeId | string, optional (null means all routes) |
 | createdBy | string (authority uid) |
 | createdAt | timestamp |
+
+## Passenger queries by transport type
+
+`routes`, `vehicles` and `schedules` all carry `type`. Passenger queries filter on the type chosen at the start, for example `where('type', '==', 'bus')`. Firestore may ask for a composite index when combining this filter with sorting; create it from the link in the error message.
 
 ## Relationships
 

@@ -19,13 +19,40 @@ RideTrack is a single React Native (Expo) app with three role-based areas, backe
                 └────────────────────────────────┘
 ```
 
+## Folder structure
+
+```
+src/
+├── app/            Routes only. A file here is a screen; keep logic thin.
+├── components/     Reusable UI shared by more than one screen
+│   ├── ui/           Generic building blocks (Screen, PlaceholderScreen)
+│   ├── navigation/   Navigation pieces (RoleTabs)
+│   └── transport/    Bus/train components (TransportBadge)
+├── constants/      Theme tokens and fixed values (theme.ts, transport.ts)
+├── lib/            Firebase init and data access (typed queries and writes)
+├── store/          Zustand stores (current user, transport choice, booking draft)
+└── (future) types/ Shared TypeScript types, added when needed
+```
+
+Rules:
+
+| Rule | Why |
+|---|---|
+| Screens live only in `src/app/`; one file per screen | Expo Router builds navigation from files |
+| Shared UI goes in `src/components/<group>/`; a component used by one screen stays next to it | Keeps `components/` small and truly shared |
+| Colours, spacing and fixed lists come from `src/constants/` | One place to change the look |
+| Screens never call Firebase directly; use functions in `src/lib/` | Easy to test and change the backend |
+| App state in `src/store/` | One source of truth |
+| Import with `@/` (maps to `src/`) | No long relative paths |
+| Docs sit in `docs/project`, `docs/design` or `docs/process` | Easy to find |
+
 ## Layers
 
 | Layer | Responsibility | Location |
 |---|---|---|
 | Screens | UI and navigation, one file per screen | `src/app/` |
 | Components | Reusable UI (cards, buttons, map markers) | `src/components/` |
-| State | Current user, role, booking draft | `src/store/` |
+| State | Current user, role, booking draft, transport choice | `src/store/` |
 | Data access | Firebase init, typed queries and writes | `src/lib/` |
 | Backend | Auth, database, security rules | Firebase |
 
@@ -38,6 +65,22 @@ After sign-in the app reads `users/{uid}.role` and redirects to the matching rou
 | passenger | `src/app/(passenger)/` |
 | conductor | `src/app/(conductor)/` |
 | authority | `src/app/(authority)/` |
+
+## Passenger transport choice (bus or train)
+
+A passenger's first step is choosing **bus** or **train** on the Select Transport screen. The choice drives the rest of the passenger app.
+
+- Stored in `src/store/transport-store.ts` (Zustand, saved to device storage so it survives restarts). Values: `bus`, `train`, or `null` before the first choice.
+- `src/app/(passenger)/(tabs)/_layout.tsx` waits for the saved value to load, then redirects to `select-transport` if it is `null`.
+- Home shows the current choice with a **Change transport** button that reopens Select Transport.
+- Data screens must filter by it: every Firestore query on `routes`, `vehicles` and `schedules` adds `where('type', '==', transport)`.
+- Conductor and authority areas are not affected; the authority manages both types.
+
+```
+First launch ──▶ Select Transport ──▶ transport = bus | train ──▶ Home / Search / Tracking (filtered)
+                        ▲                                                    │
+                        └───────────── Change transport (Home) ──────────────┘
+```
 
 ## The three connection points
 

@@ -8,7 +8,7 @@ Each member owns one area of the app. Every screen needs at least 2 working CRUD
 **Passenger search & live tracking.** Requirements: FR3, FR4, FR7. Folder: `src/app/(passenger)/` (search and tracking screens).
 
 ### Features
-- Choose bus or train
+- Choose bus or train at the start; the whole passenger app then shows only that type
 - Search routes, view results, filter and sort
 - View transport and route details with stops
 - Live vehicle tracking on a map
@@ -21,9 +21,10 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Shared theme and navigation shell
 - [x] Create GitHub repo with `main` and `dev` branches
 - [x] Add `.env.example`
-- [ ] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
-- [ ] Home and Select Transport
-- [ ] Search with recent searches (create/delete)
+- [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
+- [x] Select Transport (first screen, saved choice, redirect on first launch)
+- [ ] Home (starter built with current transport and Change button; nearby vehicles, saved routes, alerts to add)
+- [ ] Search with recent searches (create/delete), filtered by chosen transport
 - [ ] Results with Filter & Sort
 - [ ] Transport Details and Route & Stops with favourites
 - [ ] Live Tracking map with real-time marker

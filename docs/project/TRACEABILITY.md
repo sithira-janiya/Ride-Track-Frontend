@@ -40,4 +40,4 @@ The area-level assignment (FR3, FR4, FR7 to Silva; FR1, FR2, FR5, FR8, FR11, FR1
 | FR11 | | | | | Not started |
 | FR12 | | | | | Not started |
 
-Rules: every requirement has at least one screen and at least one test case; every test case in [TESTING.md](TESTING.md) names a requirement.
+Rules: every requirement has at least one screen and at least one test case; every test case in [TESTING.md](../process/TESTING.md) names a requirement.

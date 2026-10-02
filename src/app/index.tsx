@@ -2,12 +2,12 @@ import { Link } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
-import { Screen } from '@/components/screen';
+import { Screen } from '@/components/ui/screen';
 import { colors, roleColors, spacing } from '@/constants/theme';
 
 // Temporary entry point. Replaced by real sign-in, which will route by the user's role.
 const roles = [
-  { label: 'Passenger', href: '/(passenger)', color: roleColors.passenger },
+  { label: 'Passenger', href: '/(passenger)/(tabs)', color: roleColors.passenger },
   { label: 'Conductor', href: '/(conductor)', color: roleColors.conductor },
   { label: 'Authority', href: '/(authority)', color: roleColors.authority },
 ] as const;

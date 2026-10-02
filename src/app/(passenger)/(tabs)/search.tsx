@@ -1,30 +1,29 @@
 import { StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
-import { Screen } from '@/components/screen';
+import { Screen } from '@/components/ui/screen';
+import { TransportBadge } from '@/components/transport/transport-badge';
 import { colors, spacing } from '@/constants/theme';
+import { transportOptions } from '@/constants/transport';
+import { useTransportStore } from '@/store/transport-store';
 
-type Props = {
-  title: string;
-  owner: string;
-  requirements: string;
-};
+export default function SearchScreen() {
+  const transport = useTransportStore((s) => s.transport);
 
-/**
- * Temporary body for a screen that is not built yet.
- * The owner replaces the whole file with the real screen.
- */
-export function PlaceholderScreen({ title, owner, requirements }: Props) {
+  if (!transport) return null;
+
   return (
-    <Screen title={title}>
+    <Screen title="Search">
+      <TransportBadge type={transport} />
       <Card mode="outlined" style={styles.card}>
         <Card.Content style={styles.body}>
           <Text variant="titleMedium">Not built yet</Text>
           <Text variant="bodyMedium" style={styles.muted}>
-            Owner: {owner}
+            Owner: Silva. Requirements: FR3, FR4.
           </Text>
           <Text variant="bodyMedium" style={styles.muted}>
-            Requirements: {requirements}
+            This screen must search {transportOptions[transport].plural.toLowerCase()} only: every query filters by{' '}
+            type = {transport}.
           </Text>
         </Card.Content>
       </Card>

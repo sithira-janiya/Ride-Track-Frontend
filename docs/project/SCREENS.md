@@ -1,13 +1,15 @@
 # Screens
 
-42 screens. Each needs at least 2 working CRUD operations (C create, R read, U update, D delete). File paths are the planned Expo Router files.
+42 screens. Each needs at least 2 working CRUD operations (C create, R read, U update, D delete). File paths are the planned Expo Router files. Passenger tab screens live in `src/app/(passenger)/(tabs)/`; Select Transport sits beside the tabs.
+
+**Transport rule:** every passenger screen that lists or tracks vehicles (Search, Results, Filter & Sort, Transport Details, Route & Stops, Live Tracking, and Home suggestions) shows only the type chosen in Select Transport.
 
 ## Search and tracking (Silva), FR3, FR4, FR7
 
 | # | Screen | File | CRUD |
 |---|---|---|---|
-| 1 | Home | `src/app/(passenger)/index.tsx` | R routes, R alerts |
-| 2 | Select Transport | `select-transport.tsx` | R types, C saved preference |
+| 1 | Home | `src/app/(passenger)/(tabs)/index.tsx` | R routes, R alerts, U change transport |
+| 2 | Select Transport | `src/app/(passenger)/select-transport.tsx` | R types, C/U saved choice (bus or train). **First screen for a new passenger.** |
 | 3 | Search | `search.tsx` | R routes, C/D recent searches |
 | 4 | Results | `results.tsx` | R schedules, U sort |
 | 5 | Filter & Sort | `filter.tsx` | U filters, R options |

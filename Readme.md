@@ -8,7 +8,7 @@ Built by Group Y3.S2.WE_62 for IT3060 Human Computer Interaction, SLIIT.
 
 | Role | Who | What they can do |
 |---|---|---|
-| **Passenger** | Daily commuters, students, tourists | Search routes, filter and sort results, track a vehicle live on a map, book and pay for a ticket, keep a QR ticket, cancel bookings, view journey history, receive alerts, manage profile |
+| **Passenger** | Daily commuters, students, tourists | **Choose bus or train first** (the whole app then shows only that type), search routes, filter and sort results, track a vehicle live on a map, book and pay for a ticket, keep a QR ticket, cancel bookings, view journey history, receive alerts, manage profile |
 | **Conductor / inspector** | Bus conductors, train ticket inspectors | Sign in as staff, view assigned journey, scan and validate QR tickets, see passenger list and counts, report incidents and delays, complete a journey |
 | **Transport authority** | NTC / Sri Lanka Railways officers | Manage vehicles, routes, stops, schedules, fares and facilities, publish changes, watch live operations, review incidents, publish alerts |
 
@@ -18,7 +18,9 @@ The three parts connect at three points:
 2. A conductor's incident reaches the authority.
 3. An authority alert lands in passengers' Notifications.
 
-The app has 42 screens in 4 work areas, and each screen supports at least 2 CRUD operations. See [docs/SCREENS.md](docs/SCREENS.md).
+Passengers pick **bus or train** on first launch; search, results, details and live tracking then show that type only, and the choice can be changed from Home.
+
+The app has 42 screens in 4 work areas, and each screen supports at least 2 CRUD operations. See [docs/SCREENS.md](docs/project/SCREENS.md).
 
 ## Team and ownership
 
@@ -29,7 +31,7 @@ The app has 42 screens in 4 work areas, and each screen supports at least 2 CRUD
 | Herath H.M.S.G | IT23634626 | Conductor / inspector | 10 | FR2, FR6, FR7, FR8 |
 | Fernando H L R D | IT23635302 | Transport authority + shared database | 13 | FR8, FR9, FR10 |
 
-Member-wise features and tasks are in [docs/MEMBERS.md](docs/MEMBERS.md).
+Member-wise features and tasks are in [docs/MEMBERS.md](docs/project/MEMBERS.md).
 
 ## Tech stack
 
@@ -46,7 +48,7 @@ All free.
 | UI, state, forms | React Native Paper, Zustand, React Hook Form + Zod |
 | Build | EAS Build (Android APK) |
 
-Payments are simulated. Details and reasoning: [docs/TECH-INFO.md](docs/TECH-INFO.md).
+Payments are simulated. Details and reasoning: [docs/TECH-INFO.md](docs/design/TECH-INFO.md).
 
 ## Getting started
 
@@ -100,38 +102,48 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 
 ```
 ridetrack/
-├── src/
-│   ├── app/             # Expo Router screens
-│   │   ├── (passenger)/
+├── src/                      Application code
+│   ├── app/                  Routes only (Expo Router), one file per screen
+│   │   ├── (passenger)/      select-transport + (tabs)
 │   │   ├── (conductor)/
 │   │   └── (authority)/
-│   ├── components/      # Shared UI (Screen, RoleTabs)
-│   ├── constants/       # Theme tokens
-│   ├── lib/             # Firebase and data helpers
-│   └── store/           # Zustand stores
-├── assets/              # Icons and images
-├── scripts/             # Seed script (seed.ts)
-├── docs/                # Project documentation
-├── app.json             # Expo config
-├── .env.example
+│   ├── components/           Reusable UI, grouped by purpose
+│   │   ├── ui/               Screen, PlaceholderScreen
+│   │   ├── navigation/       RoleTabs
+│   │   └── transport/        TransportBadge
+│   ├── constants/            Theme tokens, transport types
+│   ├── lib/                  Firebase and data helpers
+│   └── store/                Zustand stores
+├── assets/                   Icons and images
+├── scripts/                  Seed script (seed.ts)
+├── docs/                     Documentation (see below)
+│   ├── project/              Tasks, members, screens, traceability
+│   ├── design/               Architecture, data model, UI guide, tech info
+│   └── process/              Git workflow, testing, usability testing
+├── app.json                  Expo config
+├── .env.example              Environment template (copy to .env)
 └── Readme.md
 ```
 
+Full rules for where code belongs: [docs/design/ARCHITECTURE.md](docs/design/ARCHITECTURE.md#folder-structure).
+
 ## Documentation
 
-| Document | Contents |
-|---|---|
-| [docs/UI-GUIDE.md](docs/UI-GUIDE.md) | Shared theme, components, navigation shell |
-| [docs/MEMBERS.md](docs/MEMBERS.md) | Features and tasks per team member |
-| [docs/TASKS.md](docs/TASKS.md) | Project task list and status |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | App architecture and role flows |
-| [docs/TECH-INFO.md](docs/TECH-INFO.md) | Stack, tooling, environment |
-| [docs/DATA-MODEL.md](docs/DATA-MODEL.md) | Firestore collections and rules |
-| [docs/SCREENS.md](docs/SCREENS.md) | All 42 screens and CRUD operations |
-| [docs/TESTING.md](docs/TESTING.md) | Test cases and defect log |
-| [docs/USABILITY-TESTING.md](docs/USABILITY-TESTING.md) | Usability test plan and results |
-| [docs/TRACEABILITY.md](docs/TRACEABILITY.md) | Requirements to screens to tests |
-| [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md) | Branching and contribution rules |
+Index: [docs/README.md](docs/README.md)
+
+| Folder | Document | Contents |
+|---|---|---|
+| project | [TASKS](docs/project/TASKS.md) | Project task list, status and update log |
+| project | [MEMBERS](docs/project/MEMBERS.md) | Features and tasks per team member |
+| project | [SCREENS](docs/project/SCREENS.md) | All 42 screens and CRUD operations |
+| project | [TRACEABILITY](docs/project/TRACEABILITY.md) | Requirements to screens to tests |
+| design | [ARCHITECTURE](docs/design/ARCHITECTURE.md) | App architecture, folder structure, role flows |
+| design | [DATA-MODEL](docs/design/DATA-MODEL.md) | Firestore collections and rules |
+| design | [UI-GUIDE](docs/design/UI-GUIDE.md) | Theme, shared components, navigation shell |
+| design | [TECH-INFO](docs/design/TECH-INFO.md) | Stack, tooling, environment |
+| process | [GIT-WORKFLOW](docs/process/GIT-WORKFLOW.md) | Branching and contribution rules |
+| process | [TESTING](docs/process/TESTING.md) | Test cases and defect log |
+| process | [USABILITY-TESTING](docs/process/USABILITY-TESTING.md) | Usability test plan and results |
 
 ## Contributing
 
@@ -140,7 +152,7 @@ ridetrack/
 - Open pull requests into `dev` and get one teammate's review. Only the team leader merges `dev` into `main`.
 - Never commit secrets.
 
-Full rules: [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md).
+Full rules: [docs/GIT-WORKFLOW.md](docs/process/GIT-WORKFLOW.md).
 
 ## Links
 
