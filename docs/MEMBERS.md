@@ -19,7 +19,9 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 ### Tasks
 - [x] Scaffold Expo + TypeScript project, install shared packages
 - [x] Shared theme and navigation shell
-- [ ] Create GitHub repo with `main` and `dev` branches, protect both (PRs required), add `.env.example`
+- [x] Create GitHub repo with `main` and `dev` branches
+- [x] Add `.env.example`
+- [ ] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
 - [ ] Home and Select Transport
 - [ ] Search with recent searches (create/delete)
 - [ ] Results with Filter & Sort
