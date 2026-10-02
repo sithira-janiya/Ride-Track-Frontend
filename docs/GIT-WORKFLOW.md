@@ -54,6 +54,25 @@ Open a pull request from your branch **into `dev`**.
 - Delete the feature branch after it is merged.
 - Keep `dev` runnable: do not merge a PR that breaks `npx expo start`.
 
+## Branch protection setup
+
+Done once by the repository owner on GitHub (Settings, Rules, Rulesets, New branch ruleset).
+
+**`main`**
+1. Target branch: `main`. Enforcement: Active.
+2. Enable "Restrict deletions" and "Block force pushes".
+3. Enable "Require a pull request before merging" with 1 required approval.
+4. Optionally restrict who can merge to the team leader.
+
+**`dev`**
+1. Target branch: `dev`. Enforcement: Active.
+2. Enable "Restrict deletions" and "Block force pushes".
+3. Enable "Require a pull request before merging" with 1 required approval.
+
+Also set `dev` as the default branch (Settings, General) so new pull requests target it.
+
+Check it worked: a direct `git push origin dev` from a local `dev` must be rejected.
+
 ## Releasing to main
 
 1. All planned screens are merged into `dev` and tested.
