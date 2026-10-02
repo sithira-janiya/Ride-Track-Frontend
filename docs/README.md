@@ -13,7 +13,7 @@ Project documentation for RideTrack, a React Native app for live bus and train t
 | [TESTING.md](TESTING.md) | Functional and integration test cases, defect log |
 | [USABILITY-TESTING.md](USABILITY-TESTING.md) | Usability test plan and results |
 | [TRACEABILITY.md](TRACEABILITY.md) | Requirements mapped to screens and tests |
-| [GIT-WORKFLOW.md](GIT-WORKFLOW.md) | Branching, commits, pull requests, secrets |
+| [GIT-WORKFLOW.md](GIT-WORKFLOW.md) | main / dev / feature branches, commits, pull requests, secrets |
 
 ## Team
 

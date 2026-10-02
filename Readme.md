@@ -130,7 +130,12 @@ ridetrack/
 
 ## Contributing
 
-Work on a branch named `feature/<area>-<screen>`, open a pull request into `main`, and get one teammate's review. Never commit secrets. See [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md).
+- `main` holds stable releases; `dev` is the integration branch.
+- Work on `feature/<member>/<task>` (for example `feature/silva/search-results`), branched from `dev`.
+- Open pull requests into `dev` and get one teammate's review. Only the team leader merges `dev` into `main`.
+- Never commit secrets.
+
+Full rules: [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md).
 
 ## Links
 

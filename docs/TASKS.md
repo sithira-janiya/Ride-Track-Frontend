@@ -63,7 +63,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [ ] Expo + TypeScript project scaffolded (S)
 - [ ] Expo Router, React Native Paper, Zustand installed (S)
 - [ ] Shared theme from the hi-fi prototype (S)
-- [ ] GitHub repo created, branch rules set (S)
+- [ ] GitHub repo created with `main` and `dev`, branch protection set (S)
 - [ ] Firebase project, Auth, Firestore rules (F)
 - [ ] Seed script and `.env.example` (F)
 - [x] Readme written
