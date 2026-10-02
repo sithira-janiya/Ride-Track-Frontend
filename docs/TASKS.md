@@ -65,7 +65,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](UI-GUIDE.md) (S)
 - [ ] Align theme tokens with the Figma hi-fi prototype (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
-- [ ] Branch protection on `main` and `dev`, pull requests required (S), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
+- [x] Branch protection on `main` and `dev`, pull requests required (S), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
 - [ ] Firebase project, Auth, Firestore rules (F)
 - [x] `.env.example` added (S)
 - [ ] Seed script (F)

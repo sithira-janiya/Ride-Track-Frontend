@@ -21,7 +21,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Shared theme and navigation shell
 - [x] Create GitHub repo with `main` and `dev` branches
 - [x] Add `.env.example`
-- [ ] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
+- [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
 - [ ] Home and Select Transport
 - [ ] Search with recent searches (create/delete)
 - [ ] Results with Filter & Sort
