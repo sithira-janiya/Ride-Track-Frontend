@@ -64,9 +64,11 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](UI-GUIDE.md) (S)
 - [ ] Align theme tokens with the Figma hi-fi prototype (S)
-- [ ] GitHub repo created with `main` and `dev`, branch protection set (S)
+- [x] GitHub repo created with `main` and `dev` branches (S)
+- [ ] Branch protection on `main` and `dev`, pull requests required (S), see [GIT-WORKFLOW.md](GIT-WORKFLOW.md#branch-protection-setup)
 - [ ] Firebase project, Auth, Firestore rules (F)
-- [ ] Seed script and `.env.example` (F)
+- [x] `.env.example` added (S)
+- [ ] Seed script (F)
 - [x] Readme written
 - [x] Docs folder created
 
