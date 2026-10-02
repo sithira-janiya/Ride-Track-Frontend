@@ -60,8 +60,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 ## Phase 1: Project setup
 
-- [ ] Expo + TypeScript project scaffolded (S)
-- [ ] Expo Router, React Native Paper, Zustand installed (S)
+- [x] Expo + TypeScript project scaffolded (S)
+- [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [ ] Shared theme from the hi-fi prototype (S)
 - [ ] GitHub repo created with `main` and `dev`, branch protection set (S)
 - [ ] Firebase project, Auth, Firestore rules (F)

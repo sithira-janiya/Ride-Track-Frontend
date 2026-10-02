@@ -24,3 +24,7 @@ yarn-debug.*
 *.log
 .DS_Store
 Thumbs.db
+
+# Expo generated
+expo-env.d.ts
+*.tsbuildinfo

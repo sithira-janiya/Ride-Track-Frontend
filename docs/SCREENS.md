@@ -6,7 +6,7 @@
 
 | # | Screen | File | CRUD |
 |---|---|---|---|
-| 1 | Home | `app/(passenger)/index.tsx` | R routes, R alerts |
+| 1 | Home | `src/app/(passenger)/index.tsx` | R routes, R alerts |
 | 2 | Select Transport | `select-transport.tsx` | R types, C saved preference |
 | 3 | Search | `search.tsx` | R routes, C/D recent searches |
 | 4 | Results | `results.tsx` | R schedules, U sort |
@@ -35,7 +35,7 @@
 
 | # | Screen | File | CRUD |
 |---|---|---|---|
-| 20 | Staff Login | `app/(conductor)/login.tsx` | R user, U session |
+| 20 | Staff Login | `src/app/(conductor)/login.tsx` | R user, U session |
 | 21 | Dashboard | `index.tsx` | R journeys, R incidents |
 | 22 | Assigned Journey | `journey/[id].tsx` | R schedule, U status |
 | 23 | Scan Ticket | `scan.tsx` | R booking, U status |
@@ -50,7 +50,7 @@
 
 | # | Screen | File | CRUD |
 |---|---|---|---|
-| 30 | Dashboard | `app/(authority)/index.tsx` | R counts, R alerts |
+| 30 | Dashboard | `src/app/(authority)/index.tsx` | R counts, R alerts |
 | 31 | Vehicle Mgmt | `vehicles.tsx` | R, U, D vehicles |
 | 32 | Add Vehicle | `vehicles/new.tsx` | C vehicle, U |
 | 33 | Routes | `routes.tsx` | R, U, D routes |
