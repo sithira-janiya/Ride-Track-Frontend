@@ -5,7 +5,7 @@ Each member owns one area of the app. Every screen needs at least 2 working CRUD
 ---
 
 ## Silva D S J (IT23652200), Team leader
-**Passenger search & live tracking.** Requirements: FR3, FR4, FR7. Folder: `app/(passenger)/` (search and tracking screens).
+**Passenger search & live tracking.** Requirements: FR3, FR4, FR7. Folder: `src/app/(passenger)/` (search and tracking screens).
 
 ### Features
 - Choose bus or train
@@ -17,7 +17,7 @@ Each member owns one area of the app. Every screen needs at least 2 working CRUD
 Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route & Stops, Live Tracking
 
 ### Tasks
-- [ ] Scaffold Expo + TypeScript project, install shared packages
+- [x] Scaffold Expo + TypeScript project, install shared packages
 - [ ] Shared theme and navigation shell
 - [ ] Create GitHub repo with `main` and `dev` branches, protect both (PRs required), add `.env.example`
 - [ ] Home and Select Transport
@@ -60,7 +60,7 @@ Confirm Journey, Passenger Details, Payment, Booking Confirmation, Digital Ticke
 ---
 
 ## Herath H.M.S.G (IT23634626)
-**Conductor / inspector.** Requirements: FR2, FR6, FR7, FR8. Folder: `app/(conductor)/`.
+**Conductor / inspector.** Requirements: FR2, FR6, FR7, FR8. Folder: `src/app/(conductor)/`.
 
 ### Features
 - Staff sign-in
@@ -87,7 +87,7 @@ Staff Login, Dashboard, Assigned Journey, Scan Ticket, Valid, Invalid, Passenger
 ---
 
 ## Fernando H L R D (IT23635302)
-**Transport authority + shared database.** Requirements: FR8, FR9, FR10. Folder: `app/(authority)/`, `lib/`, `scripts/`.
+**Transport authority + shared database.** Requirements: FR8, FR9, FR10. Folder: `src/app/(authority)/`, `src/lib/`, `scripts/`.
 
 ### Features
 - Manage vehicles, routes, stops, schedules, fares and facilities
