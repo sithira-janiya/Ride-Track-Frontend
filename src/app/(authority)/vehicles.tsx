@@ -1,4 +1,4 @@
-import { PlaceholderScreen } from '@/components/placeholder-screen';
+import { PlaceholderScreen } from '@/components/ui/placeholder-screen';
 
 export default function VehiclesScreen() {
   return <PlaceholderScreen title="Vehicle Management" owner="Fernando" requirements="FR9" />;

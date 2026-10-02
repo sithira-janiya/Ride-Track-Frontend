@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
-import { Screen } from '@/components/screen';
+import { Screen } from '@/components/ui/screen';
 import { colors, spacing } from '@/constants/theme';
 
 type Props = {

@@ -41,7 +41,7 @@ Status of every case starts as **Not run**. Update the Result column as you test
 
 ## Traceability
 
-Every test case must name the requirement it checks (add an `Req` column value such as FR3 when you finalise cases). The full matrix is in [TRACEABILITY.md](TRACEABILITY.md). Functional cases must cover all core features and the CRUD operations of every screen.
+Every test case must name the requirement it checks (add an `Req` column value such as FR3 when you finalise cases). The full matrix is in [TRACEABILITY.md](../project/TRACEABILITY.md). Functional cases must cover all core features and the CRUD operations of every screen.
 
 ## Usability testing
 

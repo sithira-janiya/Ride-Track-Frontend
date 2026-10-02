@@ -4,7 +4,7 @@ How the shared look and navigation are set up, so every member builds screens th
 
 ## Theme
 
-All design tokens live in [`src/constants/theme.ts`](../src/constants/theme.ts). Do not hard-code colours or spacing in screens; import them.
+All design tokens live in [`src/constants/theme.ts`](../../src/constants/theme.ts). Do not hard-code colours or spacing in screens; import them.
 
 | Token | Use |
 |---|---|
@@ -14,7 +14,7 @@ All design tokens live in [`src/constants/theme.ts`](../src/constants/theme.ts).
 | `radius` | `sm 6`, `md 12`, `lg 20` |
 | `theme` / `createTheme(accent)` | React Native Paper (Material 3) theme built from the tokens |
 
-`PaperProvider` wraps the whole app in [`src/app/_layout.tsx`](../src/app/_layout.tsx), so Paper components (`Button`, `Card`, `TextInput`, `Text`) pick up the theme automatically.
+`PaperProvider` wraps the whole app in [`src/app/_layout.tsx`](../../src/app/_layout.tsx), so Paper components (`Button`, `Card`, `TextInput`, `Text`) pick up the theme automatically.
 
 > The colours are a starting palette. They have not yet been checked against the Figma hi-fi prototype. Align the values in `theme.ts` with the Figma tokens; screens will follow without code changes.
 
@@ -22,9 +22,9 @@ All design tokens live in [`src/constants/theme.ts`](../src/constants/theme.ts).
 
 | Component | File | Use |
 |---|---|---|
-| `Screen` | `src/components/screen.tsx` | Page wrapper: safe area, background, padding, optional title and subtitle. Use for every screen. |
-| `RoleTabs` | `src/components/role-tabs.tsx` | Bottom tab bar tinted with the role colour. Used by the three role layouts. |
-| `PlaceholderScreen` | `src/components/placeholder-screen.tsx` | Temporary body for a screen that is not built yet. Delete its use when you build the real screen. |
+| `Screen` | `src/components/ui/screen.tsx` | Page wrapper: safe area, background, padding, optional title and subtitle. Use for every screen. |
+| `RoleTabs` | `src/components/navigation/role-tabs.tsx` | Bottom tab bar tinted with the role colour. Used by the three role layouts. |
+| `PlaceholderScreen` | `src/components/ui/placeholder-screen.tsx` | Temporary body for a screen that is not built yet. Delete its use when you build the real screen. |
 
 Example screen:
 
@@ -72,7 +72,7 @@ Add an entry to the `tabs` array in the role's `_layout.tsx` (name = file name, 
 
 - `src/constants/transport.ts`: `TransportType`, labels, icons and colours (bus orange, train teal).
 - `src/store/transport-store.ts`: `useTransportStore()` gives `transport` (`'bus' | 'train' | null`), `setTransport` and `clearTransport`.
-- `src/components/transport-badge.tsx`: `TransportBadge` pill to show the current choice.
+- `src/components/transport/transport-badge.tsx`: `TransportBadge` pill to show the current choice.
 - In any passenger screen that lists vehicles, read `transport` and filter your data by it:
 
 ```tsx

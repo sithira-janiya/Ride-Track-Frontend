@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
-import { Screen } from '@/components/screen';
+import { Screen } from '@/components/ui/screen';
 import { colors, spacing } from '@/constants/theme';
 import { transportOptions, transportTypes, type TransportType } from '@/constants/transport';
 import { useTransportStore } from '@/store/transport-store';

@@ -1,4 +1,4 @@
-import { RoleTabs } from '@/components/role-tabs';
+import { RoleTabs } from '@/components/navigation/role-tabs';
 
 export default function AuthorityLayout() {
   return (

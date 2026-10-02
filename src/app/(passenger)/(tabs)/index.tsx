@@ -2,8 +2,8 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Button, Card, Text } from 'react-native-paper';
 
-import { Screen } from '@/components/screen';
-import { TransportBadge } from '@/components/transport-badge';
+import { Screen } from '@/components/ui/screen';
+import { TransportBadge } from '@/components/transport/transport-badge';
 import { colors, spacing } from '@/constants/theme';
 import { transportOptions } from '@/constants/transport';
 import { useTransportStore } from '@/store/transport-store';
