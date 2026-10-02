@@ -58,27 +58,47 @@ Open a pull request from your branch **into `dev`**.
 
 Done once by the repository owner on GitHub (Settings, Rules, Rulesets, New branch ruleset).
 
-**`main`**
-1. Target branch: `main`. Enforcement: Active.
+**Merge order the rulesets enforce:** feature branch into `dev`, then `dev` into `main`. Nothing reaches `main` any other way.
+
+| Branch | Who can open a PR into it | Required before merge |
+|---|---|---|
+| `dev` | `feature/*`, `fix/*`, `docs/*` branches | PR, 1 approval, check `dev-only-from-work-branches` |
+| `main` | `dev` only | PR, 1 approval, check `main-only-from-dev` |
+
+GitHub rulesets cannot limit where a pull request comes from, so the repo has a workflow, [`.github/workflows/branch-rules.yml`](../../.github/workflows/branch-rules.yml), that fails when the source branch is wrong. The rulesets then require its checks to pass.
+
+**Ruleset for `main`**
+1. Target branch: `main`. Enforcement: Active. Leave bypass list empty.
 2. Enable "Restrict deletions" and "Block force pushes".
 3. Enable "Require a pull request before merging" with 1 required approval.
-4. Optionally restrict who can merge to the team leader.
+4. Enable "Require status checks to pass" and add the check `main-only-from-dev`.
+5. Optionally limit who can merge to the team leader.
 
-**`dev`**
+**Ruleset for `dev`**
 1. Target branch: `dev`. Enforcement: Active.
 2. Enable "Restrict deletions" and "Block force pushes".
 3. Enable "Require a pull request before merging" with 1 required approval.
+4. Enable "Require status checks to pass" and add the check `dev-only-from-work-branches`.
+
+A check only appears in the list after the workflow has run once, so merge this workflow into `dev` first and open one pull request, then add the checks to the rulesets.
 
 Also set `dev` as the default branch (Settings, General) so new pull requests target it.
 
-Check it worked: a direct `git push origin dev` from a local `dev` must be rejected.
+**Compare before merging.** Before opening a pull request, review the difference:
+- Feature into `dev`: `https://github.com/sithira-janiya/RideTrack/compare/dev...<your-branch>`
+- `dev` into `main`: `https://github.com/sithira-janiya/RideTrack/compare/main...dev`
+
+Check it worked:
+- A direct `git push origin main` or `git push origin dev` must be rejected.
+- A pull request from a feature branch into `main` must show the failing check `main-only-from-dev` and cannot be merged.
 
 ## Releasing to main
 
 1. All planned screens are merged into `dev` and tested.
-2. Silva opens a PR from `dev` into `main`.
-3. The team checks the build on a clean clone.
-4. Merge, then tag the release (for example `v1.0.0`) and build the APK from `main`.
+2. Compare `dev` with `main` (link above) and read the diff.
+3. Silva opens a PR from `dev` into `main`. It is the only kind of PR `main` accepts.
+4. The team checks the build on a clean clone, then approves.
+5. Merge, then tag the release (for example `v1.0.0`) and build the APK from `main`.
 
 ## Commit messages
 
