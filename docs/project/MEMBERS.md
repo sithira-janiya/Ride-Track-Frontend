@@ -23,7 +23,8 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Add `.env.example`
 - [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
 - [x] Select Transport (first screen, saved choice, redirect on first launch)
-- [ ] Home (starter built with current transport and Change button; nearby vehicles, saved routes, alerts to add)
+- [x] Home: current transport with Change button, alerts, nearby vehicles, saved routes (bookmark add/remove) and popular routes, all filtered by the chosen transport (uses sample data)
+- [ ] Connect Home to live Firestore data (vehicles, routes, alerts) once the backend is ready
 - [ ] Search with recent searches (create/delete), filtered by chosen transport
 - [ ] Results with Filter & Sort
 - [ ] Transport Details and Route & Stops with favourites

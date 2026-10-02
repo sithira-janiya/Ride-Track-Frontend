@@ -51,7 +51,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 **Search and tracking, 8 screens (S)**
 - [x] Select Transport (bus or train, first screen)
-- [ ] Home (starter done; full content to build)
+- [x] Home (alerts, nearby vehicles, saved and popular routes, filtered by transport; sample data)
+- [ ] Home: switch from sample data to live Firestore data (S, after F's backend)
 - [ ] Search, Results, Filter & Sort
 - [ ] Transport Details, Route & Stops
 - [ ] Live Tracking
@@ -94,6 +95,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Home screen built: current transport and Change button, alerts, nearby vehicles, saved routes (add/remove) and popular routes, all filtered by transport; sample data layer in `src/lib` and shared types in `src/types` | MEMBERS, TASKS, SCREENS, ARCHITECTURE, UI-GUIDE, TESTING |
 | 3 Oct 2026 | Repository folders cleaned: components grouped into `ui`, `navigation`, `transport`; docs grouped into `project`, `design`, `process`; `.editorconfig` and `.gitattributes` added | Readme, docs index, ARCHITECTURE, UI-GUIDE, all doc links |
 | 3 Oct 2026 | Passenger chooses bus or train first; choice saved and used app-wide; passenger routes split into `select-transport` + `(tabs)`; Home and Search show the chosen type | Readme, SCREENS, ARCHITECTURE, DATA-MODEL, UI-GUIDE, MEMBERS, TASKS, TESTING, USABILITY-TESTING |
 | 3 Oct 2026 | Repo with `main` and `dev` and `.env.example` marked done; branch protection steps documented (still open) | TASKS, MEMBERS, GIT-WORKFLOW |
