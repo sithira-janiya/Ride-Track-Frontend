@@ -100,15 +100,18 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 
 ```
 ridetrack/
-├── app/                 # Expo Router screens
-│   ├── (passenger)/
-│   ├── (conductor)/
-│   └── (authority)/
-├── components/          # Shared UI
-├── lib/                 # Firebase and data helpers
-├── store/               # Zustand stores
-├── scripts/seed.ts      # Sample data loader
+├── src/
+│   ├── app/             # Expo Router screens
+│   │   ├── (passenger)/
+│   │   ├── (conductor)/
+│   │   └── (authority)/
+│   ├── components/      # Shared UI
+│   ├── lib/             # Firebase and data helpers
+│   └── store/           # Zustand stores
+├── assets/              # Icons and images
+├── scripts/             # Seed script (seed.ts)
 ├── docs/                # Project documentation
+├── app.json             # Expo config
 ├── .env.example
 └── Readme.md
 ```

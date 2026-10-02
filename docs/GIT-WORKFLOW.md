@@ -89,4 +89,4 @@ Resolve conflicts on your branch, run the app, then push.
 
 ## Ownership
 
-Edit your own area's folder. Changes to `lib/`, `store/`, shared `components/`, or the Firestore schema should be agreed in the group chat first to avoid conflicts.
+Edit your own area's folder. Changes to `src/lib/`, `src/store/`, shared `src/components/`, or the Firestore schema should be agreed in the group chat first to avoid conflicts.

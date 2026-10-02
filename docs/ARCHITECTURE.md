@@ -23,10 +23,10 @@ RideTrack is a single React Native (Expo) app with three role-based areas, backe
 
 | Layer | Responsibility | Location |
 |---|---|---|
-| Screens | UI and navigation, one file per screen | `app/` |
-| Components | Reusable UI (cards, buttons, map markers) | `components/` |
-| State | Current user, role, booking draft | `store/` |
-| Data access | Firebase init, typed queries and writes | `lib/` |
+| Screens | UI and navigation, one file per screen | `src/app/` |
+| Components | Reusable UI (cards, buttons, map markers) | `src/components/` |
+| State | Current user, role, booking draft | `src/store/` |
+| Data access | Firebase init, typed queries and writes | `src/lib/` |
 | Backend | Auth, database, security rules | Firebase |
 
 ## Role routing
@@ -35,9 +35,9 @@ After sign-in the app reads `users/{uid}.role` and redirects to the matching rou
 
 | Role | Route group |
 |---|---|
-| passenger | `app/(passenger)/` |
-| conductor | `app/(conductor)/` |
-| authority | `app/(authority)/` |
+| passenger | `src/app/(passenger)/` |
+| conductor | `src/app/(conductor)/` |
+| authority | `src/app/(authority)/` |
 
 ## The three connection points
 
