@@ -1,64 +1,58 @@
 # RideTrack
 
-RideTrack is a mobile app that shows where Sri Lankan buses and trains are right now, when they will arrive, and lets passengers buy QR tickets that conductors scan.
+RideTrack is a React Native mobile app that shows where Sri Lankan buses and trains are right now, when they will arrive, and lets passengers buy QR tickets that conductors scan.
 
-It is the **IT3060 HCI** group project (Y3.S2.WE_62) at **SLIIT**. Milestones 1 and 2 are done; **Milestone 3** (working app + testing + final report) is due **9 Oct 2026**.
+Built by Group Y3.S2.WE_62 for IT3060 Human Computer Interaction, SLIIT.
 
-## Roles
+## Features
 
-| | Passenger | Conductor / inspector | Transport authority |
-|---|---|---|---|
-| **Who it is for** | Daily commuters, students, tourists | Bus conductors, train ticket inspectors | NTC / Sri Lanka Railways officers |
-| **Main jobs in the app** | Search routes, track a vehicle live, buy and keep a QR ticket | Scan and validate tickets, count passengers, report delays | Watch the live network, manage vehicles, routes and fares, publish alerts |
-
-## Team
-
-| Member | Student ID | Owns |
+| Role | Who | What they can do |
 |---|---|---|
-| Silva D S J (leader) | IT23652200 | Passenger search & live tracking |
-| Rajapaksha M.P.K | IT23665620 | Booking, tickets & profile |
-| Herath H.M.S.G | IT23634626 | Conductor / inspector |
-| Fernando H L R D | IT23635302 | Transport authority + shared database |
+| **Passenger** | Daily commuters, students, tourists | Search routes, filter and sort results, track a vehicle live on a map, book and pay for a ticket, keep a QR ticket, cancel bookings, view journey history, receive alerts, manage profile |
+| **Conductor / inspector** | Bus conductors, train ticket inspectors | Sign in as staff, view assigned journey, scan and validate QR tickets, see passenger list and counts, report incidents and delays, complete a journey |
+| **Transport authority** | NTC / Sri Lanka Railways officers | Manage vehicles, routes, stops, schedules, fares and facilities, publish changes, watch live operations, review incidents, publish alerts |
 
-## Features and screens
-
-42 screens across 4 work areas. Each screen needs at least 2 working CRUD operations.
-
-| Area | Owner | Screens | Requirements |
-|---|---|---|---|
-| Search & tracking | Silva | Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route & Stops, Live Tracking (8) | FR3, FR4, FR7 |
-| Booking & tickets | Rajapaksha | Confirm Journey, Passenger Details, Payment, Booking Confirmation, Digital Ticket, My Tickets, Ticket Details, Cancel Booking, Journey History, Notifications, Profile (11) | FR1, FR2, FR5, FR8, FR11, FR12 |
-| Conductor | Herath | Staff Login, Dashboard, Assigned Journey, Scan Ticket, Valid, Invalid, Passenger List, Report Incident, Incident Reported, Journey Completion (10) | FR2, FR6, FR7, FR8 |
-| Authority | Fernando | Dashboard, Vehicle Mgmt, Add Vehicle, Routes, Stops, Schedule, Fare & Facilities, Preview & Publish, Live Operations, Incident Mgmt, Review Incident, Create Alert, Alert Published (13) | FR8, FR9, FR10 |
-
-The parts connect at three points:
+The three parts connect at three points:
 
 1. A passenger's QR ticket is scanned by the conductor.
 2. A conductor's incident reaches the authority.
 3. An authority alert lands in passengers' Notifications.
 
-## Tech stack (all free)
+The app has 42 screens in 4 work areas, and each screen supports at least 2 CRUD operations. See [docs/SCREENS.md](docs/SCREENS.md).
 
-| Layer | Choice | Why |
-|---|---|---|
-| App | **React Native + Expo (SDK 52+) + TypeScript** | Required; Expo Go means no Android Studio needed |
-| Navigation | **Expo Router** (file-based) | One file = one screen, easy to split between members and for Claude Code to generate |
-| Backend / DB | **Firebase Firestore** (Spark free plan) | Real-time listeners give live tracking and alerts with no server |
-| Auth | **Firebase Authentication** (email + password) | Three roles via a `role` field on the user document |
-| Maps | **react-native-maps** | Works inside Expo Go |
-| QR generate | **react-native-qrcode-svg** | Digital ticket |
-| QR scan | **expo-camera** (`CameraView` barcode scanning) | Conductor scan screen |
-| State / forms | **Zustand** + **React Hook Form** + **Zod** | Small, simple, validated forms |
-| UI kit | **React Native Paper** | Free Material components, quick to look consistent |
-| Build | **EAS Build** (free tier) | Produces the submission APK |
+## Team and ownership
 
-Payments are **simulated** (no real gateway) so everything stays free.
+| Member | Student ID | Area | Screens | Requirements |
+|---|---|---|---|---|
+| Silva D S J (leader) | IT23652200 | Passenger search & live tracking | 8 | FR3, FR4, FR7 |
+| Rajapaksha M.P.K | IT23665620 | Booking, tickets & profile | 11 | FR1, FR2, FR5, FR8, FR11, FR12 |
+| Herath H.M.S.G | IT23634626 | Conductor / inspector | 10 | FR2, FR6, FR7, FR8 |
+| Fernando H L R D | IT23635302 | Transport authority + shared database | 13 | FR8, FR9, FR10 |
+
+Member-wise features and tasks are in [docs/MEMBERS.md](docs/MEMBERS.md).
+
+## Tech stack
+
+All free.
+
+| Layer | Choice |
+|---|---|
+| App | React Native + Expo + TypeScript |
+| Navigation | Expo Router |
+| Backend / database | Firebase Firestore (Spark free plan) |
+| Authentication | Firebase Authentication (email and password, role-based) |
+| Maps | react-native-maps |
+| QR generate / scan | react-native-qrcode-svg / expo-camera |
+| UI, state, forms | React Native Paper, Zustand, React Hook Form + Zod |
+| Build | EAS Build (Android APK) |
+
+Payments are simulated. Details and reasoning: [docs/TECH-INFO.md](docs/TECH-INFO.md).
 
 ## Getting started
 
 You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Android emulator), and access to the group's Firebase project.
 
-1. Clone the repo and install packages:
+1. Clone the repository and install packages:
 
    ```bash
    git clone https://github.com/<group>/ridetrack.git
@@ -66,7 +60,7 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
    npm install
    ```
 
-2. Create a `.env` file in the project root with the Firebase keys (get them from Fernando; **never commit this file**):
+2. Copy `.env.example` to `.env` and fill in the Firebase keys (ask Fernando; **never commit `.env`**):
 
    ```env
    EXPO_PUBLIC_FIREBASE_API_KEY=...
@@ -87,7 +81,7 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
    npm run seed
    ```
 
-5. Build the installable APK for submission:
+5. Build the installable APK:
 
    ```bash
    npm install -g eas-cli
@@ -102,40 +96,41 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 | Conductor | conductor@ridetrack.test | Test@123 |
 | Authority | authority@ridetrack.test | Test@123 |
 
-## Project structure
+## Repository structure
 
 ```
 ridetrack/
-├── app/                    # Expo Router screens
-│   ├── (passenger)/        # Search & tracking, booking & tickets
-│   ├── (conductor)/        # Staff login, scan, incidents
-│   └── (authority)/        # Vehicles, routes, alerts, live ops
-├── components/             # Shared UI pieces
-├── lib/                    # firebase.ts, auth, Firestore helpers
-├── store/                  # Zustand stores
-├── scripts/seed.ts         # Sample data loader
-├── .env                    # Firebase keys (git-ignored)
-└── app.json / eas.json
+├── app/                 # Expo Router screens
+│   ├── (passenger)/
+│   ├── (conductor)/
+│   └── (authority)/
+├── components/          # Shared UI
+├── lib/                 # Firebase and data helpers
+├── store/               # Zustand stores
+├── scripts/seed.ts      # Sample data loader
+├── docs/                # Project documentation
+├── .env.example
+└── Readme.md
 ```
 
-## Data model (Firestore collections)
+## Documentation
 
-| Collection | Key fields |
+| Document | Contents |
 |---|---|
-| `users` | name, email, role (`passenger` / `conductor` / `authority`) |
-| `vehicles` | type (bus/train), number, capacity, status, location (lat/lng) |
-| `routes` | name, stops[], fare, facilities |
-| `schedules` | routeId, vehicleId, departure, arrival |
-| `bookings` | userId, scheduleId, passengers[], status, qrCode |
-| `incidents` | conductorId, vehicleId, type, description, status |
-| `alerts` | title, message, createdBy, createdAt (shown in passenger Notifications) |
+| [docs/MEMBERS.md](docs/MEMBERS.md) | Features and tasks per team member |
+| [docs/TASKS.md](docs/TASKS.md) | Project task list and status |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | App architecture and role flows |
+| [docs/TECH-INFO.md](docs/TECH-INFO.md) | Stack, tooling, environment |
+| [docs/DATA-MODEL.md](docs/DATA-MODEL.md) | Firestore collections and rules |
+| [docs/SCREENS.md](docs/SCREENS.md) | All 42 screens and CRUD operations |
+| [docs/TESTING.md](docs/TESTING.md) | Test cases and defect log |
+| [docs/USABILITY-TESTING.md](docs/USABILITY-TESTING.md) | Usability test plan and results |
+| [docs/TRACEABILITY.md](docs/TRACEABILITY.md) | Requirements to screens to tests |
+| [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md) | Branching and contribution rules |
 
-## Git rules
+## Contributing
 
-- Work on your own branch: `feature/<area>-<screen>` (for example `feature/booking-payment`).
-- Open a pull request into `main`; at least one teammate reviews it.
-- Never commit `.env` or keys.
-- Pull `main` before starting each work session.
+Work on a branch named `feature/<area>-<screen>`, open a pull request into `main`, and get one teammate's review. Never commit secrets. See [docs/GIT-WORKFLOW.md](docs/GIT-WORKFLOW.md).
 
 ## Links
 
@@ -143,6 +138,5 @@ ridetrack/
 |---|---|
 | Figma: hi-fi prototype | RideTrack hi-fi |
 | Figma: low-fi prototype | RideTrack low-fi |
-| M2 user-testing recordings | Google Drive folder |
-| GitHub repo | _Add link here_ |
+| User-testing recordings | Google Drive folder |
 | APK build | _Add link here_ |
