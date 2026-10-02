@@ -99,6 +99,8 @@ users ─┬─< bookings >── schedules ──┬── routes
 
 ## Security rules (outline)
 
+The real rules are in `firestore.rules` in the separate `ridetrack-backend` repo. This section is the plain-language summary; keep both in step.
+
 - Passenger: read published routes, schedules, vehicles and alerts; read and write only own bookings.
 - Conductor: read bookings for assigned schedules and update status to `used`; create incidents; update own vehicle location.
 - Authority: full read and write on vehicles, routes, schedules, alerts and incidents.

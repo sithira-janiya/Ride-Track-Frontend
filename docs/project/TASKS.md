@@ -72,9 +72,11 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Branch protection on `main` and `dev`, pull requests required (S)
 - [x] Workflow `.github/workflows/branch-rules.yml`: PRs into `main` only from `dev`, PRs into `dev` only from feature, fix or docs branches (S)
 - [ ] Add the checks `main-only-from-dev` and `dev-only-from-work-branches` as required status checks in the GitHub rulesets (S), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
-- [ ] Firebase project, Auth, Firestore rules (F)
+- [x] Backend repo `ridetrack-backend` prepared locally: rules, indexes, seed script, guide (F)
+- [x] App connection to Firebase: `src/lib/firebase.ts`, `.env.example`, [BACKEND.md](../design/BACKEND.md) (F)
+- [ ] Push backend repo to GitHub and protect branches (F)
+- [ ] Create Firebase project, deploy rules, run seed (F)
 - [x] `.env.example` added (S)
-- [ ] Seed script (F)
 - [x] Readme written
 - [x] Docs folder created
 - [x] Repository folder structure cleaned (grouped components and docs, editorconfig, gitattributes)
@@ -97,6 +99,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Separate backend repo prepared (Firebase rules, indexes, seed, beginner setup guide); app gets `src/lib/firebase.ts`, new `.env.example`, a backend status line on the first screen, and the BACKEND guide | BACKEND, Readme, TECH-INFO, ARCHITECTURE, DATA-MODEL, MEMBERS, TASKS, docs index |
 | 3 Oct 2026 | Added branch-rules workflow so `main` accepts pull requests only from `dev` and `dev` only from feature, fix or docs branches; documented ruleset steps and compare links | GIT-WORKFLOW, TASKS |
 | 3 Oct 2026 | Home screen built: current transport and Change button, alerts, nearby vehicles, saved routes (add/remove) and popular routes, all filtered by transport; sample data layer in `src/lib` and shared types in `src/types` | MEMBERS, TASKS, SCREENS, ARCHITECTURE, UI-GUIDE, TESTING |
 | 3 Oct 2026 | Repository folders cleaned: components grouped into `ui`, `navigation`, `transport`; docs grouped into `project`, `design`, `process`; `.editorconfig` and `.gitattributes` added | Readme, docs index, ARCHITECTURE, UI-GUIDE, all doc links |

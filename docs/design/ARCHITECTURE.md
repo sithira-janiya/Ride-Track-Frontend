@@ -55,7 +55,7 @@ Rules:
 | Components | Reusable UI (cards, buttons, map markers) | `src/components/` |
 | State | Current user, role, booking draft, transport choice | `src/store/` |
 | Data access | Firebase init, typed queries and writes (sample data until Firebase is connected) | `src/lib/` |
-| Backend | Auth, database, security rules | Firebase |
+| Backend | Auth, database, security rules. Defined in the separate `ridetrack-backend` repo and deployed to Firebase ([BACKEND.md](BACKEND.md)) | Firebase |
 
 ## Role routing
 

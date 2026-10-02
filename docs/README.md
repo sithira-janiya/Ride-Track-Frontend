@@ -18,6 +18,7 @@ Project documentation for RideTrack, a React Native app for live bus and train t
 | [ARCHITECTURE.md](design/ARCHITECTURE.md) | System design, folder structure, role flows, connection points |
 | [DATA-MODEL.md](design/DATA-MODEL.md) | Firestore collections, relationships, security rules |
 | [UI-GUIDE.md](design/UI-GUIDE.md) | Shared theme, components and navigation shell |
+| [BACKEND.md](design/BACKEND.md) | Separate backend repo, Firebase setup for beginners, connecting the app |
 | [TECH-INFO.md](design/TECH-INFO.md) | Tech stack, justification, environment, scripts |
 
 ### process: how we work and check quality
