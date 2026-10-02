@@ -74,6 +74,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [ ] Seed script (F)
 - [x] Readme written
 - [x] Docs folder created
+- [x] Repository folder structure cleaned (grouped components and docs, editorconfig, gitattributes)
 
 ## Phase 0: Design (done)
 
@@ -93,6 +94,8 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Repository folders cleaned: components grouped into `ui`, `navigation`, `transport`; docs grouped into `project`, `design`, `process`; `.editorconfig` and `.gitattributes` added | Readme, docs index, ARCHITECTURE, UI-GUIDE, all doc links |
+| 3 Oct 2026 | Passenger chooses bus or train first; choice saved and used app-wide; passenger routes split into `select-transport` + `(tabs)`; Home and Search show the chosen type | Readme, SCREENS, ARCHITECTURE, DATA-MODEL, UI-GUIDE, MEMBERS, TASKS, TESTING, USABILITY-TESTING |
 | 3 Oct 2026 | Repo with `main` and `dev` and `.env.example` marked done; branch protection steps documented (still open) | TASKS, MEMBERS, GIT-WORKFLOW |
 | 3 Oct 2026 | Shared theme, `Screen`/`RoleTabs`/`PlaceholderScreen` components and role navigation shell added (placeholder tab screens for the three roles) | UI-GUIDE, TASKS, MEMBERS, Readme, docs index |
 | 2 Oct 2026 | Expo (SDK 57) + TypeScript project scaffolded; shared packages installed; docs moved to the `src/` layout | TASKS, MEMBERS, ARCHITECTURE, SCREENS, GIT-WORKFLOW, Readme |
