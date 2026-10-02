@@ -1,15 +1,10 @@
-import { RoleTabs } from '@/components/role-tabs';
+import { Stack } from 'expo-router';
 
 export default function PassengerLayout() {
   return (
-    <RoleTabs
-      role="passenger"
-      tabs={[
-        { name: 'index', title: 'Home', icon: 'home-outline' },
-        { name: 'search', title: 'Search', icon: 'search-outline' },
-        { name: 'tickets', title: 'Tickets', icon: 'ticket-outline' },
-        { name: 'profile', title: 'Profile', icon: 'person-outline' },
-      ]}
-    />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="select-transport" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }

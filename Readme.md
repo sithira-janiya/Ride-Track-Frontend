@@ -8,7 +8,7 @@ Built by Group Y3.S2.WE_62 for IT3060 Human Computer Interaction, SLIIT.
 
 | Role | Who | What they can do |
 |---|---|---|
-| **Passenger** | Daily commuters, students, tourists | Search routes, filter and sort results, track a vehicle live on a map, book and pay for a ticket, keep a QR ticket, cancel bookings, view journey history, receive alerts, manage profile |
+| **Passenger** | Daily commuters, students, tourists | **Choose bus or train first** (the whole app then shows only that type), search routes, filter and sort results, track a vehicle live on a map, book and pay for a ticket, keep a QR ticket, cancel bookings, view journey history, receive alerts, manage profile |
 | **Conductor / inspector** | Bus conductors, train ticket inspectors | Sign in as staff, view assigned journey, scan and validate QR tickets, see passenger list and counts, report incidents and delays, complete a journey |
 | **Transport authority** | NTC / Sri Lanka Railways officers | Manage vehicles, routes, stops, schedules, fares and facilities, publish changes, watch live operations, review incidents, publish alerts |
 
@@ -17,6 +17,8 @@ The three parts connect at three points:
 1. A passenger's QR ticket is scanned by the conductor.
 2. A conductor's incident reaches the authority.
 3. An authority alert lands in passengers' Notifications.
+
+Passengers pick **bus or train** on first launch; search, results, details and live tracking then show that type only, and the choice can be changed from Home.
 
 The app has 42 screens in 4 work areas, and each screen supports at least 2 CRUD operations. See [docs/SCREENS.md](docs/SCREENS.md).
 
@@ -102,7 +104,7 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 ridetrack/
 ├── src/
 │   ├── app/             # Expo Router screens
-│   │   ├── (passenger)/
+│   │   ├── (passenger)/   # select-transport + (tabs)
 │   │   ├── (conductor)/
 │   │   └── (authority)/
 │   ├── components/      # Shared UI (Screen, RoleTabs)
