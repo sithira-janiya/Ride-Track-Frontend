@@ -8,7 +8,7 @@
 
 | # | Screen | File | CRUD |
 |---|---|---|---|
-| 1 | Home | `src/app/(passenger)/(tabs)/index.tsx` | R routes, R alerts, U change transport |
+| 1 | Home | `src/app/(passenger)/(tabs)/index.tsx` | R nearby vehicles, R alerts, C/D saved routes, U change transport. Built with sample data; Firestore wiring pending. |
 | 2 | Select Transport | `src/app/(passenger)/select-transport.tsx` | R types, C/U saved choice (bus or train). **First screen for a new passenger.** |
 | 3 | Search | `search.tsx` | R routes, C/D recent searches |
 | 4 | Results | `results.tsx` | R schedules, U sort |
