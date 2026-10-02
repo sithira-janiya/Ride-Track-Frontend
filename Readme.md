@@ -149,7 +149,8 @@ Index: [docs/README.md](docs/README.md)
 
 - `main` holds stable releases; `dev` is the integration branch.
 - Work on `feature/<member>/<task>` (for example `feature/silva/search-results`), branched from `dev`.
-- Open pull requests into `dev` and get one teammate's review. Only the team leader merges `dev` into `main`.
+- Open pull requests into `dev` and get one teammate's review. Compare your branch with `dev` first.
+- `main` accepts pull requests from `dev` only (enforced by `.github/workflows/branch-rules.yml`). Only the team leader merges `dev` into `main`, after comparing `main` with `dev`.
 - Never commit secrets.
 
 Full rules: [docs/GIT-WORKFLOW.md](docs/process/GIT-WORKFLOW.md).
