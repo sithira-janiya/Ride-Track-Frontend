@@ -39,6 +39,22 @@ After sign-in the app reads `users/{uid}.role` and redirects to the matching rou
 | conductor | `src/app/(conductor)/` |
 | authority | `src/app/(authority)/` |
 
+## Passenger transport choice (bus or train)
+
+A passenger's first step is choosing **bus** or **train** on the Select Transport screen. The choice drives the rest of the passenger app.
+
+- Stored in `src/store/transport-store.ts` (Zustand, saved to device storage so it survives restarts). Values: `bus`, `train`, or `null` before the first choice.
+- `src/app/(passenger)/(tabs)/_layout.tsx` waits for the saved value to load, then redirects to `select-transport` if it is `null`.
+- Home shows the current choice with a **Change transport** button that reopens Select Transport.
+- Data screens must filter by it: every Firestore query on `routes`, `vehicles` and `schedules` adds `where('type', '==', transport)`.
+- Conductor and authority areas are not affected; the authority manages both types.
+
+```
+First launch ──▶ Select Transport ──▶ transport = bus | train ──▶ Home / Search / Tracking (filtered)
+                        ▲                                                    │
+                        └───────────── Change transport (Home) ──────────────┘
+```
+
 ## The three connection points
 
 1. **Ticket scan.** The passenger's Digital Ticket shows a QR encoding the booking id. The conductor's Scan Ticket reads it, loads `bookings/{id}`, and routes to Valid or Invalid, then marks the ticket used.

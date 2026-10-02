@@ -46,7 +46,9 @@ export default function SearchScreen() {
 src/app/
 ├── _layout.tsx            Root: SafeAreaProvider, PaperProvider, Stack
 ├── index.tsx              Temporary role picker (replaced by real sign-in)
-├── (passenger)/           Tabs: Home, Search, Tickets, Profile
+├── (passenger)/           Stack: select-transport, then (tabs)
+│   ├── select-transport   Choose bus or train (first screen)
+│   └── (tabs)/            Tabs: Home, Search, Tickets, Profile
 ├── (conductor)/           Tabs: Dashboard, Scan, Passengers, Report
 └── (authority)/           Tabs: Dashboard, Vehicles, Live, Alerts
 ```
@@ -65,6 +67,20 @@ src/app/
 ### Adding a tab
 
 Add an entry to the `tabs` array in the role's `_layout.tsx` (name = file name, title, Ionicons icon name) and create the matching file.
+
+## Transport type (bus or train)
+
+- `src/constants/transport.ts`: `TransportType`, labels, icons and colours (bus orange, train teal).
+- `src/store/transport-store.ts`: `useTransportStore()` gives `transport` (`'bus' | 'train' | null`), `setTransport` and `clearTransport`.
+- `src/components/transport-badge.tsx`: `TransportBadge` pill to show the current choice.
+- In any passenger screen that lists vehicles, read `transport` and filter your data by it:
+
+```tsx
+const transport = useTransportStore((s) => s.transport);
+// e.g. query(collection(db, 'routes'), where('type', '==', transport))
+```
+
+- Route paths: URLs ignore group names, but links use the group form, for example `router.push('/(passenger)/(tabs)/search')`. Run `npx expo start` once after adding a screen so route types regenerate.
 
 ## Conventions
 

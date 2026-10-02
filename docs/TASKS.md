@@ -48,7 +48,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [ ] Notifications, Profile
 
 **Search and tracking, 8 screens (S)**
-- [ ] Home, Select Transport
+- [x] Select Transport (bus or train, first screen)
+- [ ] Home (starter done; full content to build)
 - [ ] Search, Results, Filter & Sort
 - [ ] Transport Details, Route & Stops
 - [ ] Live Tracking

@@ -25,6 +25,10 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F8 | Authority | Add vehicle | Appears in Vehicle Mgmt | Not run |
 | F9 | Authority | Publish route | Visible to passengers | Not run |
 | F10 | Security | Passenger opens conductor route | Redirected away | Not run |
+| F11 | Transport | First launch as passenger | Select Transport shown before Home | Not run |
+| F12 | Transport | Choose Bus | Home says bus; Search shows bus only | Not run |
+| F13 | Transport | Close and reopen the app | Choice is remembered, Home opens directly | Not run |
+| F14 | Transport | Home, Change transport, choose Train | Home and Search switch to train | Not run |
 
 ## Integration cases
 
