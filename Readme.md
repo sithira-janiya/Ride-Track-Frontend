@@ -105,7 +105,8 @@ ridetrack/
 │   │   ├── (passenger)/
 │   │   ├── (conductor)/
 │   │   └── (authority)/
-│   ├── components/      # Shared UI
+│   ├── components/      # Shared UI (Screen, RoleTabs)
+│   ├── constants/       # Theme tokens
 │   ├── lib/             # Firebase and data helpers
 │   └── store/           # Zustand stores
 ├── assets/              # Icons and images
@@ -120,6 +121,7 @@ ridetrack/
 
 | Document | Contents |
 |---|---|
+| [docs/UI-GUIDE.md](docs/UI-GUIDE.md) | Shared theme, components, navigation shell |
 | [docs/MEMBERS.md](docs/MEMBERS.md) | Features and tasks per team member |
 | [docs/TASKS.md](docs/TASKS.md) | Project task list and status |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | App architecture and role flows |

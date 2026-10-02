@@ -1,5 +1,15 @@
-import { Stack } from 'expo-router';
+import { RoleTabs } from '@/components/role-tabs';
 
 export default function ConductorLayout() {
-  return <Stack />;
+  return (
+    <RoleTabs
+      role="conductor"
+      tabs={[
+        { name: 'index', title: 'Dashboard', icon: 'speedometer-outline' },
+        { name: 'scan', title: 'Scan', icon: 'qr-code-outline' },
+        { name: 'passengers', title: 'Passengers', icon: 'people-outline' },
+        { name: 'report', title: 'Report', icon: 'warning-outline' },
+      ]}
+    />
+  );
 }

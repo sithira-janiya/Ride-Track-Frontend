@@ -62,7 +62,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 - [x] Expo + TypeScript project scaffolded (S)
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
-- [ ] Shared theme from the hi-fi prototype (S)
+- [x] Shared theme and role navigation shell, see [UI-GUIDE.md](UI-GUIDE.md) (S)
+- [ ] Align theme tokens with the Figma hi-fi prototype (S)
 - [ ] GitHub repo created with `main` and `dev`, branch protection set (S)
 - [ ] Firebase project, Auth, Firestore rules (F)
 - [ ] Seed script and `.env.example` (F)
