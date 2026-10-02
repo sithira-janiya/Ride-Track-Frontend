@@ -82,6 +82,19 @@ const transport = useTransportStore((s) => s.transport);
 
 - Route paths: URLs ignore group names, but links use the group form, for example `router.push('/(passenger)/(tabs)/search')`. Run `npx expo start` once after adding a screen so route types regenerate.
 
+## Passenger Home building blocks
+
+| Piece | File | Purpose |
+|---|---|---|
+| `SectionHeader` | `src/components/ui/section-header.tsx` | Title row for a block of content |
+| `VehicleCard` | `src/components/home/vehicle-card.tsx` | Vehicle number, route, next stop, minutes to arrive, on time or delayed |
+| `RouteCard` | `src/components/home/route-card.tsx` | Route with fare and a bookmark button to save or remove it |
+| `AlertCard` | `src/components/home/alert-card.tsx` | Authority alert with age |
+| `useSavedRoutesStore` | `src/store/saved-routes-store.ts` | Saved route ids, kept on the device |
+| `home-data.ts` | `src/lib/home-data.ts` | Functions that return vehicles, routes and alerts for a transport type |
+
+Home currently reads `sample-data.ts`. To go live, change only the function bodies in `home-data.ts` to Firestore queries; the screen does not change.
+
 ## Conventions
 
 - TypeScript strict mode; run `npm run typecheck` before opening a PR.

@@ -29,6 +29,10 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F12 | Transport | Choose Bus | Home says bus; Search shows bus only | Not run |
 | F13 | Transport | Close and reopen the app | Choice is remembered, Home opens directly | Not run |
 | F14 | Transport | Home, Change transport, choose Train | Home and Search switch to train | Not run |
+| F15 | Home | Open Home as bus passenger | Alerts, nearby buses and routes shown; no trains | Not run |
+| F16 | Home | Tap bookmark on a popular route | Route appears under Saved routes | Not run |
+| F17 | Home | Close and reopen the app | Saved route is still there | Not run |
+| F18 | Home | Tap bookmark on a saved route | Route is removed from Saved routes | Not run |
 
 ## Integration cases
 

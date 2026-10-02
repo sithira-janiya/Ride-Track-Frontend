@@ -27,11 +27,12 @@ src/
 ├── components/     Reusable UI shared by more than one screen
 │   ├── ui/           Generic building blocks (Screen, PlaceholderScreen)
 │   ├── navigation/   Navigation pieces (RoleTabs)
-│   └── transport/    Bus/train components (TransportBadge)
+│   ├── transport/    Bus/train components (TransportBadge)
+│   └── home/         Cards used on the passenger Home screen
 ├── constants/      Theme tokens and fixed values (theme.ts, transport.ts)
-├── lib/            Firebase init and data access (typed queries and writes)
+├── lib/            Firebase init and data access (home-data.ts now serves sample-data.ts)
 ├── store/          Zustand stores (current user, transport choice, booking draft)
-└── (future) types/ Shared TypeScript types, added when needed
+└── types/          Shared TypeScript types (Vehicle, Route, Alert)
 ```
 
 Rules:
@@ -53,7 +54,7 @@ Rules:
 | Screens | UI and navigation, one file per screen | `src/app/` |
 | Components | Reusable UI (cards, buttons, map markers) | `src/components/` |
 | State | Current user, role, booking draft, transport choice | `src/store/` |
-| Data access | Firebase init, typed queries and writes | `src/lib/` |
+| Data access | Firebase init, typed queries and writes (sample data until Firebase is connected) | `src/lib/` |
 | Backend | Auth, database, security rules | Firebase |
 
 ## Role routing
