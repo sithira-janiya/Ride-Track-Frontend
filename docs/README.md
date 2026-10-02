@@ -4,6 +4,7 @@ Project documentation for RideTrack, a React Native app for live bus and train t
 
 | Doc | What it covers |
 |---|---|
+| [UI-GUIDE.md](UI-GUIDE.md) | Shared theme, components and navigation shell |
 | [MEMBERS.md](MEMBERS.md) | Features and tasks per team member |
 | [TASKS.md](TASKS.md) | Project task list and status |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System design, role flows, connection points |
