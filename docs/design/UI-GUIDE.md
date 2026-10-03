@@ -6,34 +6,45 @@ How the shared look and navigation are set up, so every member builds screens th
 
 All design tokens live in [`src/constants/theme.ts`](../../src/constants/theme.ts). Do not hard-code colours or spacing in screens; import them.
 
-| Token | Use |
+The look follows the **Milestone 2 high-fidelity prototype** (group report, section 4): dark navy headers, bright blue actions, white rounded cards and green or amber status pills. The values were read from the prototype images in that report; check them against the Figma file and change `theme.ts` if a value differs.
+
+| Token | Value / use |
 |---|---|
-| `colors` | Brand, background, surface, text, border, success, warning, error |
-| `roleColors` | Accent per role: passenger blue `#1565C0`, conductor green `#2E7D32`, authority purple `#6A1B9A` |
+| `colors.navy` | `#0F2040` header band, tab bar, landing screen |
+| `colors.primary` / `primaryDark` | `#2563EB` active chips and highlights / `#1E40AF` main buttons |
+| `colors.background`, `surface`, `surfaceAlt` | `#F8FAFC` page, `#FFFFFF` cards, `#EFF6FF` selected card and icon tiles |
+| `colors.text`, `textMuted`, `border` | `#0F2040`, `#64748B`, `#E2E8F0` |
+| `colors.success` / `successBg` | `#16A34A` / `#DCFCE7` (ON TIME pill) |
+| `colors.warning` / `warningBg` | `#B45309` / `#FEF3C7` (DELAYED pill, alerts) |
+| `roleColors` | passenger `#2563EB`, conductor `#4F46E5`, authority `#0F766E` |
 | `spacing` | `xs 4`, `sm 8`, `md 16`, `lg 24`, `xl 32` |
-| `radius` | `sm 6`, `md 12`, `lg 20` |
+| `radius` | `sm 8`, `md 12`, `lg 16`, `xl 24`, `pill 999` |
 | `theme` / `createTheme(accent)` | React Native Paper (Material 3) theme built from the tokens |
 
-`PaperProvider` wraps the whole app in [`src/app/_layout.tsx`](../../src/app/_layout.tsx), so Paper components (`Button`, `Card`, `TextInput`, `Text`) pick up the theme automatically.
-
-> The colours are a starting palette. They have not yet been checked against the Figma hi-fi prototype. Align the values in `theme.ts` with the Figma tokens; screens will follow without code changes.
+`PaperProvider` wraps the whole app in [`src/app/_layout.tsx`](../../src/app/_layout.tsx), so Paper components (`Button`, `TextInput`, `Chip`, `Text`) pick up the theme automatically. The status bar text is light because every screen starts with the navy header.
 
 ## Shared components
 
 | Component | File | Use |
 |---|---|---|
-| `Screen` | `src/components/ui/screen.tsx` | Page wrapper: safe area, background, padding, optional title and subtitle. Use for every screen. |
-| `RoleTabs` | `src/components/navigation/role-tabs.tsx` | Bottom tab bar tinted with the role colour. Used by the three role layouts. |
+| `Screen` | `src/components/ui/screen.tsx` | Page wrapper. With `title` it draws the navy header and a light body with rounded top corners. Props: `title`, `subtitle`, `back` (round back button), `headerRight`, `headerExtra` (content inside the navy band, such as the Home search card), `landing` (full navy page), `scroll`. |
+| `SurfaceCard` | `src/components/ui/surface-card.tsx` | The white rounded card for every list item and panel; pass `onPress` to make it tappable. |
+| `StatusPill` | `src/components/ui/status-pill.tsx` | ON TIME (green) or DELAYED (amber) pill. |
+| `SectionHeader` | `src/components/ui/section-header.tsx` | Title row for a block of content. |
+| `RoleTabs` | `src/components/navigation/role-tabs.tsx` | Dark navy bottom tab bar used by the three role layouts. |
+| `SearchForm` | `src/components/search/search-form.tsx` | Journey search card (Bus or Train toggle, From, Destination, travel date, preferred time, search button). Used on Home and on the Search tab. |
+| `RouteTimeline`, `FacilityChips`, `TripSummaryCard` | `src/components/trip/` | Trip screens: stop list with dots and times, facility chips with icons, vehicle and status header card. |
+| `LivePill` | `src/components/trip/live-pill.tsx` | Blue LIVE pill with a pulsing dot, used in the Live Tracking header. |
 | `PlaceholderScreen` | `src/components/ui/placeholder-screen.tsx` | Temporary body for a screen that is not built yet. Delete its use when you build the real screen. |
 
 Example screen:
 
 ```tsx
-import { Screen } from '@/components/screen';
+import { Screen } from '@/components/ui/screen';
 
 export default function SearchScreen() {
   return (
-    <Screen title="Search">
+    <Screen title="Search Transport" subtitle="Find the best journey for you." back>
       {/* your content */}
     </Screen>
   );
@@ -93,7 +104,7 @@ const transport = useTransportStore((s) => s.transport);
 | `useSavedRoutesStore` | `src/store/saved-routes-store.ts` | Saved route ids, kept on the device |
 | `home-data.ts` | `src/lib/home-data.ts` | Functions that return vehicles, routes and alerts for a transport type |
 
-Home currently reads `src/data/sample-data.ts`. To go live, change only the function bodies in `home-data.ts` to Firestore queries; the screen does not change.
+Home reads live Firestore data through `src/hooks/use-home-data.ts` (queries in `src/lib/home-live.ts`) and falls back to `src/data/sample-data.ts` through `home-data.ts` when the backend is off, nobody is signed in, an error happens or the connection is slow. A small Live data or Sample data label shows which one you are looking at.
 
 ## Conventions
 

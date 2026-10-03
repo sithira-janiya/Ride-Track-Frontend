@@ -1,14 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Badge, Button, IconButton, Text } from 'react-native-paper';
+import { Badge, Button, Text } from 'react-native-paper';
 
 import { ResultCard } from '@/components/results/result-card';
-import { TransportBadge } from '@/components/transport/transport-badge';
 import { Screen } from '@/components/ui/screen';
 import { colors, spacing } from '@/constants/theme';
 import { sortOptions } from '@/constants/results';
 import { transportOptions } from '@/constants/transport';
+import { formatDateShort, fromISODate } from '@/lib/format';
 import { activeFilterCount, filterAndSort } from '@/lib/results-filter';
 import { getResults } from '@/lib/search-data';
 import { useResultsFilterStore } from '@/store/results-filter-store';
@@ -16,7 +16,7 @@ import { useTransportStore } from '@/store/transport-store';
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { from = '', to = '' } = useLocalSearchParams<{ from: string; to: string }>();
+  const { from = '', to = '', date } = useLocalSearchParams<{ from: string; to: string; date?: string }>();
   const transport = useTransportStore((s) => s.transport);
   const filter = useResultsFilterStore((s) => s.filter);
   const resetFilters = useResultsFilterStore((s) => s.reset);
@@ -30,24 +30,23 @@ export default function ResultsScreen() {
   const sortLabel = sortOptions.find((o) => o.value === filter.sort)?.label ?? '';
 
   return (
-    <Screen title={`${from} to ${to}`}>
-      <View style={styles.top}>
-        <IconButton icon="arrow-left" accessibilityLabel="Back to search" onPress={() => router.back()} style={styles.back} />
-        <TransportBadge type={transport} />
-      </View>
-
+    <Screen
+      title="Available Transport"
+      subtitle={`${from} → ${to} • ${formatDateShort(fromISODate(date))}`}
+      back
+    >
       <View style={styles.toolbar}>
         <View style={styles.toolbarText}>
-          <Text variant="bodyMedium">
-            {shown.length} of {all.length} {option.plural.toLowerCase()}
+          <Text variant="titleSmall" style={styles.bold}>
+            {shown.length} {shown.length === 1 ? 'journey' : 'journeys'} found
           </Text>
           <Text variant="bodySmall" style={styles.muted}>
-            Sorted by {sortLabel.toLowerCase()}
+            {all.length > shown.length ? `${all.length - shown.length} hidden by filters · ` : ''}Sorted by {sortLabel.toLowerCase()}
           </Text>
         </View>
         <View>
-          <Button mode="outlined" icon="tune-variant" onPress={() => router.push('/(passenger)/filter')}>
-            Filter & sort
+          <Button mode="contained-tonal" icon="tune-variant" onPress={() => router.push('/(passenger)/filter')}>
+            Filter & Sort
           </Button>
           {activeCount > 0 ? <Badge style={styles.badge}>{activeCount}</Badge> : null}
         </View>
@@ -59,7 +58,7 @@ export default function ResultsScreen() {
           <Text style={styles.muted}>
             We could not find a {option.label.toLowerCase()} between {from} and {to}. Check the spelling or try another place.
           </Text>
-          <Button mode="contained" buttonColor={option.color} onPress={() => router.back()}>
+          <Button mode="contained" buttonColor={colors.primaryDark} onPress={() => router.back()}>
             Change search
           </Button>
         </View>
@@ -72,18 +71,23 @@ export default function ResultsScreen() {
           </Button>
         </View>
       ) : (
-        shown.map((result) => <ResultCard key={result.schedule.id} result={result} />)
+        shown.map((result) => (
+          <ResultCard
+            key={result.schedule.id}
+            result={result}
+            onPress={() => router.push({ pathname: '/(passenger)/transport/[id]', params: { id: result.schedule.id, date } })}
+          />
+        ))
       )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  top: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  back: { margin: 0 },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  toolbarText: { flex: 1 },
+  toolbarText: { flex: 1, gap: 2 },
   badge: { position: 'absolute', top: -6, right: -6 },
   empty: { gap: spacing.sm, paddingVertical: spacing.lg },
+  bold: { fontWeight: '700' },
   muted: { color: colors.textMuted },
 });

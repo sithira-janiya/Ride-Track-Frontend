@@ -1,4 +1,4 @@
-import { dayPeriods, type DayPeriod, type ResultsFilter } from '@/constants/results';
+import { dayPeriods, durationBands, type DayPeriod, type ResultsFilter } from '@/constants/results';
 import type { TripResult } from '@/types/models';
 
 import { toMinutes } from './format';
@@ -12,9 +12,13 @@ export function periodOf(departure: string): DayPeriod {
 
 /** Applies the passenger's filters, then sorts. Returns a new array. */
 export function filterAndSort(results: TripResult[], filter: ResultsFilter): TripResult[] {
-  const filtered = results.filter(({ schedule }) => {
+  const band = durationBands.find((b) => b.value === filter.duration);
+
+  const filtered = results.filter(({ schedule, route }) => {
     if (filter.onTimeOnly && schedule.status !== 'on-time') return false;
     if (filter.periods.length > 0 && !filter.periods.includes(periodOf(schedule.departure))) return false;
+    if (filter.maxFare !== null && route.fare > filter.maxFare) return false;
+    if (band && (schedule.durationMinutes < band.minMinutes || schedule.durationMinutes >= band.maxMinutes)) return false;
     return true;
   });
 
@@ -34,5 +38,10 @@ export function filterAndSort(results: TripResult[], filter: ResultsFilter): Tri
 
 /** Number of filters the passenger has turned on (sort is not counted). */
 export function activeFilterCount(filter: ResultsFilter): number {
-  return (filter.onTimeOnly ? 1 : 0) + (filter.periods.length > 0 ? 1 : 0);
+  return (
+    (filter.onTimeOnly ? 1 : 0) +
+    (filter.periods.length > 0 ? 1 : 0) +
+    (filter.maxFare !== null ? 1 : 0) +
+    (filter.duration !== null ? 1 : 0)
+  );
 }

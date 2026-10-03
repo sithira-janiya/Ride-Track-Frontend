@@ -56,6 +56,50 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F38 | Results | Start a new search after filtering | Filters are reset | Not run |
 | F39 | Results | Search as train, then as bus | Each shows only its own transport | Not run |
 
+| F40 | UI | Open the app | Landing screen is navy with the RideTrack logo and three role buttons | Not run |
+| F41 | UI | Open Select Transport | Bus is preselected with a tick; tapping Train moves the tick; Continue opens Home for the selected type | Not run |
+| F42 | UI | Open Home | Navy header with a time-based greeting and the search card; alerts, nearby vehicles and routes below | Not run |
+| F43 | UI | Tap Train in the Bus/Train toggle on Home | Home content and suggestions switch to trains | Not run |
+| F44 | Search | Tap Travel date | Date picker opens; past dates cannot be chosen; chosen date shows in the field | Not run |
+| F45 | Search | Choose Morning, then search | Results opens with only morning trips (Morning filter on) | Not run |
+| F46 | Results | Open Results | Header shows Available Transport, From to To and the travel date; cards show name, ON TIME or DELAYED pill, times with duration, fare | Not run |
+| F47 | Filter | Choose Up to Rs. 500 | Only trips on routes costing Rs. 500 or less remain; badge counts it | Not run |
+| F48 | Filter | Choose Under 2 hours, then Over 4 hours | Only trips in that duration band remain; tapping the same chip again clears it | Not run |
+| F49 | UI | Check every tab bar | Dark navy bar with white active tab and muted inactive tabs, for all three roles | Not run |
+| F50 | UI | Check every screen header | Back button on Results, Filter & Sort and Select Transport (when there is history); status bar text readable | Not run |
+| F51 | Results | Tap a result card | Transport Details opens for that trip | Not run |
+| F52 | Results | Look at a result card | Facility chips (AC, Wi-Fi, USB) and the seat count are visible | Not run |
+| F53 | Details | Open Transport Details | Vehicle name, ON TIME or DELAYED pill, route, date, times with duration, fare, seats, facilities and the stop list | Not run |
+| F54 | Details | Tap View full route | Route & Stops opens for the same trip | Not run |
+| F55 | Details | Tap the bookmark in the header | Route is saved and shows under Saved routes on Home; tapping again removes it | Not run |
+| F56 | Details | Tap Track Vehicle | Live Tracking starter screen opens with a back button | Not run |
+| F57 | Details | Look at Book Ticket | Button is disabled with a note | Not run |
+| F58 | Route | Open Route & Stops before the trip departs | All stops are Upcoming; location card says it has not departed and when it leaves | Not run |
+| F59 | Route | Open Route & Stops during the trip | Passed stops are Departed (filled dots), later ones Upcoming; card says between two stops with minutes to the next | Not run |
+| F60 | Route | Open Route & Stops after the trip ends | All stops are Arrived; card says Journey completed | Not run |
+| F61 | Details | Open a trip that does not exist | "We could not find this trip" message with a back button | Not run |
+| F62 | Tracking | Tap Track Vehicle on Transport Details | Live Tracking opens with a map showing the route line and a marker at every stop | Not run |
+| F63 | Tracking | Open Live Tracking | Map fits the whole route; header shows vehicle, route and a pulsing LIVE pill | Not run |
+| F64 | Tracking | Look at the panel | Vehicle number, ON TIME or DELAYED pill, Updated Ns ago (counts up, resets every 5 seconds), location, ETA and arrival tiles | Not run |
+| F65 | Tracking | Tap Simulate trip | Vehicle marker moves along the route for about 90 seconds; travelled part turns blue; location and ETA tiles update; the button reads Stop demo | Not run |
+| F66 | Tracking | Tap Stop demo | Movement stops and the position returns to the timetable position | Not run |
+| F67 | Tracking | Use zoom in, zoom out | Map zooms in and out | Not run |
+| F68 | Tracking | Pan away, then tap Centre on vehicle | Map returns to the vehicle | Not run |
+| F69 | Tracking | Pan away, then tap Show whole route | Map shows every stop again | Not run |
+| F70 | Tracking | Tap a stop marker | Stop name and its arrival time are shown | Not run |
+| F71 | Tracking | Open it before the trip departs | Panel says it has not departed; vehicle sits at the first stop; ETA reads Not started | Not run |
+| F72 | Tracking | Tap Route & Stops | Route & Stops opens for the same trip, and back returns to the map | Not run |
+| F73 | Home | Open the app with no Firebase keys in `.env` | Home shows sample data; label says Sample data and asks for the keys | Not run |
+| F74 | Home | Keys and test password set; tap Continue as Passenger | Signs in as the test passenger; Home shows a green Live data label | Not run |
+| F75 | Home | Compare Home as bus with the Firebase console | Vehicles, published routes and alerts match the seeded documents, for buses and the all-transport alerts only | Not run |
+| F76 | Home | Switch to Train in the search card toggle | Home shows train vehicles, routes and alerts only | Not run |
+| F77 | Home | Change a vehicle's `etaMinutes` or `status` in the console while Home is open | Home updates within a few seconds without a refresh | Not run |
+| F78 | Home | Add an alert in the console while Home is open | New alert appears at the top without a refresh | Not run |
+| F79 | Home | Wrong or missing test password | First screen says test sign-in failed; Home shows sample data labelled Sample data | Not run |
+| F80 | Home | Turn the phone's internet off, then open Home | Within about 8 seconds Home shows sample data with a slow-connection note | Not run |
+| F81 | Home | Bookmark a live route, restart the app | The route is still under Saved routes | Not run |
+| F82 | Security | Sign out, or open Home with no user | Sample data with the sign-in note; Firestore reads are denied | Not run |
+
 ## Integration cases
 
 | ID | Flow | Steps | Expected | Result |

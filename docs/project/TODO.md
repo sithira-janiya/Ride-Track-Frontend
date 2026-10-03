@@ -30,8 +30,10 @@ Everything in sections 3 to 6 depends on these.
 
 - [ ] (S) Align `src/constants/theme.ts` tokens with the Figma hi-fi prototype ([UI-GUIDE.md](../design/UI-GUIDE.md))
 - [ ] (S) Replace each `PlaceholderScreen` with the real screen as owners build them; remove the role picker once real sign-in lands
-- [ ] (S) Switch Home to live Firestore: change only the function bodies in `src/lib/home-data.ts`
-- [ ] (F) Add `EXPO_PUBLIC_MAPS_API_KEY` to `.env.example` and the EAS build config (needed for the APK, not Expo Go) ([TECH-INFO.md](../design/TECH-INFO.md))
+- [x] (S) Home reads live Firestore data through `src/hooks/use-home-data.ts` and `src/lib/home-live.ts` (checked on the local emulators)
+- [ ] (S) Confirm Home shows `Live data` on the real project, then switch the other passenger screens the same way
+- [x] (S) Maps key wired into the build: `.env.example`, `app.config.js`, `eas.json`, package name, Google provider ([MAPS-SETUP.md](../design/MAPS-SETUP.md))
+- [ ] (F) Create the restricted Google Maps API key in Google Cloud and set it, plus the four Firebase values, in the EAS `preview` environment ([MAPS-SETUP.md](../design/MAPS-SETUP.md) Parts A and B)
 - [ ] (F) Set Firestore rules before demo day; test mode expires after 30 days
 - [ ] (F) Avoid Cloud Functions (paid plan); keep all logic in the app
 - [ ] (F) Add composite indexes to `firestore.indexes.json` whenever a `type` filter plus sort asks for one
@@ -120,10 +122,10 @@ Each screen needs at least 2 working CRUD operations ([SCREENS.md](SCREENS.md)).
 
 ### Silva (leader)
 
-- [ ] Home on live Firestore data
-- [ ] Search with recent searches, Results with Filter & Sort
-- [ ] Transport Details and Route & Stops with favourites
-- [ ] Live Tracking map with real-time marker
+- [x] Home on live Firestore data (confirm on the real project)
+- [x] Search with recent searches, Results with Filter & Sort
+- [x] Transport Details and Route & Stops with save-route bookmark
+- [x] Live Tracking map with moving marker (sample timetable; real Firestore positions still to do)
 - [ ] Functional tests for this area
 - [ ] Coordinate usability testing (5+ participants)
 - [ ] Merge reviews; release APK link in the Readme

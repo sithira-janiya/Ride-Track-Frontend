@@ -4,6 +4,28 @@
 
 **Transport rule:** every passenger screen that lists or tracks vehicles (Search, Results, Filter & Sort, Transport Details, Route & Stops, Live Tracking, and Home suggestions) shows only the type chosen in Select Transport.
 
+## Fidelity to the Milestone 2 prototype
+
+The passenger screens built so far follow the prototype layout and colours. Known differences, kept on purpose or for later:
+
+| Prototype | Built app | Reason |
+|---|---|---|
+| Fare range slider | Fare chips (Any price, Up to Rs. 500, 1,000, 1,500) | No extra package needed; same effect |
+| Available seats and facilities filters | Not built; seats and facility chips are shown on cards and details | Filtering by seats and facilities can follow |
+| Track button on result cards | Whole card opens Transport Details, which has Track Vehicle | One clear tap target; Live Tracking itself is not built yet |
+| Book Ticket on Transport Details | Disabled with a note | Booking screens are not built yet |
+| Route preview inside Transport Details is a button to Route & Stops | Shows the stop list inline and a View full route button | Same information without an extra tap |
+| Live location (near a stop, ETA) | Worked out from the timetable and the phone clock | Sample data has no GPS; real positions arrive with the backend |
+| Map status filter chips (On time, Delayed, Disrupted) | Not shown; the vehicle's status pill is in the info panel | The screen follows one vehicle, so there is nothing to filter |
+| Your own location on the map | Not shown | Needs the location permission package, which is not added yet |
+| Road-following route line | Straight lines between stops | Sample data has stop coordinates only |
+| Real-time vehicle movement | Moves along the route from the timetable; a Simulate trip button drives a whole trip in about 90 seconds | Lets the movement be demonstrated at any time of day |
+| Pulsing Live indicator and last updated time (test finding UI-01) | LIVE pill with a pulsing dot and an Updated Ns ago label | Added from the Milestone 2 recommendation |
+| Early morning departure chip | Morning, Afternoon, Evening and Night | Matches the four windows used by the filter |
+| Bus/Train toggle only sets the search type | Toggle also changes the app-wide transport choice | Keeps Home, Search and Results consistent with the choose-bus-or-train-first rule |
+| Travel date shapes results | Date is chosen, passed to Results and shown; sample schedules run daily | Real dated schedules arrive with Firestore |
+| Upcoming Journey card on Home | Alerts, nearby vehicles, saved and popular routes | Bookings do not exist yet |
+
 ## Search and tracking (Silva), FR3, FR4, FR7
 
 | # | Screen | File | CRUD |
@@ -13,9 +35,9 @@
 | 3 | Search | `src/app/(passenger)/(tabs)/search.tsx` | R places and routes, C/D recent searches (built) |
 | 4 | Results | `src/app/(passenger)/results.tsx` | R schedules, U sort (built) |
 | 5 | Filter & Sort | `src/app/(passenger)/filter.tsx` (opens as a sheet over Results) | U filters, R options (built) |
-| 6 | Transport Details | `transport/[id].tsx` | R vehicle, C/D favourite |
-| 7 | Route & Stops | `route/[id].tsx` | R stops, C/D favourite |
-| 8 | Live Tracking | `track/[id].tsx` | R live location, C/D follow vehicle |
+| 6 | Transport Details | `src/app/(passenger)/transport/[id].tsx` | R trip, vehicle and facilities, C/D saved route (built) |
+| 7 | Route & Stops | `src/app/(passenger)/route/[id].tsx` | R stops and progress, C/D saved route (built) |
+| 8 | Live Tracking | `src/app/(passenger)/track/[id].tsx` (built) | R live location, C/D follow vehicle |
 
 ## Booking and tickets (Rajapaksha), FR1, FR2, FR5, FR8, FR11, FR12
 

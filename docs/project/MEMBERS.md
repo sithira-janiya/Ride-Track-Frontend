@@ -19,6 +19,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 ### Tasks
 - [x] Scaffold Expo + TypeScript project, install shared packages
 - [x] Shared theme and navigation shell
+- [x] Restyle passenger screens to the Milestone 2 hi-fi prototype (navy header, cards, pills, Select Transport, Home, Search, Results, Filter & Sort)
 - [x] Create GitHub repo with `main` and `dev` branches
 - [x] Add `.env.example`
 - [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
@@ -26,11 +27,14 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [ ] Add the two branch-rule checks as required status checks in the GitHub rulesets
 - [x] Select Transport (first screen, saved choice, redirect on first launch)
 - [x] Home: current transport with Change button, alerts, nearby vehicles, saved routes (bookmark add/remove) and popular routes, all filtered by the chosen transport (uses sample data)
-- [ ] Connect Home to live Firestore data (vehicles, routes, alerts) once the backend is ready
+- [x] Connect Home to live Firestore data (vehicles, routes, alerts), with sample fallback; checked on the local emulators
+- [ ] Confirm Home on the real Firebase project with the keys and the test password in `.env`
+- [ ] Connect Search, Results, Transport Details, Route & Stops and Live Tracking to Firestore
 - [x] Search with recent searches (create/delete), filtered by chosen transport
 - [x] Results (trips between two places, times, duration, fare, status) with Filter & Sort (sort by earliest, cheapest, shortest; filter by time of day and on time only); sample data
-- [ ] Transport Details and Route & Stops with favourites
-- [ ] Live Tracking map with real-time marker
+- [x] Transport Details and Route & Stops with save-route bookmark (opened from a Results card; Live Tracking is a starter screen)
+- [x] Live Tracking map with a moving vehicle marker (positions from the sample timetable; demo simulation)
+- [ ] Live Tracking: switch to real positions from Firestore when the backend simulator is ready
 - [ ] Functional tests for this area
 - [ ] Coordinate usability testing (5+ participants)
 - [ ] Merge reviews and release APK link in Readme

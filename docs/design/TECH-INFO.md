@@ -50,7 +50,7 @@ Stored in `.env` (git-ignored). A template `.env.example` with empty values shou
 | `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
 | `EXPO_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project |
 | `EXPO_PUBLIC_FIREBASE_APP_ID` | Firebase app id |
-| `EXPO_PUBLIC_MAPS_API_KEY` | Maps key (needed for the built APK; Expo Go works without one) |
+| `EXPO_PUBLIC_MAPS_API_KEY` | Google Maps key for the built APK; Expo Go works without one. `app.config.js` adds it to the Android build. Create and restrict it as in [MAPS-SETUP.md](MAPS-SETUP.md). |
 
 Variables prefixed `EXPO_PUBLIC_` are bundled into the app, so they are identifiers, not secrets. Real protection comes from Firestore security rules.
 
@@ -60,7 +60,7 @@ Variables prefixed `EXPO_PUBLIC_` are bundled into the app, so they are identifi
 |---|---|
 | `npm install` | Install packages |
 | `npx expo start` | Start dev server, scan QR with Expo Go |
-| `eas build -p android --profile preview` | Build the installable APK |
+| `npm run build:apk` | Build the installable APK (same as `eas build -p android --profile preview`) |
 
 ## Using Claude Code with this repo
 

@@ -30,10 +30,12 @@ src/
 │   ├── transport/    Bus/train components (TransportBadge)
 │   ├── home/         Cards used on the passenger Home screen
 │   ├── search/       Search form pieces (PlaceInput, RecentSearchItem)
-│   └── results/      Results list card (ResultCard)
-├── constants/      Theme tokens and fixed values (theme.ts, transport.ts, results.ts)
+│   ├── results/      Results list card (ResultCard)
+│   └── trip/         Trip screens: RouteTimeline, FacilityChips, TripSummaryCard
+├── constants/      Theme tokens and fixed values (theme.ts, transport.ts, results.ts, facilities.ts)
+├── hooks/          Reusable hooks (use-start-search.ts, use-live-trip.ts, use-home-data.ts)
 ├── data/           Static sample data used until Firebase is connected (sample-data.ts)
-├── lib/            Data access and services: home-data.ts and search-data.ts read data/, later Firestore
+├── lib/            Data access: home-live.ts reads Firestore for Home; home-data.ts and search-data.ts still read data/; dev-auth.ts is a temporary test sign-in
 ├── store/          Zustand stores (current user, transport choice, saved routes, recent searches, results filter, booking draft)
 └── types/          Shared TypeScript types (models.ts: Vehicle, Route, Alert)
 ```
@@ -101,6 +103,10 @@ Authority ──alert───────▶ Passenger
 ```
 
 ## Live tracking
+
+**Today (sample data):** `src/hooks/use-live-trip.ts` works out how far along a trip the vehicle is from the timetable and the phone clock, refreshing every 5 seconds (or every second in the Simulate trip demo). `src/lib/vehicle-position.ts` turns that share of the trip into a map position by moving in a straight line between stops. The screen is `src/app/(passenger)/track/[id].tsx`. To go live, make `useLiveTrip` read `vehicles/{id}.location` instead; the screen does not change.
+
+**Planned (with Firestore):**
 
 Vehicles write `location` (lat/lng, updated time) to `vehicles/{id}`. For the demo the seed script and a small simulator update positions along a route. The Live Tracking screen subscribes with `onSnapshot` and moves the marker on the map. Authority Live Operations uses the same listener across all vehicles.
 

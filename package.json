@@ -7,6 +7,7 @@
     "@expo/vector-icons": "^15.0.2",
     "@hookform/resolvers": "^5.9.1",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "9.1.0",
     "expo": "~57.0.26",
     "expo-camera": "~57.0.6",
     "expo-constants": "~57.0.20",
@@ -51,7 +52,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:apk": "npx eas-cli@latest build -p android --profile preview"
   },
   "private": true
 }

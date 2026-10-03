@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { Chip, HelperText, TextInput } from 'react-native-paper';
 
-import { spacing } from '@/constants/theme';
+import { colors, radius, spacing } from '@/constants/theme';
 
 type Props = {
   label: string;
@@ -29,12 +29,14 @@ export function PlaceInput({ label, value, onChangeText, suggestions, error, ico
         autoCapitalize="words"
         autoCorrect={false}
         returnKeyType="next"
+        style={styles.input}
+        outlineStyle={styles.outline}
       />
       {error ? <HelperText type="error">{error}</HelperText> : null}
       {showSuggestions ? (
         <View style={styles.chips}>
           {suggestions.slice(0, 4).map((place) => (
-            <Chip key={place} compact onPress={() => onChangeText(place)}>
+            <Chip key={place} compact style={styles.chip} onPress={() => onChangeText(place)}>
               {place}
             </Chip>
           ))}
@@ -46,5 +48,8 @@ export function PlaceInput({ label, value, onChangeText, suggestions, error, ico
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.xs },
+  input: { backgroundColor: colors.surface },
+  outline: { borderRadius: radius.md, borderColor: colors.border },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip: { backgroundColor: colors.surfaceAlt },
 });
