@@ -106,10 +106,14 @@ Staff Login, Dashboard, Assigned Journey, Scan Ticket, Valid, Invalid, Passenger
 Dashboard, Vehicle Mgmt, Add Vehicle, Routes, Stops, Schedule, Fare & Facilities, Preview & Publish, Live Operations, Incident Mgmt, Review Incident, Create Alert, Alert Published
 
 ### Tasks
-- [ ] Create Firebase project, share keys privately
-- [ ] Firestore collections and security rules per role
-- [ ] Auth with `role` field and route guards
-- [ ] Seed script `npm run seed`
+- [x] Backend repo `ridetrack-backend` prepared locally (security rules, indexes, seed script, setup guide); see [BACKEND.md](../design/BACKEND.md)
+- [x] Mobile connection module `src/lib/firebase.ts` and updated `.env.example`
+- [x] Push `ridetrack-backend` to GitHub with `main` and `dev`, protect both
+- [x] Create Firebase project `ridetrack` (ID `ridetrack-5ff36`) with Email/Password auth and Firestore
+- [ ] Share the four Firebase keys with the team privately
+- [ ] Deploy rules and indexes (`npm run deploy:rules`) and test rules against each role
+- [x] Run the seed (`npm run seed`); console shows `alerts`, `routes`, `schedules`, `users`, `vehicles` and the 3 test users
+- [ ] Auth in the app with `role` field and route guards
 - [ ] Vehicle Mgmt and Add Vehicle
 - [ ] Routes, Stops, Schedule, Fare & Facilities
 - [ ] Preview & Publish

@@ -38,7 +38,7 @@ Constraints: free tools only, 4 members, a short timeline, Android as the target
 - Node.js 20+
 - Git
 - Expo Go on an Android phone, or an Android emulator
-- Access to the group Firebase project
+- The Firebase keys from the backend owner (backend is a separate repo, see [BACKEND.md](BACKEND.md))
 
 ## Environment variables
 
@@ -47,6 +47,7 @@ Stored in `.env` (git-ignored). A template `.env.example` with empty values shou
 | Variable | Purpose |
 |---|---|
 | `EXPO_PUBLIC_FIREBASE_API_KEY` | Firebase web API key |
+| `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
 | `EXPO_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project |
 | `EXPO_PUBLIC_FIREBASE_APP_ID` | Firebase app id |
 | `EXPO_PUBLIC_MAPS_API_KEY` | Maps key (needed for the built APK; Expo Go works without one) |
@@ -59,7 +60,6 @@ Variables prefixed `EXPO_PUBLIC_` are bundled into the app, so they are identifi
 |---|---|
 | `npm install` | Install packages |
 | `npx expo start` | Start dev server, scan QR with Expo Go |
-| `npm run seed` | Load sample routes, vehicles and test users |
 | `eas build -p android --profile preview` | Build the installable APK |
 
 ## Using Claude Code with this repo
@@ -77,4 +77,4 @@ Variables prefixed `EXPO_PUBLIC_` are bundled into the app, so they are identifi
 
 ## Test accounts
 
-See the Readme: `passenger@`, `conductor@` and `authority@ridetrack.test`, created by `npm run seed`.
+See the Readme: `passenger@`, `conductor@` and `authority@ridetrack.test`, created by the backend repo's seed script.
