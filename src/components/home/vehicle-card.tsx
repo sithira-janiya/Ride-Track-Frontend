@@ -4,7 +4,7 @@ import { Card, Text } from 'react-native-paper';
 
 import { colors, radius, spacing } from '@/constants/theme';
 import { transportOptions } from '@/constants/transport';
-import type { Vehicle } from '@/types/transport';
+import type { Vehicle } from '@/types/models';
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const option = transportOptions[vehicle.type];

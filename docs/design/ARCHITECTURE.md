@@ -30,9 +30,10 @@ src/
 │   ├── transport/    Bus/train components (TransportBadge)
 │   └── home/         Cards used on the passenger Home screen
 ├── constants/      Theme tokens and fixed values (theme.ts, transport.ts)
-├── lib/            Firebase init and data access (home-data.ts now serves sample-data.ts)
-├── store/          Zustand stores (current user, transport choice, booking draft)
-└── types/          Shared TypeScript types (Vehicle, Route, Alert)
+├── data/           Static sample data used until Firebase is connected (sample-data.ts)
+├── lib/            Data access and services: home-data.ts now reads data/, later Firestore
+├── store/          Zustand stores (current user, transport choice, saved routes, booking draft)
+└── types/          Shared TypeScript types (models.ts: Vehicle, Route, Alert)
 ```
 
 Rules:
@@ -43,6 +44,8 @@ Rules:
 | Shared UI goes in `src/components/<group>/`; a component used by one screen stays next to it | Keeps `components/` small and truly shared |
 | Colours, spacing and fixed lists come from `src/constants/` | One place to change the look |
 | Screens never call Firebase directly; use functions in `src/lib/` | Easy to test and change the backend |
+| Sample or mock data lives in `src/data/`, never inside screens or `lib/` | Removing it later is one folder |
+| Shared TypeScript shapes live in `src/types/models.ts` | One definition per entity, matches DATA-MODEL.md |
 | App state in `src/store/` | One source of truth |
 | Import with `@/` (maps to `src/`) | No long relative paths |
 | Docs sit in `docs/project`, `docs/design` or `docs/process` | Easy to find |

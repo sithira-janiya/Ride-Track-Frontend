@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
 import { colors, spacing } from '@/constants/theme';
-import type { Alert } from '@/types/transport';
+import type { Alert } from '@/types/models';
 
 function timeAgo(minutes: number) {
   if (minutes < 60) return `${minutes} min ago`;
