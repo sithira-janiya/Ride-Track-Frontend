@@ -9,7 +9,8 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
-        <StatusBar style="dark" />
+        {/* Every screen starts with the navy header, so the status bar text is light. */}
+        <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false }} />
       </PaperProvider>
     </SafeAreaProvider>

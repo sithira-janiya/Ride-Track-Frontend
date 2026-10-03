@@ -71,7 +71,17 @@ The two repos never import each other. They only share the Firebase project.
    - `Backend: connected to Firebase` means the keys are loaded.
    - `Backend: not configured (using sample data)` means `.env` is missing or empty.
 
-Screens still show sample data until they are switched to read from Firestore (each owner does this for their own screens).
+The passenger **Home** screen now reads Firestore (`src/lib/home-live.ts`, used through `src/hooks/use-home-data.ts`). It shows a **Live data** or **Sample data** label and a short reason when it falls back to samples. The other screens still show sample data until their owners switch them.
+
+The rules only let signed-in users read, and there is no real login screen yet. Until there is, add the seed password to `.env` as `EXPO_PUBLIC_DEV_TEST_PASSWORD` (the value in the backend README). The role buttons on the first screen then sign in as the matching seeded test user (`src/lib/dev-auth.ts`). The first screen shows `test sign-in on` when it is set up. Delete that file when real sign-in lands.
+
+What Home reads, and the rule behind each query:
+
+| Collection | Query | Why |
+|---|---|---|
+| `vehicles` | `type == transport`, ordered by `etaMinutes` | Uses the deployed index on `type` and `etaMinutes` |
+| `routes` | `type == transport` and `published == true` | Passengers may only read published routes, so the query must say so |
+| `alerts` | newest 20, filtered to the transport or everyone in the app | Small collection; no index needed |
 
 ## How the app uses the connection
 

@@ -1,7 +1,7 @@
 import type { TransportType } from '@/constants/transport';
 import type { Route, TripResult } from '@/types/models';
 
-import { sampleRoutes, sampleSchedules } from '@/data/sample-data';
+import { sampleRoutes, sampleSchedules, sampleVehicles } from '@/data/sample-data';
 
 /**
  * Data used by the passenger Search and Results screens. Every function takes the transport
@@ -47,6 +47,7 @@ export function getResults(transport: TransportType, from: string, to: string): 
     .filter((s) => s.type === transport)
     .flatMap((schedule) => {
       const route = routes.find((r) => r.id === schedule.routeId);
-      return route ? [{ schedule, route }] : [];
+      const vehicle = sampleVehicles.find((v) => v.id === schedule.vehicleId);
+      return route ? [{ schedule, route, vehicle }] : [];
     });
 }

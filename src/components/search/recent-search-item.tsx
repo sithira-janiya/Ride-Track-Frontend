@@ -1,6 +1,7 @@
-import { StyleSheet } from 'react-native';
-import { Card, IconButton, Text } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { IconButton, Text } from 'react-native-paper';
 
+import { SurfaceCard } from '@/components/ui/surface-card';
 import { colors, spacing } from '@/constants/theme';
 import type { RecentSearch } from '@/store/recent-searches-store';
 
@@ -10,11 +11,16 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
-/** One row in the recent searches list: tap to reuse, bin to delete. */
+/** One row in the recent searches list: tap to search again, X to delete. */
 export function RecentSearchItem({ search, onPress, onRemove }: Props) {
   return (
-    <Card mode="outlined" style={styles.card} onPress={() => onPress(search)}>
-      <Card.Content style={styles.row}>
+    <SurfaceCard
+      onPress={() => onPress(search)}
+      accessibilityLabel={`Search ${search.from} to ${search.to} again`}
+      style={styles.card}
+    >
+      <View style={styles.row}>
+        <IconButton icon="history" size={18} iconColor={colors.textMuted} style={styles.icon} />
         <Text variant="bodyLarge" style={styles.text} numberOfLines={1}>
           {search.from} to {search.to}
         </Text>
@@ -24,13 +30,14 @@ export function RecentSearchItem({ search, onPress, onRemove }: Props) {
           accessibilityLabel={`Remove ${search.from} to ${search.to} from recent searches`}
           onPress={() => onRemove(search.id)}
         />
-      </Card.Content>
-    </Card>
+      </View>
+    </SurfaceCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 0 },
-  text: { flex: 1, marginRight: spacing.sm },
+  card: { paddingVertical: 0, paddingHorizontal: spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  icon: { margin: 0 },
+  text: { flex: 1, marginHorizontal: spacing.xs },
 });

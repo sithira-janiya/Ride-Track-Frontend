@@ -29,7 +29,7 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 |---|---|---|
 | name | string | e.g. Colombo to Kandy |
 | type | `bus` \| `train` | |
-| stops | `{name, lat, lng, order}`[] | |
+| stops | `{name, lat, lng, order}`[] (the app's sample data stores `at`, a 0 to 1 share of the trip, instead of `order`, to work out the time at each stop) | |
 | fare | number | LKR |
 | published | boolean | set by Preview & Publish |
 
@@ -72,6 +72,14 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 | routeId | string, optional (null means all routes) |
 | createdBy | string (authority uid) |
 | createdAt | timestamp |
+
+## How the app maps documents
+
+`src/lib/home-live.ts` reads documents defensively: a missing field becomes an empty value instead of a crash.
+
+- `vehicles.status`: `delayed` is shown as Delayed, any other value as On time.
+- `routes.stops`: the app sorts by `order` and turns it into a 0 to 1 share of the trip (`at`).
+- `alerts.type`: `bus` or `train` limits the alert to that transport; empty or missing means everyone. "Minutes ago" is worked out from `createdAt`.
 
 ## Passenger queries by transport type
 

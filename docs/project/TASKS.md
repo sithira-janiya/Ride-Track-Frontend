@@ -6,13 +6,15 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 > Design phases (requirements, low-fi, hi-fi, user testing) are done per the project history. The app shell is set up (project, packages, theme, role navigation with placeholder tabs); the 42 real screens and the Firebase backend are still to be built.
 
-**Progress snapshot (3 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, deploying and testing Firestore rules, and sharing the keys. Phases 2 to 4 not started.
+**Progress snapshot (4 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, deploying and testing Firestore rules, and sharing the keys. Phases 2 to 4 not started.
 
 ---
 
 ## Phase 4: Release
 
-- [ ] Release APK built with `eas build -p android --profile preview` (F)
+- [x] Build config ready for the APK: `eas.json`, `app.config.js`, package name, maps plugin ([MAPS-SETUP.md](../design/MAPS-SETUP.md))
+- [ ] Create the restricted Google Maps API key and set it in EAS (project owner, MAPS-SETUP Parts A and B)
+- [ ] Release APK built with `npm run build:apk` (F)
 - [ ] APK link added to the Readme links table (S)
 - [ ] Clean-clone check: Readme steps work, no `.env` or keys in the repo (S)
 - [ ] Final bug-fix pass (All)
@@ -52,11 +54,14 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 **Search and tracking, 8 screens (S)**
 - [x] Select Transport (bus or train, first screen)
 - [x] Home (alerts, nearby vehicles, saved and popular routes, filtered by transport; sample data)
-- [ ] Home: switch from sample data to live Firestore data (S, after F's backend)
+- [x] Home reads live Firestore data (vehicles, published routes, alerts; real-time; sample fallback). Checked on the local emulators; still to confirm on the real project with the keys (S)
+- [ ] Replace the temporary test sign-in (`src/lib/dev-auth.ts`) with real login, then delete it (F + R)
+- [ ] Switch Search, Results, Transport Details, Route & Stops and Live Tracking to Firestore (S)
 - [x] Search (From/To with place suggestions, swap, recent searches add/remove/clear, filtered by transport; sample data)
 - [x] Results and Filter & Sort (sort: earliest, cheapest, shortest; filter: time of day, on time only; empty states; sample data)
-- [ ] Transport Details, Route & Stops
-- [ ] Live Tracking
+- [x] Transport Details and Route & Stops (trip summary, fare, seats, facilities, route timeline, save-route bookmark; sample data)
+- [x] Live Tracking (map, route line, stops, moving vehicle marker, ETA tiles, demo simulation; sample timetable positions)
+- [ ] Live Tracking: read real vehicle positions from Firestore `vehicles/{id}.location` once the backend position simulator exists (S + F)
 
 **Cross-role integration**
 - [ ] Alert: authority publishes, passenger Notifications updates live (F + R)
@@ -69,7 +74,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](../design/UI-GUIDE.md) (S)
 - [ ] Set up ESLint (`npx expo install eslint eslint-config-expo`) so `npx expo lint` works (S)
-- [ ] Align theme tokens with the Figma hi-fi prototype (S)
+- [x] Theme and interfaces aligned with the Milestone 2 hi-fi prototype: navy headers, blue actions, pills, cards, Select Transport, Home, Search, Results, Filter & Sort (S)
+- [ ] Check theme values and remaining screens against the Figma file (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
 - [x] Branch protection on `main` and `dev`, pull requests required (S)
 - [x] Workflow `.github/workflows/branch-rules.yml`: PRs into `main` only from `dev`, PRs into `dev` only from feature, fix or docs branches (S)
@@ -102,6 +108,12 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 4 Oct 2026 | Pull request opened from `feature/silva/home-live-data` into `dev` for the finished passenger screens (Transport Details, Route & Stops, Live Tracking, Home on live Firestore data, hi-fi restyle, Maps key setup); Silva's finished tasks ticked in TODO | TASKS, TODO |
+| 3 Oct 2026 | Home switched to live Firestore data: real-time listeners for vehicles, published routes and alerts (always filtered by the chosen transport), falls back to sample data when the backend is off, nobody is signed in, an error happens or the connection is slow; Live data or Sample data label; temporary test sign-in from the role picker using the seeded accounts. Checked against the local emulators with the real rules and seed data | ARCHITECTURE, BACKEND, DATA-MODEL, TESTING, TASKS, MEMBERS, TODO, UI-GUIDE |
+| 3 Oct 2026 | Google Maps key setup for the APK: `app.config.js` adds the maps plugin from `EXPO_PUBLIC_MAPS_API_KEY` and fails the EAS build if it is missing, `eas.json` build profiles, Android package `com.ridetrack.app`, Google provider on the tracking map, `npm run build:apk`, and the MAPS-SETUP guide (the key itself still has to be created in Google Cloud) | MAPS-SETUP, TECH-INFO, TASKS, TODO, docs index, Readme |
+| 3 Oct 2026 | Live Tracking built: map with the route line, stop markers, a moving vehicle marker, travelled part highlighted, zoom, centre and whole-route buttons, LIVE pill, location, ETA and arrival tiles, updated-seconds label, and a demo simulation; position comes from the timetable (sample data) | SCREENS, ARCHITECTURE, TECH-INFO, TESTING, UI-GUIDE, MEMBERS, TASKS |
+| 3 Oct 2026 | Transport Details and Route & Stops built: trip summary, journey information, fare, seats, facilities, route timeline with stop times and progress, save-route bookmark; result cards open Transport Details and show seats and facility chips; sample stops, seats and facilities added; Live Tracking starter screen | SCREENS, DATA-MODEL, TESTING, UI-GUIDE, ARCHITECTURE, MEMBERS, TASKS, Readme |
+| 3 Oct 2026 | Theme and passenger interfaces restyled to match the Milestone 2 hi-fi prototype: navy header `Screen`, `SurfaceCard`, `StatusPill`, navy tab bar, Select Transport with Continue, Home with greeting and search card, Search with travel date and time chips, Results cards, Filter & Sort with fare and duration | UI-GUIDE, SCREENS, TASKS, MEMBERS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Results and Filter & Sort built: trips between two places with times, duration, fare and status; sort and filter sheet with live updates, empty states, reset; sample schedules added | MEMBERS, TASKS, SCREENS, TESTING, DATA-MODEL, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Search screen built: From/To inputs with suggestions, swap, validation, saved recent searches (add, remove, clear), always filtered by the chosen transport; Results starter screen added so Search can navigate | MEMBERS, TASKS, SCREENS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |

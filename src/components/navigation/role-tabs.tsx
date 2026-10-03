@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 
-import { colors, roleColors, type Role } from '@/constants/theme';
+import { colors, type Role } from '@/constants/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -13,15 +13,16 @@ export type RoleTab = {
   icon: IconName;
 };
 
-/** Bottom tab bar shared by all three roles, tinted with the role's accent colour. */
-export function RoleTabs({ role, tabs }: { role: Role; tabs: RoleTab[] }) {
+/** Dark navy bottom tab bar shared by all three roles, as in the prototype. */
+export function RoleTabs({ tabs }: { role: Role; tabs: RoleTab[] }) {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: roleColors[role],
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarActiveTintColor: colors.onNavy,
+        tabBarInactiveTintColor: '#7F93C0',
+        tabBarStyle: { backgroundColor: colors.navy, borderTopColor: colors.navy },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
       {tabs.map((tab) => (
