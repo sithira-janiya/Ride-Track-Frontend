@@ -1,7 +1,7 @@
 import type { TransportType } from '@/constants/transport';
-import type { Alert, Route, Vehicle } from '@/types/transport';
+import type { Alert, Route, Vehicle } from '@/types/models';
 
-import { sampleAlerts, sampleRoutes, sampleVehicles } from './sample-data';
+import { sampleAlerts, sampleRoutes, sampleVehicles } from '@/data/sample-data';
 
 /**
  * Data used by the passenger Home screen. Every function takes the transport type chosen at the

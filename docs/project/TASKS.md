@@ -67,6 +67,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Expo + TypeScript project scaffolded (S)
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](../design/UI-GUIDE.md) (S)
+- [ ] Set up ESLint (`npx expo install eslint eslint-config-expo`) so `npx expo lint` works (S)
 - [ ] Align theme tokens with the Figma hi-fi prototype (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
 - [x] Branch protection on `main` and `dev`, pull requests required (S)
@@ -102,6 +103,7 @@ Newest first. Add a line here whenever tasks or docs change.
 |---|---|---|
 | 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |
 | 3 Oct 2026 | Separate backend repo prepared (Firebase rules, indexes, seed, beginner setup guide); app gets `src/lib/firebase.ts`, new `.env.example`, a backend status line on the first screen, and the BACKEND guide | BACKEND, Readme, TECH-INFO, ARCHITECTURE, DATA-MODEL, MEMBERS, TASKS, docs index |
+| 3 Oct 2026 | Folder tidy: removed empty `.gitkeep` files, moved sample data to `src/data/`, renamed `src/types/transport.ts` to `models.ts`, refreshed folder structure in Readme and ARCHITECTURE | Readme, ARCHITECTURE, UI-GUIDE, TASKS |
 | 3 Oct 2026 | Added branch-rules workflow so `main` accepts pull requests only from `dev` and `dev` only from feature, fix or docs branches; documented ruleset steps and compare links | GIT-WORKFLOW, TASKS |
 | 3 Oct 2026 | Home screen built: current transport and Change button, alerts, nearby vehicles, saved routes (add/remove) and popular routes, all filtered by transport; sample data layer in `src/lib` and shared types in `src/types` | MEMBERS, TASKS, SCREENS, ARCHITECTURE, UI-GUIDE, TESTING |
 | 3 Oct 2026 | Repository folders cleaned: components grouped into `ui`, `navigation`, `transport`; docs grouped into `project`, `design`, `process`; `.editorconfig` and `.gitattributes` added | Readme, docs index, ARCHITECTURE, UI-GUIDE, all doc links |

@@ -1,4 +1,4 @@
-import type { Alert, Route, Vehicle } from '@/types/transport';
+import type { Alert, Route, Vehicle } from '@/types/models';
 
 /**
  * Sample data used until the Firebase backend is connected.

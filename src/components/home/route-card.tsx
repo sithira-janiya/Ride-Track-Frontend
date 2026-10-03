@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { Card, IconButton, Text } from 'react-native-paper';
 
 import { colors, spacing } from '@/constants/theme';
-import type { Route } from '@/types/transport';
+import type { Route } from '@/types/models';
 
 type Props = {
   route: Route;

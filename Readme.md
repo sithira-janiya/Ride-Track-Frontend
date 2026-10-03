@@ -105,12 +105,15 @@ ridetrack/
 │   │   ├── (conductor)/
 │   │   └── (authority)/
 │   ├── components/           Reusable UI, grouped by purpose
-│   │   ├── ui/               Screen, PlaceholderScreen
+│   │   ├── ui/               Screen, PlaceholderScreen, SectionHeader
 │   │   ├── navigation/       RoleTabs
-│   │   └── transport/        TransportBadge
+│   │   ├── transport/        TransportBadge
+│   │   └── home/             Cards for the passenger Home screen
 │   ├── constants/            Theme tokens, transport types
-│   ├── lib/                  Firebase and data helpers
-│   └── store/                Zustand stores
+│   ├── data/                 Sample data used until Firebase is connected
+│   ├── lib/                  Data access and services (Firebase later)
+│   ├── store/                Zustand stores
+│   └── types/                Shared TypeScript types (models.ts)
 ├── assets/                   Icons and images
 ├── scripts/                  Helper scripts (the data seed lives in the backend repo)
 ├── docs/                     Documentation (see below)
