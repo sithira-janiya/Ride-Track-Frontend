@@ -109,7 +109,8 @@ ridetrack/
 │   │   ├── navigation/       RoleTabs
 │   │   ├── transport/        TransportBadge
 │   │   ├── home/             Cards for the passenger Home screen
-│   │   └── search/           Search form pieces
+│   │   ├── search/           Search form pieces
+│   │   └── results/          Results list card
 │   ├── constants/            Theme tokens, transport types
 │   ├── data/                 Sample data used until Firebase is connected
 │   ├── lib/                  Data access and services (Firebase later)

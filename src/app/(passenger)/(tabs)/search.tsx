@@ -12,6 +12,7 @@ import { colors, spacing } from '@/constants/theme';
 import { transportOptions } from '@/constants/transport';
 import { suggestPlaces } from '@/lib/search-data';
 import { selectRecent, useRecentSearchesStore, type RecentSearch } from '@/store/recent-searches-store';
+import { useResultsFilterStore } from '@/store/results-filter-store';
 import { useTransportStore } from '@/store/transport-store';
 
 export default function SearchScreen() {
@@ -21,6 +22,7 @@ export default function SearchScreen() {
   const addSearch = useRecentSearchesStore((s) => s.addSearch);
   const removeSearch = useRecentSearchesStore((s) => s.removeSearch);
   const clearSearches = useRecentSearchesStore((s) => s.clearSearches);
+  const resetFilters = useResultsFilterStore((s) => s.reset);
 
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -37,6 +39,7 @@ export default function SearchScreen() {
 
   const go = (fromPlace: string, toPlace: string) => {
     addSearch({ type: transport, from: fromPlace, to: toPlace });
+    resetFilters();
     router.push({ pathname: '/(passenger)/results', params: { from: fromPlace.trim(), to: toPlace.trim() } });
   };
 
