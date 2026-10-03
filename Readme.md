@@ -80,11 +80,10 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 
 4. Sample data (routes, vehicles, test users) is loaded once by the backend owner from the `ridetrack-backend` repository (`npm run seed` there). You do not run it in this repo.
 
-5. Build the installable APK:
+5. Build the installable APK (needs the Google Maps key first, see [docs/design/MAPS-SETUP.md](docs/design/MAPS-SETUP.md)):
 
    ```bash
-   npm install -g eas-cli
-   eas build -p android --profile preview
+   npm run build:apk
    ```
 
 ### Test logins (created by the backend seed script)

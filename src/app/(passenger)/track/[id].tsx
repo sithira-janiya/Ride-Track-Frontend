@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import { Button, IconButton, Text } from 'react-native-paper';
 
 import { LivePill } from '@/components/trip/live-pill';
@@ -83,6 +83,7 @@ export default function LiveTrackingScreen() {
       <View style={styles.mapWrap}>
         <MapView
           ref={mapRef}
+          provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={{
             latitude: (route.stops[0].lat + route.stops[route.stops.length - 1].lat) / 2,

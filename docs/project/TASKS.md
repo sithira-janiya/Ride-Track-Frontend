@@ -12,7 +12,9 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 ## Phase 4: Release
 
-- [ ] Release APK built with `eas build -p android --profile preview` (F)
+- [x] Build config ready for the APK: `eas.json`, `app.config.js`, package name, maps plugin ([MAPS-SETUP.md](../design/MAPS-SETUP.md))
+- [ ] Create the restricted Google Maps API key and set it in EAS (project owner, MAPS-SETUP Parts A and B)
+- [ ] Release APK built with `npm run build:apk` (F)
 - [ ] APK link added to the Readme links table (S)
 - [ ] Clean-clone check: Readme steps work, no `.env` or keys in the repo (S)
 - [ ] Final bug-fix pass (All)
@@ -104,6 +106,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Google Maps key setup for the APK: `app.config.js` adds the maps plugin from `EXPO_PUBLIC_MAPS_API_KEY` and fails the EAS build if it is missing, `eas.json` build profiles, Android package `com.ridetrack.app`, Google provider on the tracking map, `npm run build:apk`, and the MAPS-SETUP guide (the key itself still has to be created in Google Cloud) | MAPS-SETUP, TECH-INFO, TASKS, TODO, docs index, Readme |
 | 3 Oct 2026 | Live Tracking built: map with the route line, stop markers, a moving vehicle marker, travelled part highlighted, zoom, centre and whole-route buttons, LIVE pill, location, ETA and arrival tiles, updated-seconds label, and a demo simulation; position comes from the timetable (sample data) | SCREENS, ARCHITECTURE, TECH-INFO, TESTING, UI-GUIDE, MEMBERS, TASKS |
 | 3 Oct 2026 | Transport Details and Route & Stops built: trip summary, journey information, fare, seats, facilities, route timeline with stop times and progress, save-route bookmark; result cards open Transport Details and show seats and facility chips; sample stops, seats and facilities added; Live Tracking starter screen | SCREENS, DATA-MODEL, TESTING, UI-GUIDE, ARCHITECTURE, MEMBERS, TASKS, Readme |
 | 3 Oct 2026 | Theme and passenger interfaces restyled to match the Milestone 2 hi-fi prototype: navy header `Screen`, `SurfaceCard`, `StatusPill`, navy tab bar, Select Transport with Continue, Home with greeting and search card, Search with travel date and time chips, Results cards, Filter & Sort with fare and duration | UI-GUIDE, SCREENS, TASKS, MEMBERS, TESTING, ARCHITECTURE, Readme |
