@@ -52,7 +52,7 @@ Payments are simulated. Details and reasoning: [docs/TECH-INFO.md](docs/design/T
 
 ## Getting started
 
-You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Android emulator), and access to the group's Firebase project.
+You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Android emulator), and the Firebase keys from the backend owner (Fernando). The backend lives in a separate repository, `ridetrack-backend`; see [docs/design/BACKEND.md](docs/design/BACKEND.md).
 
 1. Clone the repository and install packages:
 
@@ -66,22 +66,19 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
 
    ```env
    EXPO_PUBLIC_FIREBASE_API_KEY=...
+   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
    EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
    EXPO_PUBLIC_FIREBASE_APP_ID=...
    EXPO_PUBLIC_MAPS_API_KEY=...
    ```
 
-3. Start the app and scan the QR code with Expo Go:
+3. Start the app and scan the QR code with Expo Go. The first screen shows `Backend: connected to Firebase` when the keys are loaded:
 
    ```bash
-   npx expo start
+   npx expo start -c
    ```
 
-4. Load the sample data (routes, vehicles, test users) once:
-
-   ```bash
-   npm run seed
-   ```
+4. Sample data (routes, vehicles, test users) is loaded once by the backend owner from the `ridetrack-backend` repository (`npm run seed` there). You do not run it in this repo.
 
 5. Build the installable APK:
 
@@ -90,7 +87,7 @@ You need: Node.js 20+, Git, the **Expo Go** app on an Android phone (or an Andro
    eas build -p android --profile preview
    ```
 
-### Test logins (created by the seed script)
+### Test logins (created by the backend seed script)
 
 | Role | Email | Password |
 |---|---|---|
@@ -111,13 +108,16 @@ ridetrack/
 │   │   ├── ui/               Screen, PlaceholderScreen, SectionHeader
 │   │   ├── navigation/       RoleTabs
 │   │   ├── transport/        TransportBadge
-│   │   └── home/             Cards for the passenger Home screen
+│   │   ├── home/             Cards for the passenger Home screen
+│   │   ├── search/           Search form pieces
+│   │   └── results/          Results list card
 │   ├── constants/            Theme tokens, transport types
 │   ├── data/                 Sample data used until Firebase is connected
 │   ├── lib/                  Data access and services (Firebase later)
 │   ├── store/                Zustand stores
 │   └── types/                Shared TypeScript types (models.ts)
 ├── assets/                   Icons and images
+├── scripts/                  Helper scripts (the data seed lives in the backend repo)
 ├── docs/                     Documentation (see below)
 │   ├── project/              Tasks, members, screens, traceability
 │   ├── design/               Architecture, data model, UI guide, tech info
@@ -142,6 +142,7 @@ Index: [docs/README.md](docs/README.md)
 | design | [ARCHITECTURE](docs/design/ARCHITECTURE.md) | App architecture, folder structure, role flows |
 | design | [DATA-MODEL](docs/design/DATA-MODEL.md) | Firestore collections and rules |
 | design | [UI-GUIDE](docs/design/UI-GUIDE.md) | Theme, shared components, navigation shell |
+| design | [BACKEND](docs/design/BACKEND.md) | Backend repo, Firebase setup, how to connect |
 | design | [TECH-INFO](docs/design/TECH-INFO.md) | Stack, tooling, environment |
 | process | [GIT-WORKFLOW](docs/process/GIT-WORKFLOW.md) | Branching and contribution rules |
 | process | [TESTING](docs/process/TESTING.md) | Test cases and defect log |

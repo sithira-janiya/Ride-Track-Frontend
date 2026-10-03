@@ -6,7 +6,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 > Design phases (requirements, low-fi, hi-fi, user testing) are done per the project history. The app shell is set up (project, packages, theme, role navigation with placeholder tabs); the 42 real screens and the Firebase backend are still to be built.
 
-**Progress snapshot (3 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, Firebase and the seed script. Phases 2 to 4 not started.
+**Progress snapshot (3 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, deploying and testing Firestore rules, and sharing the keys. Phases 2 to 4 not started.
 
 ---
 
@@ -53,7 +53,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Select Transport (bus or train, first screen)
 - [x] Home (alerts, nearby vehicles, saved and popular routes, filtered by transport; sample data)
 - [ ] Home: switch from sample data to live Firestore data (S, after F's backend)
-- [ ] Search, Results, Filter & Sort
+- [x] Search (From/To with place suggestions, swap, recent searches add/remove/clear, filtered by transport; sample data)
+- [x] Results and Filter & Sort (sort: earliest, cheapest, shortest; filter: time of day, on time only; empty states; sample data)
 - [ ] Transport Details, Route & Stops
 - [ ] Live Tracking
 
@@ -73,9 +74,12 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Branch protection on `main` and `dev`, pull requests required (S)
 - [x] Workflow `.github/workflows/branch-rules.yml`: PRs into `main` only from `dev`, PRs into `dev` only from feature, fix or docs branches (S)
 - [ ] Add the checks `main-only-from-dev` and `dev-only-from-work-branches` as required status checks in the GitHub rulesets (S), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
-- [ ] Firebase project, Auth, Firestore rules (F)
+- [x] Backend repo `ridetrack-backend` prepared locally: rules, indexes, seed script, guide (F)
+- [x] App connection to Firebase: `src/lib/firebase.ts`, `.env.example`, [BACKEND.md](../design/BACKEND.md) (F)
+- [x] Push backend repo to GitHub and protect branches (F)
+- [x] Firebase project `ridetrack` (ID `ridetrack-5ff36`) created, seed run: collections and 3 test users confirmed in the console (F)
+- [ ] Deploy rules and indexes and test rules per role (F)
 - [x] `.env.example` added (S)
-- [ ] Seed script (F)
 - [x] Readme written
 - [x] Docs folder created
 - [x] Repository folder structure cleaned (grouped components and docs, editorconfig, gitattributes)
@@ -98,6 +102,10 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Results and Filter & Sort built: trips between two places with times, duration, fare and status; sort and filter sheet with live updates, empty states, reset; sample schedules added | MEMBERS, TASKS, SCREENS, TESTING, DATA-MODEL, ARCHITECTURE, Readme |
+| 3 Oct 2026 | Search screen built: From/To inputs with suggestions, swap, validation, saved recent searches (add, remove, clear), always filtered by the chosen transport; Results starter screen added so Search can navigate | MEMBERS, TASKS, SCREENS, TESTING, ARCHITECTURE, Readme |
+| 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |
+| 3 Oct 2026 | Separate backend repo prepared (Firebase rules, indexes, seed, beginner setup guide); app gets `src/lib/firebase.ts`, new `.env.example`, a backend status line on the first screen, and the BACKEND guide | BACKEND, Readme, TECH-INFO, ARCHITECTURE, DATA-MODEL, MEMBERS, TASKS, docs index |
 | 3 Oct 2026 | Folder tidy: removed empty `.gitkeep` files, moved sample data to `src/data/`, renamed `src/types/transport.ts` to `models.ts`, refreshed folder structure in Readme and ARCHITECTURE | Readme, ARCHITECTURE, UI-GUIDE, TASKS |
 | 3 Oct 2026 | Added branch-rules workflow so `main` accepts pull requests only from `dev` and `dev` only from feature, fix or docs branches; documented ruleset steps and compare links | GIT-WORKFLOW, TASKS |
 | 3 Oct 2026 | Home screen built: current transport and Change button, alerts, nearby vehicles, saved routes (add/remove) and popular routes, all filtered by transport; sample data layer in `src/lib` and shared types in `src/types` | MEMBERS, TASKS, SCREENS, ARCHITECTURE, UI-GUIDE, TESTING |

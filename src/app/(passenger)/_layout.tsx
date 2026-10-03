@@ -5,6 +5,8 @@ export default function PassengerLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="select-transport" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="results" />
+      <Stack.Screen name="filter" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

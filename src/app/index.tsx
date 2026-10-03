@@ -4,6 +4,7 @@ import { Button, Text } from 'react-native-paper';
 
 import { Screen } from '@/components/ui/screen';
 import { colors, roleColors, spacing } from '@/constants/theme';
+import { isBackendConfigured, isUsingEmulator } from '@/lib/firebase';
 
 // Temporary entry point. Replaced by real sign-in, which will route by the user's role.
 const roles = [
@@ -31,6 +32,9 @@ export default function Index() {
             </Link>
           ))}
         </View>
+        <Text variant="bodySmall" style={styles.status}>
+          Backend: {isBackendConfigured ? (isUsingEmulator ? 'local emulator' : 'connected to Firebase') : 'not configured (using sample data)'}
+        </Text>
       </View>
     </Screen>
   );
@@ -42,4 +46,5 @@ const styles = StyleSheet.create({
   tagline: { color: colors.textMuted, textAlign: 'center', marginBottom: spacing.lg },
   buttons: { gap: spacing.md },
   buttonContent: { paddingVertical: spacing.sm },
+  status: { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg },
 });
