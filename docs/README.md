@@ -7,6 +7,7 @@ Project documentation for RideTrack, a React Native app for live bus and train t
 | Doc | What it covers |
 |---|---|
 | [TASKS.md](project/TASKS.md) | Project task list, status and update log |
+| [TODO.md](project/TODO.md) | Master to-do built from every doc, in build order |
 | [MEMBERS.md](project/MEMBERS.md) | Features and tasks per team member |
 | [SCREENS.md](project/SCREENS.md) | All 42 screens with owner, file and CRUD operations |
 | [TRACEABILITY.md](project/TRACEABILITY.md) | Requirements mapped to screens and tests |

@@ -2,6 +2,10 @@
 
 The backend lives in a **separate repository**, `ridetrack-backend`, owned by Fernando. This repo (the mobile app) only connects to it. This page explains how the two fit together and what to do, step by step.
 
+## Current project
+
+Firebase project name `ridetrack`, project ID `ridetrack-5ff36` (Spark plan). Firestore holds `alerts`, `routes`, `schedules`, `users` and `vehicles`, and Authentication holds the three test users. The project ID is not a secret; the API key and app ID still go only in each member's local `.env`.
+
 ## The big picture
 
 RideTrack uses **Firebase**, Google's ready-made backend. Firebase gives us a login system (Authentication) and a database (Firestore) that the app talks to directly, so there is no server for us to build or host. It is free on the Spark plan.

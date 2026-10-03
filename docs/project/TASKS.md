@@ -6,7 +6,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 
 > Design phases (requirements, low-fi, hi-fi, user testing) are done per the project history. The app shell is set up (project, packages, theme, role navigation with placeholder tabs); the 42 real screens and the Firebase backend are still to be built.
 
-**Progress snapshot (3 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, Firebase and the seed script. Phases 2 to 4 not started.
+**Progress snapshot (3 Oct 2026):** Phase 0 design done. Phase 1 setup mostly done; open items are the required status checks in the rulesets, Figma token alignment, deploying and testing Firestore rules, and sharing the keys. Phases 2 to 4 not started.
 
 ---
 
@@ -74,8 +74,9 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [ ] Add the checks `main-only-from-dev` and `dev-only-from-work-branches` as required status checks in the GitHub rulesets (S), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)
 - [x] Backend repo `ridetrack-backend` prepared locally: rules, indexes, seed script, guide (F)
 - [x] App connection to Firebase: `src/lib/firebase.ts`, `.env.example`, [BACKEND.md](../design/BACKEND.md) (F)
-- [ ] Push backend repo to GitHub and protect branches (F)
-- [ ] Create Firebase project, deploy rules, run seed (F)
+- [x] Push backend repo to GitHub and protect branches (F)
+- [x] Firebase project `ridetrack` (ID `ridetrack-5ff36`) created, seed run: collections and 3 test users confirmed in the console (F)
+- [ ] Deploy rules and indexes and test rules per role (F)
 - [x] `.env.example` added (S)
 - [x] Readme written
 - [x] Docs folder created
@@ -99,6 +100,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |
 | 3 Oct 2026 | Separate backend repo prepared (Firebase rules, indexes, seed, beginner setup guide); app gets `src/lib/firebase.ts`, new `.env.example`, a backend status line on the first screen, and the BACKEND guide | BACKEND, Readme, TECH-INFO, ARCHITECTURE, DATA-MODEL, MEMBERS, TASKS, docs index |
 | 3 Oct 2026 | Added branch-rules workflow so `main` accepts pull requests only from `dev` and `dev` only from feature, fix or docs branches; documented ruleset steps and compare links | GIT-WORKFLOW, TASKS |
 | 3 Oct 2026 | Home screen built: current transport and Change button, alerts, nearby vehicles, saved routes (add/remove) and popular routes, all filtered by transport; sample data layer in `src/lib` and shared types in `src/types` | MEMBERS, TASKS, SCREENS, ARCHITECTURE, UI-GUIDE, TESTING |
