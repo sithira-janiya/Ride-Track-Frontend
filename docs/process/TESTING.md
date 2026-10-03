@@ -89,6 +89,16 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F70 | Tracking | Tap a stop marker | Stop name and its arrival time are shown | Not run |
 | F71 | Tracking | Open it before the trip departs | Panel says it has not departed; vehicle sits at the first stop; ETA reads Not started | Not run |
 | F72 | Tracking | Tap Route & Stops | Route & Stops opens for the same trip, and back returns to the map | Not run |
+| F73 | Home | Open the app with no Firebase keys in `.env` | Home shows sample data; label says Sample data and asks for the keys | Not run |
+| F74 | Home | Keys and test password set; tap Continue as Passenger | Signs in as the test passenger; Home shows a green Live data label | Not run |
+| F75 | Home | Compare Home as bus with the Firebase console | Vehicles, published routes and alerts match the seeded documents, for buses and the all-transport alerts only | Not run |
+| F76 | Home | Switch to Train in the search card toggle | Home shows train vehicles, routes and alerts only | Not run |
+| F77 | Home | Change a vehicle's `etaMinutes` or `status` in the console while Home is open | Home updates within a few seconds without a refresh | Not run |
+| F78 | Home | Add an alert in the console while Home is open | New alert appears at the top without a refresh | Not run |
+| F79 | Home | Wrong or missing test password | First screen says test sign-in failed; Home shows sample data labelled Sample data | Not run |
+| F80 | Home | Turn the phone's internet off, then open Home | Within about 8 seconds Home shows sample data with a slow-connection note | Not run |
+| F81 | Home | Bookmark a live route, restart the app | The route is still under Saved routes | Not run |
+| F82 | Security | Sign out, or open Home with no user | Sample data with the sign-in note; Firestore reads are denied | Not run |
 
 ## Integration cases
 

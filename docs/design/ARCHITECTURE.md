@@ -33,9 +33,9 @@ src/
 │   ├── results/      Results list card (ResultCard)
 │   └── trip/         Trip screens: RouteTimeline, FacilityChips, TripSummaryCard
 ├── constants/      Theme tokens and fixed values (theme.ts, transport.ts, results.ts, facilities.ts)
-├── hooks/          Reusable hooks (use-start-search.ts)
+├── hooks/          Reusable hooks (use-start-search.ts, use-live-trip.ts, use-home-data.ts)
 ├── data/           Static sample data used until Firebase is connected (sample-data.ts)
-├── lib/            Data access and services: home-data.ts and search-data.ts read data/, later Firestore
+├── lib/            Data access: home-live.ts reads Firestore for Home; home-data.ts and search-data.ts still read data/; dev-auth.ts is a temporary test sign-in
 ├── store/          Zustand stores (current user, transport choice, saved routes, recent searches, results filter, booking draft)
 └── types/          Shared TypeScript types (models.ts: Vehicle, Route, Alert)
 ```

@@ -104,7 +104,7 @@ const transport = useTransportStore((s) => s.transport);
 | `useSavedRoutesStore` | `src/store/saved-routes-store.ts` | Saved route ids, kept on the device |
 | `home-data.ts` | `src/lib/home-data.ts` | Functions that return vehicles, routes and alerts for a transport type |
 
-Home currently reads `src/data/sample-data.ts`. To go live, change only the function bodies in `home-data.ts` to Firestore queries; the screen does not change.
+Home reads live Firestore data through `src/hooks/use-home-data.ts` (queries in `src/lib/home-live.ts`) and falls back to `src/data/sample-data.ts` through `home-data.ts` when the backend is off, nobody is signed in, an error happens or the connection is slow. A small Live data or Sample data label shows which one you are looking at.
 
 ## Conventions
 

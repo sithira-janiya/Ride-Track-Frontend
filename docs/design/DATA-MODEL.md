@@ -73,6 +73,14 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 | createdBy | string (authority uid) |
 | createdAt | timestamp |
 
+## How the app maps documents
+
+`src/lib/home-live.ts` reads documents defensively: a missing field becomes an empty value instead of a crash.
+
+- `vehicles.status`: `delayed` is shown as Delayed, any other value as On time.
+- `routes.stops`: the app sorts by `order` and turns it into a 0 to 1 share of the trip (`at`).
+- `alerts.type`: `bus` or `train` limits the alert to that transport; empty or missing means everyone. "Minutes ago" is worked out from `createdAt`.
+
 ## Passenger queries by transport type
 
 `routes`, `vehicles` and `schedules` all carry `type`. Passenger queries filter on the type chosen at the start, for example `where('type', '==', 'bus')`. Firestore may ask for a composite index when combining this filter with sorting; create it from the link in the error message.
