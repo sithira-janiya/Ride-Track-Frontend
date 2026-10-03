@@ -55,7 +55,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [ ] Home: switch from sample data to live Firestore data (S, after F's backend)
 - [x] Search (From/To with place suggestions, swap, recent searches add/remove/clear, filtered by transport; sample data)
 - [x] Results and Filter & Sort (sort: earliest, cheapest, shortest; filter: time of day, on time only; empty states; sample data)
-- [ ] Transport Details, Route & Stops
+- [x] Transport Details and Route & Stops (trip summary, fare, seats, facilities, route timeline, save-route bookmark; sample data)
 - [ ] Live Tracking
 
 **Cross-role integration**
@@ -103,6 +103,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Transport Details and Route & Stops built: trip summary, journey information, fare, seats, facilities, route timeline with stop times and progress, save-route bookmark; result cards open Transport Details and show seats and facility chips; sample stops, seats and facilities added; Live Tracking starter screen | SCREENS, DATA-MODEL, TESTING, UI-GUIDE, ARCHITECTURE, MEMBERS, TASKS, Readme |
 | 3 Oct 2026 | Theme and passenger interfaces restyled to match the Milestone 2 hi-fi prototype: navy header `Screen`, `SurfaceCard`, `StatusPill`, navy tab bar, Select Transport with Continue, Home with greeting and search card, Search with travel date and time chips, Results cards, Filter & Sort with fare and duration | UI-GUIDE, SCREENS, TASKS, MEMBERS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Results and Filter & Sort built: trips between two places with times, duration, fare and status; sort and filter sheet with live updates, empty states, reset; sample schedules added | MEMBERS, TASKS, SCREENS, TESTING, DATA-MODEL, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Search screen built: From/To inputs with suggestions, swap, validation, saved recent searches (add, remove, clear), always filtered by the chosen transport; Results starter screen added so Search can navigate | MEMBERS, TASKS, SCREENS, TESTING, ARCHITECTURE, Readme |

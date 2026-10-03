@@ -29,7 +29,7 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 |---|---|---|
 | name | string | e.g. Colombo to Kandy |
 | type | `bus` \| `train` | |
-| stops | `{name, lat, lng, order}`[] | |
+| stops | `{name, lat, lng, order}`[] (the app's sample data stores `at`, a 0 to 1 share of the trip, instead of `order`, to work out the time at each stop) | |
 | fare | number | LKR |
 | published | boolean | set by Preview & Publish |
 

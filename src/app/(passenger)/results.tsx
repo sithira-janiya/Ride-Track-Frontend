@@ -71,7 +71,13 @@ export default function ResultsScreen() {
           </Button>
         </View>
       ) : (
-        shown.map((result) => <ResultCard key={result.schedule.id} result={result} />)
+        shown.map((result) => (
+          <ResultCard
+            key={result.schedule.id}
+            result={result}
+            onPress={() => router.push({ pathname: '/(passenger)/transport/[id]', params: { id: result.schedule.id, date } })}
+          />
+        ))
       )}
     </Screen>
   );

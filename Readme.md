@@ -110,7 +110,8 @@ ridetrack/
 │   │   ├── transport/        TransportBadge
 │   │   ├── home/             Cards for the passenger Home screen
 │   │   ├── search/           Search form pieces
-│   │   └── results/          Results list card
+│   │   ├── results/          Results list card
+│   │   └── trip/             Route timeline, facility chips, trip summary
 │   ├── constants/            Theme tokens, transport types
 │   ├── hooks/                Reusable hooks
 │   ├── data/                 Sample data used until Firebase is connected

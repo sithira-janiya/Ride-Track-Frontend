@@ -30,7 +30,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [ ] Connect Home to live Firestore data (vehicles, routes, alerts) once the backend is ready
 - [x] Search with recent searches (create/delete), filtered by chosen transport
 - [x] Results (trips between two places, times, duration, fare, status) with Filter & Sort (sort by earliest, cheapest, shortest; filter by time of day and on time only); sample data
-- [ ] Transport Details and Route & Stops with favourites
+- [x] Transport Details and Route & Stops with save-route bookmark (opened from a Results card; Live Tracking is a starter screen)
 - [ ] Live Tracking map with real-time marker
 - [ ] Functional tests for this area
 - [ ] Coordinate usability testing (5+ participants)

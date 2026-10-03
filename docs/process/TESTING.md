@@ -67,6 +67,17 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F48 | Filter | Choose Under 2 hours, then Over 4 hours | Only trips in that duration band remain; tapping the same chip again clears it | Not run |
 | F49 | UI | Check every tab bar | Dark navy bar with white active tab and muted inactive tabs, for all three roles | Not run |
 | F50 | UI | Check every screen header | Back button on Results, Filter & Sort and Select Transport (when there is history); status bar text readable | Not run |
+| F51 | Results | Tap a result card | Transport Details opens for that trip | Not run |
+| F52 | Results | Look at a result card | Facility chips (AC, Wi-Fi, USB) and the seat count are visible | Not run |
+| F53 | Details | Open Transport Details | Vehicle name, ON TIME or DELAYED pill, route, date, times with duration, fare, seats, facilities and the stop list | Not run |
+| F54 | Details | Tap View full route | Route & Stops opens for the same trip | Not run |
+| F55 | Details | Tap the bookmark in the header | Route is saved and shows under Saved routes on Home; tapping again removes it | Not run |
+| F56 | Details | Tap Track Vehicle | Live Tracking starter screen opens with a back button | Not run |
+| F57 | Details | Look at Book Ticket | Button is disabled with a note | Not run |
+| F58 | Route | Open Route & Stops before the trip departs | All stops are Upcoming; location card says it has not departed and when it leaves | Not run |
+| F59 | Route | Open Route & Stops during the trip | Passed stops are Departed (filled dots), later ones Upcoming; card says between two stops with minutes to the next | Not run |
+| F60 | Route | Open Route & Stops after the trip ends | All stops are Arrived; card says Journey completed | Not run |
+| F61 | Details | Open a trip that does not exist | "We could not find this trip" message with a back button | Not run |
 
 ## Integration cases
 

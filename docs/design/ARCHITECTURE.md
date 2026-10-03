@@ -30,8 +30,9 @@ src/
 │   ├── transport/    Bus/train components (TransportBadge)
 │   ├── home/         Cards used on the passenger Home screen
 │   ├── search/       Search form pieces (PlaceInput, RecentSearchItem)
-│   └── results/      Results list card (ResultCard)
-├── constants/      Theme tokens and fixed values (theme.ts, transport.ts, results.ts)
+│   ├── results/      Results list card (ResultCard)
+│   └── trip/         Trip screens: RouteTimeline, FacilityChips, TripSummaryCard
+├── constants/      Theme tokens and fixed values (theme.ts, transport.ts, results.ts, facilities.ts)
 ├── hooks/          Reusable hooks (use-start-search.ts)
 ├── data/           Static sample data used until Firebase is connected (sample-data.ts)
 ├── lib/            Data access and services: home-data.ts and search-data.ts read data/, later Firestore
