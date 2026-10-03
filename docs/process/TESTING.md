@@ -34,6 +34,17 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F17 | Home | Close and reopen the app | Saved route is still there | Not run |
 | F18 | Home | Tap bookmark on a saved route | Route is removed from Saved routes | Not run |
 
+| F19 | Search | Type "col" in From | Suggestions show Colombo (bus) or Colombo Fort (train) only | Not run |
+| F20 | Search | Tap a suggestion | Box fills with that place | Not run |
+| F21 | Search | Tap Search with empty From and To | Error under each box, no navigation | Not run |
+| F22 | Search | Same place in From and To | "Choose a different place", no navigation | Not run |
+| F23 | Search | Valid search | Results screen opens with the two places; search saved under Recent searches | Not run |
+| F24 | Search | Tap the swap button | From and To exchange | Not run |
+| F25 | Search | Tap a recent search | Results opens for that pair | Not run |
+| F26 | Search | Tap X on a recent search, then Clear all | Item removed; list empties | Not run |
+| F27 | Search | Search as bus, change to train | Recent searches show only train searches | Not run |
+| F28 | Search | Close and reopen the app | Recent searches are still there | Not run |
+
 ## Integration cases
 
 | ID | Flow | Steps | Expected | Result |

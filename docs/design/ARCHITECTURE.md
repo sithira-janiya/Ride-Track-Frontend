@@ -28,11 +28,12 @@ src/
 │   ├── ui/           Generic building blocks (Screen, PlaceholderScreen)
 │   ├── navigation/   Navigation pieces (RoleTabs)
 │   ├── transport/    Bus/train components (TransportBadge)
-│   └── home/         Cards used on the passenger Home screen
+│   ├── home/         Cards used on the passenger Home screen
+│   └── search/       Search form pieces (PlaceInput, RecentSearchItem)
 ├── constants/      Theme tokens and fixed values (theme.ts, transport.ts)
 ├── data/           Static sample data used until Firebase is connected (sample-data.ts)
-├── lib/            Data access and services: home-data.ts now reads data/, later Firestore
-├── store/          Zustand stores (current user, transport choice, saved routes, booking draft)
+├── lib/            Data access and services: home-data.ts and search-data.ts read data/, later Firestore
+├── store/          Zustand stores (current user, transport choice, saved routes, recent searches, booking draft)
 └── types/          Shared TypeScript types (models.ts: Vehicle, Route, Alert)
 ```
 

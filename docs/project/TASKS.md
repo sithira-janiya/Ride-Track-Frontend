@@ -53,7 +53,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Select Transport (bus or train, first screen)
 - [x] Home (alerts, nearby vehicles, saved and popular routes, filtered by transport; sample data)
 - [ ] Home: switch from sample data to live Firestore data (S, after F's backend)
-- [ ] Search, Results, Filter & Sort
+- [x] Search (From/To with place suggestions, swap, recent searches add/remove/clear, filtered by transport; sample data)
+- [ ] Results (starter placeholder exists) and Filter & Sort
 - [ ] Transport Details, Route & Stops
 - [ ] Live Tracking
 
@@ -101,6 +102,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Search screen built: From/To inputs with suggestions, swap, validation, saved recent searches (add, remove, clear), always filtered by the chosen transport; Results starter screen added so Search can navigate | MEMBERS, TASKS, SCREENS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |
 | 3 Oct 2026 | Separate backend repo prepared (Firebase rules, indexes, seed, beginner setup guide); app gets `src/lib/firebase.ts`, new `.env.example`, a backend status line on the first screen, and the BACKEND guide | BACKEND, Readme, TECH-INFO, ARCHITECTURE, DATA-MODEL, MEMBERS, TASKS, docs index |
 | 3 Oct 2026 | Folder tidy: removed empty `.gitkeep` files, moved sample data to `src/data/`, renamed `src/types/transport.ts` to `models.ts`, refreshed folder structure in Readme and ARCHITECTURE | Readme, ARCHITECTURE, UI-GUIDE, TASKS |
