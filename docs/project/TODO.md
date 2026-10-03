@@ -123,9 +123,9 @@ Each screen needs at least 2 working CRUD operations ([SCREENS.md](SCREENS.md)).
 ### Silva (leader)
 
 - [x] Home on live Firestore data (confirm on the real project)
-- [ ] Search with recent searches, Results with Filter & Sort
-- [ ] Transport Details and Route & Stops with favourites
-- [ ] Live Tracking map with real-time marker
+- [x] Search with recent searches, Results with Filter & Sort
+- [x] Transport Details and Route & Stops with save-route bookmark
+- [x] Live Tracking map with moving marker (sample timetable; real Firestore positions still to do)
 - [ ] Functional tests for this area
 - [ ] Coordinate usability testing (5+ participants)
 - [ ] Merge reviews; release APK link in the Readme
