@@ -73,7 +73,7 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Expo + TypeScript project scaffolded (S)
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](../design/UI-GUIDE.md) (S)
-- [ ] Set up ESLint (`npx expo install eslint eslint-config-expo`) so `npx expo lint` works (S)
+- [x] Set up ESLint (`eslint.config.js`) so `npx expo lint` works (S)
 - [x] Theme and interfaces aligned with the Milestone 2 hi-fi prototype: navy headers, blue actions, pills, cards, Select Transport, Home, Search, Results, Filter & Sort (S)
 - [ ] Check theme values and remaining screens against the Figma file (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
@@ -108,6 +108,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 4 Oct 2026 | Lint and typecheck both pass: ESLint config added; fixed React Compiler lint errors in `LivePill`, `useHomeData` and `useLiveTrip`. Typecheck errors were stale generated route types (`.expo/types`, regenerate by running `npx expo start`) | TASKS |
 | 4 Oct 2026 | Pull request opened from `feature/silva/home-live-data` into `dev` for the finished passenger screens (Transport Details, Route & Stops, Live Tracking, Home on live Firestore data, hi-fi restyle, Maps key setup); Silva's finished tasks ticked in TODO | TASKS, TODO |
 | 3 Oct 2026 | Home switched to live Firestore data: real-time listeners for vehicles, published routes and alerts (always filtered by the chosen transport), falls back to sample data when the backend is off, nobody is signed in, an error happens or the connection is slow; Live data or Sample data label; temporary test sign-in from the role picker using the seeded accounts. Checked against the local emulators with the real rules and seed data | ARCHITECTURE, BACKEND, DATA-MODEL, TESTING, TASKS, MEMBERS, TODO, UI-GUIDE |
 | 3 Oct 2026 | Google Maps key setup for the APK: `app.config.js` adds the maps plugin from `EXPO_PUBLIC_MAPS_API_KEY` and fails the EAS build if it is missing, `eas.json` build profiles, Android package `com.ridetrack.app`, Google provider on the tracking map, `npm run build:apk`, and the MAPS-SETUP guide (the key itself still has to be created in Google Cloud) | MAPS-SETUP, TECH-INFO, TASKS, TODO, docs index, Readme |

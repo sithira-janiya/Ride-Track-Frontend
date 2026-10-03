@@ -52,10 +52,13 @@ export function useHomeData(transport: TransportType | null): HomeData {
 
   // Listen to Firestore for the chosen transport.
   useEffect(() => {
-    setLive({});
-    setFailure(undefined);
-    setSlow(false);
-    if (!isBackendConfigured || !transport || !user) return;
+    // Whatever happens below, clear this run's results when it ends (transport or user changed).
+    const reset = () => {
+      setLive({});
+      setFailure(undefined);
+      setSlow(false);
+    };
+    if (!isBackendConfigured || !transport || !user) return reset;
 
     const fail = (error: { code?: string; message: string }) => setFailure(error.code ?? error.message);
     const unsubscribers = [
@@ -68,6 +71,7 @@ export function useHomeData(transport: TransportType | null): HomeData {
     return () => {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
       clearTimeout(timer);
+      reset();
     };
   }, [transport, user]);
 

@@ -23,7 +23,7 @@ export function useLiveTrip(detail: TripDetail | undefined, simulate: boolean) {
   const [fraction, setFraction] = useState(() => (detail ? tripFraction(detail, clockMinutes()) : 0));
   const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
   const simulated = useRef(0);
-  const lastUpdate = useRef(Date.now());
+  const lastUpdate = useRef(0); // set on mount; reading the clock during render is impure
 
   // Refresh the position.
   useEffect(() => {
@@ -48,6 +48,7 @@ export function useLiveTrip(detail: TripDetail | undefined, simulate: boolean) {
 
   // Count the seconds since the last refresh for the "updated Ns ago" label.
   useEffect(() => {
+    if (!lastUpdate.current) lastUpdate.current = Date.now();
     const id = setInterval(() => setSecondsSinceUpdate(Math.round((Date.now() - lastUpdate.current) / 1000)), 1000);
     return () => clearInterval(id);
   }, []);

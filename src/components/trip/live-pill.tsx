@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
@@ -6,7 +6,7 @@ import { colors, radius, spacing } from '@/constants/theme';
 
 /** Blue LIVE pill with a softly pulsing dot, so passengers can see the position is being refreshed. */
 export function LivePill() {
-  const opacity = useRef(new Animated.Value(1)).current;
+  const [opacity] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
     const loop = Animated.loop(
