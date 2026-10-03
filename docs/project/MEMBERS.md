@@ -19,6 +19,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 ### Tasks
 - [x] Scaffold Expo + TypeScript project, install shared packages
 - [x] Shared theme and navigation shell
+- [x] Restyle passenger screens to the Milestone 2 hi-fi prototype (navy header, cards, pills, Select Transport, Home, Search, Results, Filter & Sort)
 - [x] Create GitHub repo with `main` and `dev` branches
 - [x] Add `.env.example`
 - [x] Protect `main` and `dev` on GitHub (pull requests required), see [GIT-WORKFLOW.md](../process/GIT-WORKFLOW.md#branch-protection-setup)

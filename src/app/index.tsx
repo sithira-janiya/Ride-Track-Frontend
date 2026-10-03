@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import { Screen } from '@/components/ui/screen';
-import { colors, roleColors, spacing } from '@/constants/theme';
+import { colors, radius, roleColors, spacing } from '@/constants/theme';
 import { isBackendConfigured, isUsingEmulator } from '@/lib/firebase';
 
 // Temporary entry point. Replaced by real sign-in, which will route by the user's role.
@@ -15,8 +16,11 @@ const roles = [
 
 export default function Index() {
   return (
-    <Screen scroll={false}>
+    <Screen landing>
       <View style={styles.center}>
+        <View style={styles.logo}>
+          <Ionicons name="location" size={34} color={colors.onNavy} />
+        </View>
         <Text variant="displaySmall" style={styles.brand}>
           RideTrack
         </Text>
@@ -33,7 +37,8 @@ export default function Index() {
           ))}
         </View>
         <Text variant="bodySmall" style={styles.status}>
-          Backend: {isBackendConfigured ? (isUsingEmulator ? 'local emulator' : 'connected to Firebase') : 'not configured (using sample data)'}
+          Backend:{' '}
+          {isBackendConfigured ? (isUsingEmulator ? 'local emulator' : 'connected to Firebase') : 'not configured (using sample data)'}
         </Text>
       </View>
     </Screen>
@@ -42,9 +47,19 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', gap: spacing.sm },
-  brand: { color: colors.primary, fontWeight: '800', textAlign: 'center' },
-  tagline: { color: colors.textMuted, textAlign: 'center', marginBottom: spacing.lg },
+  logo: {
+    alignSelf: 'center',
+    width: 68,
+    height: 68,
+    borderRadius: radius.xl,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  brand: { color: colors.onNavy, fontWeight: '800', textAlign: 'center' },
+  tagline: { color: colors.onNavyMuted, textAlign: 'center', marginBottom: spacing.lg },
   buttons: { gap: spacing.md },
   buttonContent: { paddingVertical: spacing.sm },
-  status: { color: colors.textMuted, textAlign: 'center', marginTop: spacing.lg },
+  status: { color: colors.onNavyMuted, textAlign: 'center', marginTop: spacing.lg },
 });

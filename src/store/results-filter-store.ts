@@ -1,12 +1,21 @@
 import { create } from 'zustand';
 
-import { defaultResultsFilter, type DayPeriod, type ResultsFilter, type SortOption } from '@/constants/results';
+import {
+  defaultResultsFilter,
+  type DayPeriod,
+  type DurationBand,
+  type ResultsFilter,
+  type SortOption,
+} from '@/constants/results';
 
 type ResultsFilterState = {
   filter: ResultsFilter;
   setSort: (sort: SortOption) => void;
   togglePeriod: (period: DayPeriod) => void;
+  setPeriods: (periods: DayPeriod[]) => void;
   setOnTimeOnly: (value: boolean) => void;
+  setMaxFare: (maxFare: number | null) => void;
+  setDuration: (duration: DurationBand | null) => void;
   reset: () => void;
 };
 
@@ -23,6 +32,9 @@ export const useResultsFilterStore = create<ResultsFilterState>()((set) => ({
           : [...s.filter.periods, period],
       },
     })),
+  setPeriods: (periods) => set((s) => ({ filter: { ...s.filter, periods } })),
   setOnTimeOnly: (onTimeOnly) => set((s) => ({ filter: { ...s.filter, onTimeOnly } })),
+  setMaxFare: (maxFare) => set((s) => ({ filter: { ...s.filter, maxFare } })),
+  setDuration: (duration) => set((s) => ({ filter: { ...s.filter, duration } })),
   reset: () => set({ filter: defaultResultsFilter }),
 }));

@@ -69,7 +69,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Expo Router, React Native Paper, Zustand and other shared packages installed (S)
 - [x] Shared theme and role navigation shell, see [UI-GUIDE.md](../design/UI-GUIDE.md) (S)
 - [ ] Set up ESLint (`npx expo install eslint eslint-config-expo`) so `npx expo lint` works (S)
-- [ ] Align theme tokens with the Figma hi-fi prototype (S)
+- [x] Theme and interfaces aligned with the Milestone 2 hi-fi prototype: navy headers, blue actions, pills, cards, Select Transport, Home, Search, Results, Filter & Sort (S)
+- [ ] Check theme values and remaining screens against the Figma file (S)
 - [x] GitHub repo created with `main` and `dev` branches (S)
 - [x] Branch protection on `main` and `dev`, pull requests required (S)
 - [x] Workflow `.github/workflows/branch-rules.yml`: PRs into `main` only from `dev`, PRs into `dev` only from feature, fix or docs branches (S)
@@ -102,6 +103,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Theme and passenger interfaces restyled to match the Milestone 2 hi-fi prototype: navy header `Screen`, `SurfaceCard`, `StatusPill`, navy tab bar, Select Transport with Continue, Home with greeting and search card, Search with travel date and time chips, Results cards, Filter & Sort with fare and duration | UI-GUIDE, SCREENS, TASKS, MEMBERS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Results and Filter & Sort built: trips between two places with times, duration, fare and status; sort and filter sheet with live updates, empty states, reset; sample schedules added | MEMBERS, TASKS, SCREENS, TESTING, DATA-MODEL, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Search screen built: From/To inputs with suggestions, swap, validation, saved recent searches (add, remove, clear), always filtered by the chosen transport; Results starter screen added so Search can navigate | MEMBERS, TASKS, SCREENS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Firebase project `ridetrack` (ID `ridetrack-5ff36`) created and seeded: Firestore collections and 3 test users confirmed in the console | MEMBERS, TASKS, TODO, BACKEND |

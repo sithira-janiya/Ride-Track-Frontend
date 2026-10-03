@@ -1,22 +1,22 @@
-import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { StyleSheet } from 'react-native';
+import { Text } from 'react-native-paper';
 
 import { AlertCard } from '@/components/home/alert-card';
 import { RouteCard } from '@/components/home/route-card';
 import { VehicleCard } from '@/components/home/vehicle-card';
-import { TransportBadge } from '@/components/transport/transport-badge';
+import { SearchForm } from '@/components/search/search-form';
 import { Screen } from '@/components/ui/screen';
 import { SectionHeader } from '@/components/ui/section-header';
+import { SurfaceCard } from '@/components/ui/surface-card';
 import { colors, spacing } from '@/constants/theme';
 import { transportOptions } from '@/constants/transport';
+import { greeting } from '@/lib/format';
 import { getAlerts, getNearbyVehicles, getPopularRoutes, getRoutesByIds } from '@/lib/home-data';
 import { useSavedRoutesStore } from '@/store/saved-routes-store';
 import { useTransportStore } from '@/store/transport-store';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const transport = useTransportStore((s) => s.transport);
   const savedIds = useSavedRoutesStore((s) => s.routeIds);
   const toggleRoute = useSavedRoutesStore((s) => s.toggleRoute);
@@ -35,23 +35,18 @@ export default function HomeScreen() {
   const option = transportOptions[transport];
 
   return (
-    <Screen title="Home">
-      <View style={styles.top}>
-        <View style={styles.topText}>
-          <TransportBadge type={transport} />
-          <Text variant="bodyMedium" style={styles.muted}>
-            Showing {option.plural.toLowerCase()} only
+    <Screen
+      title={`${greeting()}!`}
+      subtitle="Where are you travelling today?"
+      headerExtra={
+        <SurfaceCard style={styles.searchCard}>
+          <Text variant="labelMedium" style={styles.cardLabel}>
+            SEARCH YOUR JOURNEY
           </Text>
-        </View>
-        <Button mode="outlined" compact onPress={() => router.push('/(passenger)/select-transport')}>
-          Change
-        </Button>
-      </View>
-
-      <Button mode="contained" buttonColor={option.color} onPress={() => router.push('/(passenger)/(tabs)/search')}>
-        Search {option.plural.toLowerCase()}
-      </Button>
-
+          <SearchForm />
+        </SurfaceCard>
+      }
+    >
       <SectionHeader title="Alerts" hint="From the transport authority" />
       {data.alerts.length === 0 ? (
         <Text style={styles.muted}>No alerts right now.</Text>
@@ -86,7 +81,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  topText: { gap: spacing.xs },
+  searchCard: { gap: spacing.sm },
+  cardLabel: { color: colors.textMuted, letterSpacing: 0.6 },
   muted: { color: colors.textMuted },
 });

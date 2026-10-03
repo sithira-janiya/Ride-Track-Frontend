@@ -1,55 +1,95 @@
+import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
-import { Card, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
-import { colors, spacing } from '@/constants/theme';
+import { StatusPill } from '@/components/ui/status-pill';
+import { SurfaceCard } from '@/components/ui/surface-card';
+import { colors, radius, spacing } from '@/constants/theme';
+import { transportOptions } from '@/constants/transport';
 import { formatDuration, formatFare, toClock, toMinutes } from '@/lib/format';
 import type { TripResult } from '@/types/models';
 
-/** One trip in the Results list: times, duration, fare and whether it is running on time. */
+/** One trip in the Results list, laid out like the prototype: name and status, times with a duration pill, fare. */
 export function ResultCard({ result }: { result: TripResult }) {
   const { schedule, route } = result;
+  const option = transportOptions[route.type];
   const arrival = toClock(toMinutes(schedule.departure) + schedule.durationMinutes);
-  const delayed = schedule.status === 'delayed';
 
   return (
-    <Card mode="outlined" style={styles.card}>
-      <Card.Content style={styles.body}>
-        <View style={styles.top}>
-          <Text variant="titleMedium" style={styles.bold}>
+    <SurfaceCard style={styles.card}>
+      <View style={styles.top}>
+        <View style={styles.icon}>
+          <Ionicons name={option.icon} size={20} color={option.color} />
+        </View>
+        <View style={styles.titleBlock}>
+          <Text variant="titleMedium" style={styles.bold} numberOfLines={1}>
             {route.name}
           </Text>
-          <Text variant="labelLarge" style={{ color: delayed ? colors.warning : colors.success }}>
-            {delayed ? 'Delayed' : 'On time'}
+          <Text variant="bodySmall" style={styles.muted} numberOfLines={1}>
+            {route.from} to {route.to}
           </Text>
         </View>
-        <Text variant="bodySmall" style={styles.muted}>
-          {route.from} to {route.to}
+        <StatusPill status={schedule.status} />
+      </View>
+
+      <View style={styles.times}>
+        <Text variant="titleLarge" style={styles.bold}>
+          {schedule.departure}
         </Text>
-        <View style={styles.times}>
-          <Text variant="headlineSmall" style={styles.bold}>
-            {schedule.departure}
-          </Text>
-          <Text variant="bodyMedium" style={styles.muted}>
+        <View style={styles.line} />
+        <View style={styles.durationPill}>
+          <Text variant="labelMedium" style={styles.durationText}>
             {formatDuration(schedule.durationMinutes)}
           </Text>
-          <Text variant="headlineSmall" style={styles.bold}>
-            {arrival}
-          </Text>
         </View>
+        <View style={styles.line} />
+        <Text variant="titleLarge" style={styles.bold}>
+          {arrival}
+        </Text>
+      </View>
+
+      <View style={styles.bottom}>
         <Text variant="titleMedium" style={styles.fare}>
           {formatFare(route.fare)}
         </Text>
-      </Card.Content>
-    </Card>
+        <Text variant="bodySmall" style={styles.muted}>
+          per passenger
+        </Text>
+      </View>
+    </SurfaceCard>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.surface },
-  body: { gap: spacing.xs },
-  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  times: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.xs },
+  card: { gap: spacing.md },
+  top: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  icon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleBlock: { flex: 1 },
+  times: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  line: { flex: 1, height: 1, backgroundColor: colors.border },
+  durationPill: {
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  durationText: { color: colors.primary, fontWeight: '600' },
+  bottom: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: spacing.sm,
+  },
   bold: { fontWeight: '700' },
   muted: { color: colors.textMuted },
-  fare: { color: colors.primary, fontWeight: '700', marginTop: spacing.xs },
+  fare: { color: colors.primaryDark, fontWeight: '800' },
 });

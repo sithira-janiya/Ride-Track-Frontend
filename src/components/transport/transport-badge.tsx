@@ -22,9 +22,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs,
-    borderRadius: radius.lg,
+    borderRadius: radius.pill,
   },
   text: { color: '#FFFFFF', fontWeight: '600' },
 });

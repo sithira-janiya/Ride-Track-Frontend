@@ -1,31 +1,43 @@
 import { MD3LightTheme, type MD3Theme } from 'react-native-paper';
 
+/**
+ * Design tokens taken from the Milestone 2 high-fidelity prototype: dark navy headers,
+ * bright blue actions, white rounded cards and green or amber status pills.
+ * If the Figma file changes, change the values here; screens follow automatically.
+ */
 export const colors = {
-  primary: '#1565C0',
+  primary: '#2563EB',
+  primaryDark: '#1E40AF',
   onPrimary: '#FFFFFF',
-  secondary: '#F9A825',
-  background: '#F5F7FA',
+  navy: '#0F2040',
+  onNavy: '#FFFFFF',
+  onNavyMuted: '#93B4F8',
+  secondary: '#F59E0B',
+  background: '#F8FAFC',
   surface: '#FFFFFF',
-  text: '#1B2430',
-  textMuted: '#5F6B7A',
-  border: '#DDE3EA',
-  success: '#2E7D32',
-  warning: '#ED6C02',
-  error: '#C62828',
+  surfaceAlt: '#EFF6FF',
+  text: '#0F2040',
+  textMuted: '#64748B',
+  border: '#E2E8F0',
+  success: '#16A34A',
+  successBg: '#DCFCE7',
+  warning: '#B45309',
+  warningBg: '#FEF3C7',
+  error: '#DC2626',
 } as const;
 
 // One accent colour per role so users always know which area they are in.
 export const roleColors = {
-  passenger: '#1565C0',
-  conductor: '#2E7D32',
-  authority: '#6A1B9A',
+  passenger: '#2563EB',
+  conductor: '#4F46E5',
+  authority: '#0F766E',
 } as const;
 
 export type Role = keyof typeof roleColors;
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
 
-export const radius = { sm: 6, md: 12, lg: 20 } as const;
+export const radius = { sm: 8, md: 12, lg: 16, xl: 24, pill: 999 } as const;
 
 export function createTheme(accent: string = colors.primary): MD3Theme {
   return {
@@ -36,11 +48,14 @@ export function createTheme(accent: string = colors.primary): MD3Theme {
       primary: accent,
       onPrimary: colors.onPrimary,
       secondary: colors.secondary,
+      secondaryContainer: colors.surfaceAlt,
+      onSecondaryContainer: colors.primaryDark,
       background: colors.background,
       surface: colors.surface,
       onSurface: colors.text,
       onSurfaceVariant: colors.textMuted,
       outline: colors.border,
+      outlineVariant: colors.border,
       error: colors.error,
     },
   };

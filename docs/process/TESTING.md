@@ -56,6 +56,18 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F38 | Results | Start a new search after filtering | Filters are reset | Not run |
 | F39 | Results | Search as train, then as bus | Each shows only its own transport | Not run |
 
+| F40 | UI | Open the app | Landing screen is navy with the RideTrack logo and three role buttons | Not run |
+| F41 | UI | Open Select Transport | Bus is preselected with a tick; tapping Train moves the tick; Continue opens Home for the selected type | Not run |
+| F42 | UI | Open Home | Navy header with a time-based greeting and the search card; alerts, nearby vehicles and routes below | Not run |
+| F43 | UI | Tap Train in the Bus/Train toggle on Home | Home content and suggestions switch to trains | Not run |
+| F44 | Search | Tap Travel date | Date picker opens; past dates cannot be chosen; chosen date shows in the field | Not run |
+| F45 | Search | Choose Morning, then search | Results opens with only morning trips (Morning filter on) | Not run |
+| F46 | Results | Open Results | Header shows Available Transport, From to To and the travel date; cards show name, ON TIME or DELAYED pill, times with duration, fare | Not run |
+| F47 | Filter | Choose Up to Rs. 500 | Only trips on routes costing Rs. 500 or less remain; badge counts it | Not run |
+| F48 | Filter | Choose Under 2 hours, then Over 4 hours | Only trips in that duration band remain; tapping the same chip again clears it | Not run |
+| F49 | UI | Check every tab bar | Dark navy bar with white active tab and muted inactive tabs, for all three roles | Not run |
+| F50 | UI | Check every screen header | Back button on Results, Filter & Sort and Select Transport (when there is history); status bar text readable | Not run |
+
 ## Integration cases
 
 | ID | Flow | Steps | Expected | Result |

@@ -14,14 +14,14 @@ export const transportOptions: Record<
     plural: 'Buses',
     description: 'NTC and private buses across Sri Lanka',
     icon: 'bus-outline',
-    color: '#E65100',
+    color: '#2563EB',
   },
   train: {
     label: 'Train',
     plural: 'Trains',
     description: 'Sri Lanka Railways intercity and local trains',
     icon: 'train-outline',
-    color: '#00695C',
+    color: '#0E7490',
   },
 };
 

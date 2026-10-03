@@ -16,11 +16,35 @@ export const dayPeriods: { value: DayPeriod; label: string; hours: string; from:
   { value: 'night', label: 'Night', hours: '9 pm to 5 am', from: 21, to: 5 },
 ];
 
+export type DurationBand = 'short' | 'medium' | 'long';
+
+export const durationBands: { value: DurationBand; label: string; minMinutes: number; maxMinutes: number }[] = [
+  { value: 'short', label: 'Under 2 hours', minMinutes: 0, maxMinutes: 120 },
+  { value: 'medium', label: '2 to 4 hours', minMinutes: 120, maxMinutes: 240 },
+  { value: 'long', label: 'Over 4 hours', minMinutes: 240, maxMinutes: Infinity },
+];
+
+/** Highest fare the passenger will accept, in LKR. null means any price. */
+export const fareLimits: { value: number | null; label: string }[] = [
+  { value: null, label: 'Any price' },
+  { value: 500, label: 'Up to Rs. 500' },
+  { value: 1000, label: 'Up to Rs. 1,000' },
+  { value: 1500, label: 'Up to Rs. 1,500' },
+];
+
 export type ResultsFilter = {
   sort: SortOption;
   /** Empty means any time of day. */
   periods: DayPeriod[];
   onTimeOnly: boolean;
+  maxFare: number | null;
+  duration: DurationBand | null;
 };
 
-export const defaultResultsFilter: ResultsFilter = { sort: 'earliest', periods: [], onTimeOnly: false };
+export const defaultResultsFilter: ResultsFilter = {
+  sort: 'earliest',
+  periods: [],
+  onTimeOnly: false,
+  maxFare: null,
+  duration: null,
+};

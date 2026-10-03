@@ -4,6 +4,20 @@
 
 **Transport rule:** every passenger screen that lists or tracks vehicles (Search, Results, Filter & Sort, Transport Details, Route & Stops, Live Tracking, and Home suggestions) shows only the type chosen in Select Transport.
 
+## Fidelity to the Milestone 2 prototype
+
+The passenger screens built so far follow the prototype layout and colours. Known differences, kept on purpose or for later:
+
+| Prototype | Built app | Reason |
+|---|---|---|
+| Fare range slider | Fare chips (Any price, Up to Rs. 500, 1,000, 1,500) | No extra package needed; same effect |
+| Available seats and facilities filters, seats on result cards | Not shown | Seats and facilities are not in the data yet |
+| View Details and Track buttons on result cards | Not shown | Transport Details and Live Tracking are not built yet |
+| Early morning departure chip | Morning, Afternoon, Evening and Night | Matches the four windows used by the filter |
+| Bus/Train toggle only sets the search type | Toggle also changes the app-wide transport choice | Keeps Home, Search and Results consistent with the choose-bus-or-train-first rule |
+| Travel date shapes results | Date is chosen, passed to Results and shown; sample schedules run daily | Real dated schedules arrive with Firestore |
+| Upcoming Journey card on Home | Alerts, nearby vehicles, saved and popular routes | Bookings do not exist yet |
+
 ## Search and tracking (Silva), FR3, FR4, FR7
 
 | # | Screen | File | CRUD |

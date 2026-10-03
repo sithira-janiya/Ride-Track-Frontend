@@ -112,6 +112,7 @@ ridetrack/
 │   │   ├── search/           Search form pieces
 │   │   └── results/          Results list card
 │   ├── constants/            Theme tokens, transport types
+│   ├── hooks/                Reusable hooks
 │   ├── data/                 Sample data used until Firebase is connected
 │   ├── lib/                  Data access and services (Firebase later)
 │   ├── store/                Zustand stores
