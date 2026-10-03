@@ -44,6 +44,17 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F26 | Search | Tap X on a recent search, then Clear all | Item removed; list empties | Not run |
 | F27 | Search | Search as bus, change to train | Recent searches show only train searches | Not run |
 | F28 | Search | Close and reopen the app | Recent searches are still there | Not run |
+| F29 | Results | Search Colombo to Kandy as bus | Route 1 trips listed, earliest first, with times, duration, fare and status | Not run |
+| F30 | Results | Search Kandy to Colombo (reverse) | Same Route 1 trips are listed | Not run |
+| F31 | Results | Search a pair with no route | "No buses found" with a Change search button | Not run |
+| F32 | Results | Open Filter & sort, choose Cheapest | List reorders; header says "Sorted by cheapest" | Not run |
+| F33 | Results | Choose Shortest trip | Trips ordered by travel time | Not run |
+| F34 | Results | Turn on "On time only" | Delayed trips disappear; filter badge shows 1; count updates | Not run |
+| F35 | Results | Choose Evening and Night | Only trips leaving 5 pm to 5 am remain | Not run |
+| F36 | Results | Apply filters that match nothing | "Nothing matches your filters" with Clear filters | Not run |
+| F37 | Filter | Tap Reset | Sort and filters return to defaults | Not run |
+| F38 | Results | Start a new search after filtering | Filters are reset | Not run |
+| F39 | Results | Search as train, then as bus | Each shows only its own transport | Not run |
 
 ## Integration cases
 

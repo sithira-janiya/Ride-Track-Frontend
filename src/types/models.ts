@@ -37,3 +37,21 @@ export type Alert = {
   /** Minutes ago, for display only. */
   minutesAgo: number;
 };
+
+export type Schedule = {
+  id: string;
+  type: TransportType;
+  routeId: string;
+  vehicleId: string;
+  /** Departure time as "HH:MM", 24-hour. */
+  departure: string;
+  /** Trip length in minutes, so arrival = departure + duration. */
+  durationMinutes: number;
+  status: VehicleStatus;
+};
+
+/** One row in the Results list: a schedule together with its route. */
+export type TripResult = {
+  schedule: Schedule;
+  route: Route;
+};

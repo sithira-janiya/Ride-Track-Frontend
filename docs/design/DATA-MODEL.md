@@ -40,7 +40,7 @@ Firestore (NoSQL). Ids are document ids unless stated. Timestamps use Firestore 
 | routeId | string |
 | vehicleId | string |
 | conductorId | string |
-| departure | timestamp |
+| departure | timestamp (the app's sample data uses `"HH:MM"` plus `durationMinutes` for now; map when Firestore is connected) |
 | arrival | timestamp |
 
 ### `bookings/{id}`

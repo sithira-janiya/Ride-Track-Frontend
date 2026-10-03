@@ -27,8 +27,8 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Select Transport (first screen, saved choice, redirect on first launch)
 - [x] Home: current transport with Change button, alerts, nearby vehicles, saved routes (bookmark add/remove) and popular routes, all filtered by the chosen transport (uses sample data)
 - [ ] Connect Home to live Firestore data (vehicles, routes, alerts) once the backend is ready
-- [x] Search with recent searches (create/delete), filtered by chosen transport; Results is a starter placeholder
-- [ ] Results with Filter & Sort
+- [x] Search with recent searches (create/delete), filtered by chosen transport
+- [x] Results (trips between two places, times, duration, fare, status) with Filter & Sort (sort by earliest, cheapest, shortest; filter by time of day and on time only); sample data
 - [ ] Transport Details and Route & Stops with favourites
 - [ ] Live Tracking map with real-time marker
 - [ ] Functional tests for this area
