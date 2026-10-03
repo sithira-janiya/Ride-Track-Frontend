@@ -104,6 +104,10 @@ Authority ──alert───────▶ Passenger
 
 ## Live tracking
 
+**Today (sample data):** `src/hooks/use-live-trip.ts` works out how far along a trip the vehicle is from the timetable and the phone clock, refreshing every 5 seconds (or every second in the Simulate trip demo). `src/lib/vehicle-position.ts` turns that share of the trip into a map position by moving in a straight line between stops. The screen is `src/app/(passenger)/track/[id].tsx`. To go live, make `useLiveTrip` read `vehicles/{id}.location` instead; the screen does not change.
+
+**Planned (with Firestore):**
+
 Vehicles write `location` (lat/lng, updated time) to `vehicles/{id}`. For the demo the seed script and a small simulator update positions along a route. The Live Tracking screen subscribes with `onSnapshot` and moves the marker on the map. Authority Live Operations uses the same listener across all vehicles.
 
 ## Key decisions

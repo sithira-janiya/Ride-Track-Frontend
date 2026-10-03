@@ -56,7 +56,8 @@ Legend: `[x]` Done, `[ ]` To do. Owners: **S** Silva, **R** Rajapaksha, **H** He
 - [x] Search (From/To with place suggestions, swap, recent searches add/remove/clear, filtered by transport; sample data)
 - [x] Results and Filter & Sort (sort: earliest, cheapest, shortest; filter: time of day, on time only; empty states; sample data)
 - [x] Transport Details and Route & Stops (trip summary, fare, seats, facilities, route timeline, save-route bookmark; sample data)
-- [ ] Live Tracking
+- [x] Live Tracking (map, route line, stops, moving vehicle marker, ETA tiles, demo simulation; sample timetable positions)
+- [ ] Live Tracking: read real vehicle positions from Firestore `vehicles/{id}.location` once the backend position simulator exists (S + F)
 
 **Cross-role integration**
 - [ ] Alert: authority publishes, passenger Notifications updates live (F + R)
@@ -103,6 +104,7 @@ Newest first. Add a line here whenever tasks or docs change.
 
 | Date | Change | Docs touched |
 |---|---|---|
+| 3 Oct 2026 | Live Tracking built: map with the route line, stop markers, a moving vehicle marker, travelled part highlighted, zoom, centre and whole-route buttons, LIVE pill, location, ETA and arrival tiles, updated-seconds label, and a demo simulation; position comes from the timetable (sample data) | SCREENS, ARCHITECTURE, TECH-INFO, TESTING, UI-GUIDE, MEMBERS, TASKS |
 | 3 Oct 2026 | Transport Details and Route & Stops built: trip summary, journey information, fare, seats, facilities, route timeline with stop times and progress, save-route bookmark; result cards open Transport Details and show seats and facility chips; sample stops, seats and facilities added; Live Tracking starter screen | SCREENS, DATA-MODEL, TESTING, UI-GUIDE, ARCHITECTURE, MEMBERS, TASKS, Readme |
 | 3 Oct 2026 | Theme and passenger interfaces restyled to match the Milestone 2 hi-fi prototype: navy header `Screen`, `SurfaceCard`, `StatusPill`, navy tab bar, Select Transport with Continue, Home with greeting and search card, Search with travel date and time chips, Results cards, Filter & Sort with fare and duration | UI-GUIDE, SCREENS, TASKS, MEMBERS, TESTING, ARCHITECTURE, Readme |
 | 3 Oct 2026 | Results and Filter & Sort built: trips between two places with times, duration, fare and status; sort and filter sheet with live updates, empty states, reset; sample schedules added | MEMBERS, TASKS, SCREENS, TESTING, DATA-MODEL, ARCHITECTURE, Readme |

@@ -34,6 +34,7 @@ The look follows the **Milestone 2 high-fidelity prototype** (group report, sect
 | `RoleTabs` | `src/components/navigation/role-tabs.tsx` | Dark navy bottom tab bar used by the three role layouts. |
 | `SearchForm` | `src/components/search/search-form.tsx` | Journey search card (Bus or Train toggle, From, Destination, travel date, preferred time, search button). Used on Home and on the Search tab. |
 | `RouteTimeline`, `FacilityChips`, `TripSummaryCard` | `src/components/trip/` | Trip screens: stop list with dots and times, facility chips with icons, vehicle and status header card. |
+| `LivePill` | `src/components/trip/live-pill.tsx` | Blue LIVE pill with a pulsing dot, used in the Live Tracking header. |
 | `PlaceholderScreen` | `src/components/ui/placeholder-screen.tsx` | Temporary body for a screen that is not built yet. Delete its use when you build the real screen. |
 
 Example screen:

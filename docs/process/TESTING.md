@@ -78,6 +78,17 @@ Status of every case starts as **Not run**. Update the Result column as you test
 | F59 | Route | Open Route & Stops during the trip | Passed stops are Departed (filled dots), later ones Upcoming; card says between two stops with minutes to the next | Not run |
 | F60 | Route | Open Route & Stops after the trip ends | All stops are Arrived; card says Journey completed | Not run |
 | F61 | Details | Open a trip that does not exist | "We could not find this trip" message with a back button | Not run |
+| F62 | Tracking | Tap Track Vehicle on Transport Details | Live Tracking opens with a map showing the route line and a marker at every stop | Not run |
+| F63 | Tracking | Open Live Tracking | Map fits the whole route; header shows vehicle, route and a pulsing LIVE pill | Not run |
+| F64 | Tracking | Look at the panel | Vehicle number, ON TIME or DELAYED pill, Updated Ns ago (counts up, resets every 5 seconds), location, ETA and arrival tiles | Not run |
+| F65 | Tracking | Tap Simulate trip | Vehicle marker moves along the route for about 90 seconds; travelled part turns blue; location and ETA tiles update; the button reads Stop demo | Not run |
+| F66 | Tracking | Tap Stop demo | Movement stops and the position returns to the timetable position | Not run |
+| F67 | Tracking | Use zoom in, zoom out | Map zooms in and out | Not run |
+| F68 | Tracking | Pan away, then tap Centre on vehicle | Map returns to the vehicle | Not run |
+| F69 | Tracking | Pan away, then tap Show whole route | Map shows every stop again | Not run |
+| F70 | Tracking | Tap a stop marker | Stop name and its arrival time are shown | Not run |
+| F71 | Tracking | Open it before the trip departs | Panel says it has not departed; vehicle sits at the first stop; ETA reads Not started | Not run |
+| F72 | Tracking | Tap Route & Stops | Route & Stops opens for the same trip, and back returns to the map | Not run |
 
 ## Integration cases
 
