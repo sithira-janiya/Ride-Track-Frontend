@@ -11,24 +11,27 @@ import { sampleRoutes, sampleSchedules, sampleVehicles } from '@/data/sample-dat
  * query(collection(db, 'routes'), where('type', '==', transport)).
  */
 
-/** Every place a passenger can pick, for the chosen transport, sorted A to Z. */
-export function getPlaces(transport: TransportType): string[] {
+/** Every place the given routes start or end at, without duplicates, sorted A to Z. */
+export function placesFromRoutes(routes: Route[]): string[] {
   const names = new Set<string>();
-  sampleRoutes
-    .filter((r) => r.type === transport)
-    .forEach((r) => {
-      names.add(r.from);
-      names.add(r.to);
-    });
+  routes.forEach((r) => {
+    if (r.from) names.add(r.from);
+    if (r.to) names.add(r.to);
+  });
   return [...names].sort((a, b) => a.localeCompare(b));
+}
+
+/** Sample places for the chosen transport. Used until (or instead of) live Firestore routes. */
+export function getPlaces(transport: TransportType): string[] {
+  return placesFromRoutes(sampleRoutes.filter((r) => r.type === transport));
 }
 
 const matches = (place: string, query: string) => place.toLowerCase().includes(query.trim().toLowerCase());
 
 /** Places that contain what the passenger typed. An empty query returns nothing. */
-export function suggestPlaces(transport: TransportType, query: string, exclude?: string): string[] {
+export function suggestPlaces(places: string[], query: string, exclude?: string): string[] {
   if (!query.trim()) return [];
-  return getPlaces(transport).filter((p) => matches(p, query) && p.toLowerCase() !== exclude?.trim().toLowerCase());
+  return places.filter((p) => matches(p, query) && p.toLowerCase() !== exclude?.trim().toLowerCase());
 }
 
 /** Routes between two places, in either direction. Used by the Results screen. */

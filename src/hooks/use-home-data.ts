@@ -1,8 +1,8 @@
-import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { TransportType } from '@/constants/transport';
-import { getBackend, isBackendConfigured } from '@/lib/firebase';
+import { useFirebaseUser } from '@/hooks/use-firebase-user';
+import { isBackendConfigured } from '@/lib/firebase';
 import { getAlerts, getNearbyVehicles, getPopularRoutes } from '@/lib/home-data';
 import { subscribeAlerts, subscribeRoutes, subscribeVehicles } from '@/lib/home-live';
 import type { Alert, Route, Vehicle } from '@/types/models';
@@ -39,16 +39,10 @@ export function useHomeData(transport: TransportType | null): HomeData {
     [transport],
   );
 
-  const [user, setUser] = useState<User | null | undefined>(undefined); // undefined = still checking
+  const user = useFirebaseUser(); // undefined = still checking
   const [live, setLive] = useState<{ vehicles?: Vehicle[]; routes?: Route[]; alerts?: Alert[] }>({});
   const [failure, setFailure] = useState<string | undefined>();
   const [slow, setSlow] = useState(false);
-
-  // Who is signed in. Rules only let signed-in users read data.
-  useEffect(() => {
-    if (!isBackendConfigured) return;
-    return onAuthStateChanged(getBackend().auth, setUser);
-  }, []);
 
   // Listen to Firestore for the chosen transport.
   useEffect(() => {

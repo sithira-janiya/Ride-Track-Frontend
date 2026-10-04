@@ -7,6 +7,7 @@ import { PlaceInput } from '@/components/search/place-input';
 import { colors, spacing } from '@/constants/theme';
 import { dayPeriods, type DayPeriod } from '@/constants/results';
 import { transportOptions, transportTypes, type TransportType } from '@/constants/transport';
+import { usePlaces } from '@/hooks/use-places';
 import { useStartSearch } from '@/hooks/use-start-search';
 import { suggestPlaces } from '@/lib/search-data';
 import { useTransportStore } from '@/store/transport-store';
@@ -22,6 +23,7 @@ export function SearchForm() {
   const transport = useTransportStore((s) => s.transport);
   const setTransport = useTransportStore((s) => s.setTransport);
   const startSearch = useStartSearch();
+  const places = usePlaces(transport);
 
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -71,7 +73,7 @@ export function SearchForm() {
         icon="map-marker-outline"
         value={from}
         onChangeText={setFrom}
-        suggestions={suggestPlaces(transport, from, to)}
+        suggestions={suggestPlaces(places, from, to)}
         error={fromError}
       />
       <View style={styles.swapRow}>
@@ -82,7 +84,7 @@ export function SearchForm() {
         icon="flag-outline"
         value={to}
         onChangeText={setTo}
-        suggestions={suggestPlaces(transport, to, from)}
+        suggestions={suggestPlaces(places, to, from)}
         error={toError}
       />
 
