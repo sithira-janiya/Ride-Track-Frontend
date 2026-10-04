@@ -29,11 +29,11 @@ The area-level assignment (FR3, FR4, FR7 to Silva; FR1, FR2, FR5, FR8, FR11, FR1
 |---|---|---|---|---|---|
 | FR1 | | | | | Not started |
 | FR2 | | | | | Not started |
-| FR3 | | | | | Not started |
-| FR4 | | | | | Not started |
+| FR3 | Search, Results, Filter & Sort (Milestone 2 hi-fi) | `src/app/(passenger)/(tabs)/search.tsx`, `results.tsx`, `filter.tsx`, `src/hooks/use-places.ts`, `use-results.ts`, `src/lib/search-data.ts`, `results-filter.ts` | F1, F2, F19 to F52, F83 to F87 | | Tests written, logic checks pass; phone run pending |
+| FR4 | Transport Details, Route & Stops (Milestone 2 hi-fi) | `src/app/(passenger)/transport/[id].tsx`, `route/[id].tsx`, `src/hooks/use-trip-detail.ts`, `src/lib/trip-data.ts`, `trip-progress.ts` | F51 to F61, F85 to F90 | | Tests written, logic checks pass; phone run pending |
 | FR5 | | | | | Not started |
 | FR6 | | | | | Not started |
-| FR7 | | | | | Not started |
+| FR7 | Live Tracking (Milestone 2 hi-fi) | `src/app/(passenger)/track/[id].tsx`, `src/hooks/use-live-trip.ts`, `src/lib/vehicle-position.ts`, backend `scripts/simulate.mjs` | F3, F56, F62 to F72, F91 to F95 | | Tests written, logic checks pass; phone run pending (Report Incident is Herath's) |
 | FR8 | | | | | Not started |
 | FR9 | | | | | Not started |
 | FR10 | | | | | Not started |

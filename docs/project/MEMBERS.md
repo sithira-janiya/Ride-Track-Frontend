@@ -35,7 +35,7 @@ Home, Select Transport, Search, Results, Filter & Sort, Transport Details, Route
 - [x] Transport Details and Route & Stops with save-route bookmark (opened from a Results card; Live Tracking is a starter screen)
 - [x] Live Tracking map with a moving vehicle marker (positions from the sample timetable; demo simulation)
 - [x] Live Tracking: reads real positions from Firestore (`vehicles/{id}.location`), timetable fallback; the backend simulator (`npm run simulate`) makes it move
-- [ ] Functional tests for this area
+- [ ] Functional tests for this area (cases F1 to F95 written, 34 automated logic checks pass; run the screens on a phone and record results)
 - [ ] Coordinate usability testing (5+ participants)
 - [ ] Merge reviews and release APK link in Readme
 
