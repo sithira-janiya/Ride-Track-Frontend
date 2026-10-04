@@ -1,16 +1,16 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Badge, Button, Text } from 'react-native-paper';
+import { ActivityIndicator, Badge, Button, Text } from 'react-native-paper';
 
 import { ResultCard } from '@/components/results/result-card';
 import { Screen } from '@/components/ui/screen';
+import { useResults } from '@/hooks/use-results';
 import { colors, spacing } from '@/constants/theme';
 import { sortOptions } from '@/constants/results';
 import { transportOptions } from '@/constants/transport';
 import { formatDateShort, fromISODate } from '@/lib/format';
 import { activeFilterCount, filterAndSort } from '@/lib/results-filter';
-import { getResults } from '@/lib/search-data';
 import { useResultsFilterStore } from '@/store/results-filter-store';
 import { useTransportStore } from '@/store/transport-store';
 
@@ -21,7 +21,7 @@ export default function ResultsScreen() {
   const filter = useResultsFilterStore((s) => s.filter);
   const resetFilters = useResultsFilterStore((s) => s.reset);
 
-  const all = useMemo(() => (transport ? getResults(transport, from, to) : []), [transport, from, to]);
+  const { results: all, loading } = useResults(transport, from, to);
   const shown = useMemo(() => filterAndSort(all, filter), [all, filter]);
 
   if (!transport) return null;
@@ -52,7 +52,9 @@ export default function ResultsScreen() {
         </View>
       </View>
 
-      {all.length === 0 ? (
+      {loading ? (
+        <ActivityIndicator style={styles.empty} accessibilityLabel="Loading journeys" />
+      ) : all.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="titleMedium">No {option.plural.toLowerCase()} found</Text>
           <Text style={styles.muted}>

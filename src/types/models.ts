@@ -18,6 +18,8 @@ export type Vehicle = {
   nextStop: string;
   /** Onboard facilities, for example Air Conditioning or Wi-Fi. */
   facilities: string[];
+  /** Seats on the vehicle, when the backend knows it. */
+  capacity?: number;
 };
 
 /** A stop on a route. `at` is how far along the trip it is, from 0 (start) to 1 (end). */

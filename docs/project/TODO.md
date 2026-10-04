@@ -32,7 +32,8 @@ Everything in sections 3 to 6 depends on these.
 - [ ] (S) Replace each `PlaceholderScreen` with the real screen as owners build them; remove the role picker once real sign-in lands
 - [x] (S) Home reads live Firestore data through `src/hooks/use-home-data.ts` and `src/lib/home-live.ts` (checked on the local emulators)
 - [x] (S) Search suggestions read live Firestore routes through `src/hooks/use-places.ts` (sample fallback)
-- [ ] (S) Confirm Home shows `Live data` on the real project, then switch Results, Transport Details, Route & Stops and Live Tracking the same way
+- [x] (S) Results read live Firestore trips through `src/hooks/use-results.ts` (sample fallback)
+- [ ] (S) Confirm Home shows `Live data` on the real project, then switch Transport Details, Route & Stops and Live Tracking the same way
 - [x] (S) Maps key wired into the build: `.env.example`, `app.config.js`, `eas.json`, package name, Google provider ([MAPS-SETUP.md](../design/MAPS-SETUP.md))
 - [ ] (F) Create the restricted Google Maps API key in Google Cloud and set it, plus the four Firebase values, in the EAS `preview` environment ([MAPS-SETUP.md](../design/MAPS-SETUP.md) Parts A and B)
 - [ ] (F) Set Firestore rules before demo day; test mode expires after 30 days

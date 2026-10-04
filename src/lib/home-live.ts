@@ -42,6 +42,7 @@ export function toVehicle(doc: QueryDocumentSnapshot<DocumentData>): Vehicle {
     etaMinutes: number(d.etaMinutes),
     nextStop: text(d.nextStop),
     facilities: Array.isArray(d.facilities) ? d.facilities.filter((f): f is string => typeof f === 'string') : [],
+    capacity: typeof d.capacity === 'number' ? d.capacity : undefined,
   };
 }
 
