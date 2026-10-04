@@ -35,7 +35,6 @@ Everything in sections 3 to 6 depends on these.
 - [x] (S) Results read live Firestore trips through `src/hooks/use-results.ts` (sample fallback)
 - [x] (S) Transport Details, Route & Stops and the Live Tracking trip load live through `src/hooks/use-trip-detail.ts` (sample fallback)
 - [x] (S) Live Tracking reads `vehicles/{id}.location` (fresh under 2 min, else timetable)
-- [ ] (F) Backend: vehicle location simulator (`npm run simulate`) so the marker moves on live data
 - [ ] (S) Confirm Home, Search, Results and trip screens show live data on the real project
 - [x] (S) Maps key wired into the build: `.env.example`, `app.config.js`, `eas.json`, package name, Google provider ([MAPS-SETUP.md](../design/MAPS-SETUP.md))
 - [ ] (F) Create the restricted Google Maps API key in Google Cloud and set it, plus the four Firebase values, in the EAS `preview` environment ([MAPS-SETUP.md](../design/MAPS-SETUP.md) Parts A and B)
