@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, IconButton, Text } from 'react-native-paper';
 
 import { RouteTimeline } from '@/components/trip/route-timeline';
 import { TripSummaryCard } from '@/components/trip/trip-summary-card';
@@ -10,8 +10,8 @@ import { Screen } from '@/components/ui/screen';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { colors, radius, spacing } from '@/constants/theme';
+import { useTripDetail } from '@/hooks/use-trip-detail';
 import { formatDate, fromISODate } from '@/lib/format';
-import { getTripDetail } from '@/lib/trip-data';
 import { getTripProgress } from '@/lib/trip-progress';
 import { useSavedRoutesStore } from '@/store/saved-routes-store';
 
@@ -19,7 +19,7 @@ export default function RouteAndStopsScreen() {
   const router = useRouter();
   const { id, date } = useLocalSearchParams<{ id: string; date?: string }>();
 
-  const detail = useMemo(() => getTripDetail(id), [id]);
+  const { detail, loading } = useTripDetail(id);
   const progress = useMemo(() => {
     if (!detail) return null;
     const now = new Date();
@@ -29,6 +29,14 @@ export default function RouteAndStopsScreen() {
   const routeId = detail?.route.id ?? '';
   const saved = useSavedRoutesStore((s) => s.routeIds.includes(routeId));
   const toggleRoute = useSavedRoutesStore((s) => s.toggleRoute);
+
+  if (loading) {
+    return (
+      <Screen title="Route & Stops" back>
+        <ActivityIndicator style={styles.loading} accessibilityLabel="Loading trip" />
+      </Screen>
+    );
+  }
 
   if (!detail || !progress) {
     return (
@@ -94,6 +102,7 @@ export default function RouteAndStopsScreen() {
 }
 
 const styles = StyleSheet.create({
+  loading: { paddingVertical: spacing.xl },
   location: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   pin: {
     width: 40,

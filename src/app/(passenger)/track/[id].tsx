@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, IconButton, Text } from 'react-native-paper';
 
 import { LivePill } from '@/components/trip/live-pill';
 import { Screen } from '@/components/ui/screen';
@@ -12,8 +12,8 @@ import { SurfaceCard } from '@/components/ui/surface-card';
 import { colors, radius, spacing } from '@/constants/theme';
 import { transportOptions } from '@/constants/transport';
 import { useLiveTrip } from '@/hooks/use-live-trip';
+import { useTripDetail } from '@/hooks/use-trip-detail';
 import { toClock, toMinutes } from '@/lib/format';
-import { getTripDetail } from '@/lib/trip-data';
 import { getTripProgress } from '@/lib/trip-progress';
 import { minutesAtFraction, positionAt, stopCoordinates } from '@/lib/vehicle-position';
 
@@ -24,7 +24,7 @@ export default function LiveTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const mapRef = useRef<MapView>(null);
 
-  const detail = useMemo(() => getTripDetail(id), [id]);
+  const { detail, loading } = useTripDetail(id);
   const [simulate, setSimulate] = useState(false);
   const { fraction, secondsSinceUpdate } = useLiveTrip(detail, simulate);
 
@@ -34,6 +34,14 @@ export default function LiveTrackingScreen() {
     const timer = setTimeout(() => setStopsDrawn(true), 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  if (loading) {
+    return (
+      <Screen title="Live Tracking" back>
+        <ActivityIndicator style={styles.loading} accessibilityLabel="Loading trip" />
+      </Screen>
+    );
+  }
 
   if (!detail) {
     return (
@@ -195,6 +203,7 @@ export default function LiveTrackingScreen() {
 }
 
 const styles = StyleSheet.create({
+  loading: { paddingVertical: spacing.xl },
   mapWrap: { flex: 1, minHeight: 280, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
   map: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   controls: { position: 'absolute', right: spacing.xs, top: spacing.xs },

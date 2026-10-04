@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, IconButton, Text } from 'react-native-paper';
 
 import { FacilityChips } from '@/components/trip/facility-chips';
 import { RouteTimeline } from '@/components/trip/route-timeline';
@@ -11,8 +11,8 @@ import { Screen } from '@/components/ui/screen';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SurfaceCard } from '@/components/ui/surface-card';
 import { colors, radius, spacing } from '@/constants/theme';
+import { useTripDetail } from '@/hooks/use-trip-detail';
 import { formatDate, formatDuration, formatFare, fromISODate, toClock, toMinutes } from '@/lib/format';
-import { getTripDetail } from '@/lib/trip-data';
 import { getTripProgress } from '@/lib/trip-progress';
 import { useSavedRoutesStore } from '@/store/saved-routes-store';
 
@@ -20,7 +20,7 @@ export default function TransportDetailsScreen() {
   const router = useRouter();
   const { id, date } = useLocalSearchParams<{ id: string; date?: string }>();
 
-  const detail = useMemo(() => getTripDetail(id), [id]);
+  const { detail, loading } = useTripDetail(id);
   const progress = useMemo(() => {
     if (!detail) return null;
     const now = new Date();
@@ -30,6 +30,14 @@ export default function TransportDetailsScreen() {
   const routeId = detail?.route.id ?? '';
   const saved = useSavedRoutesStore((s) => s.routeIds.includes(routeId));
   const toggleRoute = useSavedRoutesStore((s) => s.toggleRoute);
+
+  if (loading) {
+    return (
+      <Screen title="Transport Details" back>
+        <ActivityIndicator style={styles.loading} accessibilityLabel="Loading trip" />
+      </Screen>
+    );
+  }
 
   if (!detail || !progress) {
     return (
@@ -146,6 +154,7 @@ export default function TransportDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
+  loading: { paddingVertical: spacing.xl },
   journey: { gap: spacing.md },
   label: { color: colors.textMuted, letterSpacing: 0.6 },
   times: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
