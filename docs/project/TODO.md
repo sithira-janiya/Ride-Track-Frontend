@@ -68,7 +68,7 @@ Each screen needs at least 2 working CRUD operations ([SCREENS.md](SCREENS.md)).
 - [ ] 6 Transport Details `transport/[id].tsx`: R vehicle, C/D favourite
 - [ ] 7 Route & Stops `route/[id].tsx`: R stops, C/D favourite (map with stops)
 - [ ] 8 Live Tracking `track/[id].tsx`: R live location via `onSnapshot`, C/D follow vehicle, moving marker
-- [ ] Vehicle location simulator/seed that moves positions along a route for the demo ([ARCHITECTURE.md](../design/ARCHITECTURE.md) Live tracking)
+- [x] Vehicle location simulator/seed that moves positions along a route for the demo (backend repo: `npm run simulate`, branch `feature/silva/location-simulator`, to be merged into backend `dev`) ([ARCHITECTURE.md](../design/ARCHITECTURE.md) Live tracking)
 
 ### Passenger: booking, tickets, profile (R), FR1, FR2, FR5, FR8, FR11, FR12
 
