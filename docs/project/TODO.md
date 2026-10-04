@@ -131,7 +131,7 @@ Each screen needs at least 2 working CRUD operations ([SCREENS.md](SCREENS.md)).
 - [x] Transport Details and Route & Stops with save-route bookmark
 - [x] Live Tracking map with moving marker (sample timetable; real Firestore positions still to do)
 - [ ] Functional tests for this area (cases written, 34 automated logic checks pass; screens still to run on a phone)
-- [ ] Coordinate usability testing (5+ participants)
+- [ ] Coordinate usability testing (5+ participants) (plan written; recruit, set dates and hold the sessions)
 - [ ] Merge reviews; release APK link in the Readme
 
 ### Rajapaksha
