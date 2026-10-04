@@ -40,3 +40,28 @@ export function positionAt(stops: Stop[], fraction: number): LatLng {
 export function stopCoordinates(stops: Stop[]): LatLng[] {
   return stops.map((s) => ({ latitude: s.lat, longitude: s.lng }));
 }
+
+/**
+ * How far along the route (0 to 1) the closest point to a GPS position is. The position is
+ * snapped to the nearest straight stretch between two stops, so a vehicle that is slightly off
+ * the drawn line still gets a sensible share of the trip.
+ */
+export function fractionOnRoute(stops: Stop[], point: { lat: number; lng: number }): number {
+  if (stops.length < 2) return 0;
+  // Scale longitude so a degree east-west is comparable to a degree north-south at this latitude.
+  const scale = Math.cos((point.lat * Math.PI) / 180);
+  let best = { distance: Infinity, fraction: 0 };
+  for (let i = 0; i < stops.length - 1; i += 1) {
+    const a = stops[i];
+    const b = stops[i + 1];
+    const dx = (b.lng - a.lng) * scale;
+    const dy = b.lat - a.lat;
+    const lengthSquared = dx * dx + dy * dy;
+    const px = (point.lng - a.lng) * scale;
+    const py = point.lat - a.lat;
+    const t = lengthSquared === 0 ? 0 : Math.min(1, Math.max(0, (px * dx + py * dy) / lengthSquared));
+    const distance = Math.hypot(px - t * dx, py - t * dy);
+    if (distance < best.distance) best = { distance, fraction: a.at + (b.at - a.at) * t };
+  }
+  return best.fraction;
+}

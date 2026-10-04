@@ -29,6 +29,14 @@ type OnError = (error: FirestoreError) => void;
 const text = (value: unknown, fallback = ''): string => (typeof value === 'string' ? value : fallback);
 const number = (value: unknown, fallback = 0): number => (typeof value === 'number' && Number.isFinite(value) ? value : fallback);
 
+/** The vehicle's `location` map ({ lat, lng, updatedAt }) from Firestore, or undefined if it is missing or incomplete. */
+function toLocation(value: unknown): Vehicle['location'] {
+  const l = value as { lat?: unknown; lng?: unknown; updatedAt?: { toMillis?: () => number } } | null | undefined;
+  if (typeof l?.lat !== 'number' || typeof l.lng !== 'number') return undefined;
+  const updatedAt = typeof l.updatedAt?.toMillis === 'function' ? l.updatedAt.toMillis() : 0;
+  return { lat: l.lat, lng: l.lng, updatedAt };
+}
+
 export function toVehicle(doc: QueryDocumentSnapshot<DocumentData>): Vehicle {
   const d = doc.data();
   return {
@@ -43,6 +51,7 @@ export function toVehicle(doc: QueryDocumentSnapshot<DocumentData>): Vehicle {
     nextStop: text(d.nextStop),
     facilities: Array.isArray(d.facilities) ? d.facilities.filter((f): f is string => typeof f === 'string') : [],
     capacity: typeof d.capacity === 'number' ? d.capacity : undefined,
+    location: toLocation(d.location),
   };
 }
 

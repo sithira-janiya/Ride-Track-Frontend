@@ -26,7 +26,7 @@ export default function LiveTrackingScreen() {
 
   const { detail, loading } = useTripDetail(id);
   const [simulate, setSimulate] = useState(false);
-  const { fraction, secondsSinceUpdate } = useLiveTrip(detail, simulate);
+  const { fraction, secondsSinceUpdate, isLive } = useLiveTrip(detail, simulate);
 
   // Stop markers are custom views: let them draw once, then stop re-rendering them.
   const [stopsDrawn, setStopsDrawn] = useState(false);
@@ -55,7 +55,9 @@ export default function LiveTrackingScreen() {
   const { schedule, route, vehicle, stopTimes } = detail;
   const option = transportOptions[route.type];
   const coordinates = stopCoordinates(route.stops);
-  const position = positionAt(route.stops, fraction);
+  // Real GPS point while the vehicle is reporting; otherwise the spot on the route for this share of the trip.
+  const gps = isLive ? vehicle.location : undefined;
+  const position = gps ? { latitude: gps.lat, longitude: gps.lng } : positionAt(route.stops, fraction);
 
   const real = new Date();
   const nowMinutes = simulate ? minutesAtFraction(detail, fraction) : real.getHours() * 60 + real.getMinutes() + real.getSeconds() / 60;
@@ -195,7 +197,9 @@ export default function LiveTrackingScreen() {
         <Text variant="labelSmall" style={styles.muted}>
           {simulate
             ? 'Demo: the vehicle drives the whole trip in about 90 seconds.'
-            : 'Position comes from the timetable and your phone clock. Real GPS arrives with the backend.'}
+            : isLive
+              ? 'Live GPS position reported by the vehicle.'
+              : 'No recent GPS from this vehicle, so the position follows the timetable and your phone clock.'}
         </Text>
       </SurfaceCard>
     </Screen>

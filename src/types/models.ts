@@ -20,6 +20,8 @@ export type Vehicle = {
   facilities: string[];
   /** Seats on the vehicle, when the backend knows it. */
   capacity?: number;
+  /** Last reported GPS position; `updatedAt` is milliseconds since 1970. */
+  location?: { lat: number; lng: number; updatedAt: number };
 };
 
 /** A stop on a route. `at` is how far along the trip it is, from 0 (start) to 1 (end). */
