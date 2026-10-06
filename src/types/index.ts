@@ -91,6 +91,21 @@ export interface Ticket {
   qrToken: string | null;
   issuedAt: string;
   paymentStatus?: PaymentStatus;
+  /** display fields; the app falls back to ids when the server does not send them */
+  routeNo?: string;
+  boardStopName?: string;
+  alightStopName?: string;
+}
+
+/** Returned by POST /tickets. `paymentUrl` is null in mock mode, which pays in-app. */
+export interface PaymentSession {
+  ticketId: number;
+  paymentUrl: string | null;
+}
+
+export interface TicketPage {
+  items: Ticket[];
+  nextPage: number | null;
 }
 
 export interface DelayAlert {

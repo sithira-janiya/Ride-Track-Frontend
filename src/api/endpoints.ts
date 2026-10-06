@@ -1,7 +1,7 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, Route, RouteDetail, Stop, Ticket, User, VehiclePosition } from '@/types';
+import type { Arrival, AuthResult, PaymentSession, Route, RouteDetail, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -40,7 +40,17 @@ export const routesApi = {
     env.useMockApi ? mockApi.getVehicles(id) : get(`/routes/${id}/vehicles`),
 };
 
+const TICKET_PAGE_SIZE = 20;
+
 export const ticketsApi = {
-  list: (status?: string): Promise<Ticket[]> =>
-    env.useMockApi ? mockApi.getTickets() : get('/tickets', { status }),
+  create: (input: { tripId: number; boardStopId: number; alightStopId: number }): Promise<PaymentSession> =>
+    env.useMockApi ? mockApi.createTicket(input) : post('/tickets', input),
+  get: (id: number): Promise<Ticket> => (env.useMockApi ? mockApi.getTicket(id) : get(`/tickets/${id}`)),
+  list: async (status?: string, page = 1): Promise<TicketPage> => {
+    if (env.useMockApi) return mockApi.listTickets(status, page);
+    // docs/07-api.md does not fix the paging envelope; treat a full page as "there may be more"
+    const items = await get<Ticket[]>('/tickets', { status, page });
+    return { items, nextPage: items.length >= TICKET_PAGE_SIZE ? page + 1 : null };
+  },
+  cancel: (id: number): Promise<Ticket> => (env.useMockApi ? mockApi.cancelTicket(id) : post(`/tickets/${id}/cancel`)),
 };

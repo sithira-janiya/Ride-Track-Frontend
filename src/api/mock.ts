@@ -1,6 +1,8 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
-import type { Arrival, AuthResult, Route, RouteDetail, Stop, Ticket, User, VehiclePosition } from '@/types';
+import type {
+  Arrival, AuthResult, PaymentSession, Route, RouteDetail, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+} from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 const minsFromNow = (m: number) => new Date(Date.now() + m * 60000).toISOString();
@@ -39,6 +41,27 @@ const vehiclesByRoute: Record<
   ],
   2: [{ vehicleId: 201, regNo: 'TR-0042', offsetSec: 30, periodSec: 600, passengerCount: 310, capacity: 480 }],
 };
+
+const TICKET_PAGE_SIZE = 8;
+let nextTicketId = 100;
+// a longer history so pagination is visible in mock mode
+const tickets: Ticket[] = Array.from({ length: 12 }, (_, i): Ticket => {
+  const status: TicketStatus = i % 5 === 4 ? 'CANCELLED' : 'USED';
+  return {
+    ticketId: 99 - i,
+    tripId: 11,
+    boardStopId: 1,
+    alightStopId: 3,
+    fare: 50,
+    status,
+    qrToken: null,
+    issuedAt: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
+    paymentStatus: status === 'CANCELLED' ? 'REFUNDED' : 'PAID',
+    routeNo: '138',
+    boardStopName: 'Colombo Fort',
+    alightStopName: 'Borella',
+  };
+});
 
 const routes: Route[] = [
   { routeId: 1, routeNo: '138', name: 'Colombo - Kottawa', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kottawa' },
@@ -156,5 +179,59 @@ export const mockApi = {
     );
   },
 
-  getTickets: (): Promise<Ticket[]> => delay([]),
+  async createTicket(input: { tripId: number; boardStopId: number; alightStopId: number }): Promise<PaymentSession> {
+    const routeId = Math.floor(input.tripId / 10);
+    const path = stopsFor(routeId);
+    const board = path.find((s) => s.stopId === input.boardStopId);
+    const alight = path.find((s) => s.stopId === input.alightStopId);
+    if (!board || !alight || alight.stopSequence! <= board.stopSequence!) throw new Error('Choose a drop-off stop after your boarding stop.');
+    const ticket: Ticket = {
+      ticketId: nextTicketId++,
+      tripId: input.tripId,
+      boardStopId: board.stopId,
+      alightStopId: alight.stopId,
+      fare: alight.fareFromOrigin! - board.fareFromOrigin!,
+      status: 'PENDING',
+      qrToken: null,
+      issuedAt: new Date().toISOString(),
+      paymentStatus: 'PENDING',
+      routeNo: routes.find((r) => r.routeId === routeId)?.routeNo,
+      boardStopName: board.name,
+      alightStopName: alight.name,
+    };
+    tickets.unshift(ticket);
+    return delay({ ticketId: ticket.ticketId, paymentUrl: null });
+  },
+
+  /** Stands in for the payment gateway webhook: marks the ticket paid and issues its QR token. */
+  async confirmPayment(ticketId: number): Promise<void> {
+    const t = tickets.find((x) => x.ticketId === ticketId);
+    if (t && t.status === 'PENDING') {
+      t.status = 'ACTIVE';
+      t.paymentStatus = 'PAID';
+      t.qrToken = `mock-qr-${t.ticketId}-${t.tripId}`;
+    }
+    return delay(undefined, 800);
+  },
+
+  async getTicket(ticketId: number): Promise<Ticket> {
+    const t = tickets.find((x) => x.ticketId === ticketId);
+    if (!t) throw new Error('Ticket not found.');
+    return delay({ ...t });
+  },
+
+  async cancelTicket(ticketId: number): Promise<Ticket> {
+    const t = tickets.find((x) => x.ticketId === ticketId);
+    if (!t) throw new Error('Ticket not found.');
+    if (t.status !== 'ACTIVE') throw new Error('Only an unused ticket can be cancelled.');
+    t.status = 'CANCELLED';
+    t.paymentStatus = 'REFUNDED';
+    return delay({ ...t });
+  },
+
+  listTickets(status?: string, page = 1): Promise<TicketPage> {
+    const all = tickets.filter((t) => !status || t.status === status);
+    const items = all.slice((page - 1) * TICKET_PAGE_SIZE, page * TICKET_PAGE_SIZE);
+    return delay({ items, nextPage: page * TICKET_PAGE_SIZE < all.length ? page + 1 : null });
+  },
 };

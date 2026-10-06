@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 
+import { useTicketCache } from '@/store/tickets';
 import type { AuthResult, AuthTokens, User } from '@/types';
 import { getItem, removeItem, setItem } from '@/utils/secure-storage';
 
@@ -64,6 +65,7 @@ export const useAuth = create<AuthState>((set, get) => {
 
     logout: async () => {
       set({ user: null, accessToken: null, refreshToken: null });
+      useTicketCache.getState().reset(); // tickets belong to the account, not the device
       await removeItem(KEY);
     },
   };
