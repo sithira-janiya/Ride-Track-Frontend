@@ -1,7 +1,7 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
 import type {
-  Arrival, AuthResult, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  Arrival, AuthResult, DelayAlert, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
 } from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
@@ -82,6 +82,14 @@ const users: User[] = [
   { userId: 2, name: 'Demo Conductor', email: 'staff@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
   { userId: 3, name: 'Demo Officer', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
 ];
+
+const hoursAgo = (h: number) => new Date(Date.now() - h * 3600000).toISOString();
+const alerts: DelayAlert[] = [
+  { alertId: 3, tripId: 11, type: 'DELAY', message: 'Route 138 is running about 12 minutes late because of traffic near Nugegoda.', delayMinutes: 12, createdAt: hoursAgo(0.5), isRead: false },
+  { alertId: 2, tripId: 21, type: 'ROUTE_CHANGE', message: 'Main Line trains will skip Maradana until further notice.', delayMinutes: null, createdAt: hoursAgo(5), isRead: false },
+  { alertId: 1, tripId: 13, type: 'CANCELLATION', message: 'The 8:08 AM trip on route 138 is cancelled.', delayMinutes: null, createdAt: hoursAgo(26), isRead: true },
+];
+let nextAlertId = 4;
 
 /** All demo accounts use this password. Mock mode only. */
 export const MOCK_PASSWORD = 'Password1!';
@@ -238,6 +246,37 @@ export const mockApi = {
       }
     }
     throw new Error('Vehicle not found.');
+  },
+
+  getAlerts: (unread?: boolean): Promise<DelayAlert[]> => delay(alerts.filter((a) => !unread || !a.isRead).map((a) => ({ ...a }))),
+
+  async markAlertRead(alertId: number): Promise<DelayAlert> {
+    const a = alerts.find((x) => x.alertId === alertId);
+    if (!a) throw new Error('Alert not found.');
+    a.isRead = true;
+    return delay({ ...a }, 150);
+  },
+
+  /** Demo only: stands in for the server pushing `alert:new`. */
+  createDemoAlert(): DelayAlert {
+    const a: DelayAlert = {
+      alertId: nextAlertId++,
+      tripId: 11,
+      type: 'DELAY',
+      message: 'Route 138 is running about 8 minutes late.',
+      delayMinutes: 8,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+    };
+    alerts.unshift(a);
+    return { ...a };
+  },
+
+  async updateUser(userId: number, input: Partial<Pick<User, 'name' | 'language' | 'notificationsEnabled'>>): Promise<User> {
+    const u = users.find((x) => x.userId === userId);
+    if (!u) throw new Error('Account not found.');
+    Object.assign(u, input);
+    return delay({ ...u });
   },
 
   async getTicket(ticketId: number): Promise<Ticket> {

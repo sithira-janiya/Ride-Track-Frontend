@@ -1,0 +1,107 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { errorMessage } from '@/api/client';
+import { mockApi } from '@/api/mock';
+import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
+import { env } from '@/config/env';
+import { useAlerts, useMarkRead } from '@/hooks/use-alerts';
+import { useColors } from '@/hooks/use-colors';
+import { useAlertBanner } from '@/store/alert-banner';
+import { spacing, typography } from '@/theme';
+import type { AlertType } from '@/types';
+
+const TYPE: Record<AlertType, { label: string; tone: Tone }> = {
+  DELAY: { label: 'Delay', tone: 'warning' },
+  CANCELLATION: { label: 'Cancelled', tone: 'danger' },
+  ROUTE_CHANGE: { label: 'Route change', tone: 'info' },
+};
+
+function when(iso: string) {
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+  if (mins < 1440) return `${Math.round(mins / 60)} h ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+export default function AlertsScreen() {
+  const c = useColors();
+  const alerts = useAlerts();
+  const markRead = useMarkRead();
+  const queryClient = useQueryClient();
+  const showBanner = useAlertBanner((s) => s.show);
+  const unread = alerts.data?.filter((a) => !a.isRead) ?? [];
+
+  return (
+    <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.content}>
+          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
+            Alerts
+          </Text>
+
+          {alerts.isPending ? (
+            <Loading label="Loading alerts…" />
+          ) : alerts.isError ? (
+            <ErrorMessage message={errorMessage(alerts.error)} onRetry={() => alerts.refetch()} />
+          ) : alerts.data.length === 0 ? (
+            <EmptyState title="No alerts" message="Delays, cancellations and route changes will show up here." />
+          ) : (
+            <>
+              {unread.length > 1 ? (
+                <Button
+                  title={`Mark all ${unread.length} as read`}
+                  variant="secondary"
+                  onPress={() => unread.forEach((a) => markRead.mutate(a.alertId))}
+                />
+              ) : null}
+              {alerts.data.map((a) => {
+                const t = TYPE[a.type];
+                return (
+                  <Card key={a.alertId} style={!a.isRead ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
+                    <View style={styles.row}>
+                      <StatusBadge label={t.label} tone={t.tone} />
+                      <Text style={[styles.caption, { color: c.textSecondary }]}>
+                        {!a.isRead ? '● New · ' : ''}
+                        {when(a.createdAt)}
+                      </Text>
+                    </View>
+                    <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>
+                    {a.delayMinutes ? (
+                      <Text style={[styles.caption, { color: c.textSecondary }]}>Delay: about {a.delayMinutes} minutes</Text>
+                    ) : null}
+                    {!a.isRead ? <Button title="Mark as read" variant="secondary" onPress={() => markRead.mutate(a.alertId)} /> : null}
+                  </Card>
+                );
+              })}
+            </>
+          )}
+
+          {env.useMockApi ? (
+            <Button
+              title="Demo: simulate a new alert"
+              variant="secondary"
+              onPress={() => {
+                const a = mockApi.createDemoAlert();
+                showBanner(a.message);
+                queryClient.invalidateQueries({ queryKey: ['alerts'] });
+              }}
+            />
+          ) : null}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  scroll: { padding: spacing.lg },
+  content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
+  heading: { ...typography.heading },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, flexWrap: 'wrap' },
+  body: { ...typography.body },
+  caption: { ...typography.caption },
+});

@@ -23,6 +23,8 @@ export interface User {
   phone: string | null;
   role: Role;
   language?: string;
+  /** master switch for alert notifications (docs/07-api.md `PATCH /users/me`) */
+  notificationsEnabled?: boolean;
   isActive: boolean;
 }
 

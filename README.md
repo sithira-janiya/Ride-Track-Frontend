@@ -15,6 +15,7 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 | HTTP / real-time | Axios, socket.io-client |
 | Maps | react-native-maps (native only; web shows a notice) |
 | Tickets / scanning | react-native-qrcode-svg, expo-brightness, expo-web-browser, expo-camera, expo-haptics |
+| Alerts | expo-notifications (push registration), socket `alert:new` |
 | Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache) |
 | Forms | React Hook Form |
 
@@ -60,7 +61,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 3 | Passenger: live map with real-time vehicles | Done (not yet tested on a device; no marker animation) |
 | 4 | Passenger: buy ticket, payment, ticket list, QR, cancel, offline cache | Built, untested on a device; real payment gateway not exercised |
 | 5 | Staff: QR scanner, scan result, manual entry, passenger count, shift | Built; manual entry, shift and count checked in the browser; camera scan and haptics not tested on a device |
-| 6 | Passenger: alerts and profile settings | Not started |
+| 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
 | 7 | Authority: dashboard, live fleet, reports, alerts | Not started |
 
 ## Features built so far
@@ -70,6 +71,9 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Route detail: ordered stops with fares, upcoming arrivals at a chosen stop.
 - Live map: route line, stops and moving vehicles over WebSocket, with arrival time and occupancy (icon and text). Shows "Live / Reconnecting" and an "out of date" warning after 60 s without updates.
 - Tickets: pick boarding stop, drop-off stop and trip, see the fare, pay. A pending payment is saved on the device and re-checked when the app resumes, so it is never lost. Ticket list with filters and paging, QR screen with a screen-brightness boost, cancel an unused ticket. Tickets are cached on the device so they still show offline, and cleared on logout.
+
+- Alerts tab: delay, cancellation and route-change alerts with unread highlighting, a tab badge with the unread count, "Mark as read" and "Mark all as read". A banner slides in over any screen when the server sends `alert:new`. The device is registered for push notifications on login (skipped in mock mode, on web, and when notifications are off). In mock mode a "Demo: simulate a new alert" button stands in for the server.
+- Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out.
 
 **Staff**
 - Scan tab: camera permission flow, QR scanning, then a large VALID / INVALID result with the reason (icon, word and colour) and haptic feedback. "Scan next ticket" resets for the next passenger. If a QR will not scan, type the ticket number instead.
@@ -84,13 +88,13 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 src/
 ├── app/                  Expo Router screens (a file = a route)
 │   ├── (auth)/           login, register
-│   ├── (passenger)/      home, tickets, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
+│   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      authority home (dashboard arrives in Phase 7)
 ├── api/                  axios client, typed endpoint wrappers, mock API
-├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/
+├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/
 ├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, ...
-├── store/                Zustand stores: auth, favourites, tickets, shift
+├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
 ```
@@ -109,6 +113,8 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - The real backend does not exist yet; the shapes of `POST /tickets` and the `GET /tickets` paging are assumed (see `src/api/endpoints.ts`).
 - The real backend's response to `POST /scans` and `POST /vehicles/:id/occupancy` is assumed (`{result, reason}` and `{vehicleId, passengerCount, capacity}`).
 - In mock mode a ticket can only be scanned if it was bought in the same app session (the mock data lives in memory).
+- Language choice is saved to the account, but the app text is not translated yet; everything is still English.
+- Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
 
 ## Keeping this README current

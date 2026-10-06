@@ -1,7 +1,7 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
+import type { Arrival, AuthResult, DelayAlert, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -11,6 +11,9 @@ async function get<T>(url: string, params?: object): Promise<T> {
 }
 async function post<T>(url: string, body?: object): Promise<T> {
   return (await api.post<{ data: T }>(url, body)).data.data;
+}
+async function put<T>(url: string, body?: object): Promise<T> {
+  return (await api.put<{ data: T }>(url, body)).data.data;
 }
 async function patch<T>(url: string, body?: object): Promise<T> {
   return (await api.patch<{ data: T }>(url, body)).data.data;
@@ -25,7 +28,9 @@ export const authApi = {
 
 export const userApi = {
   me: () => get<User>('/users/me'),
-  update: (input: Partial<Pick<User, 'name' | 'language'>>) => patch<User>('/users/me', input),
+  update: (userId: number, input: Partial<Pick<User, 'name' | 'language' | 'notificationsEnabled'>>): Promise<User> =>
+    env.useMockApi ? mockApi.updateUser(userId, input) : patch<User>('/users/me', input),
+  registerPushToken: (token: string) => (env.useMockApi ? Promise.resolve() : put('/users/me/push-token', { token })),
 };
 
 export const routesApi = {
@@ -64,4 +69,10 @@ export const scansApi = {
 export const vehiclesApi = {
   setOccupancy: (vehicleId: number, passengerCount: number): Promise<Occupancy> =>
     env.useMockApi ? mockApi.setOccupancy(vehicleId, passengerCount) : post(`/vehicles/${vehicleId}/occupancy`, { passengerCount }),
+};
+
+export const alertsApi = {
+  list: (unread?: boolean): Promise<DelayAlert[]> =>
+    env.useMockApi ? mockApi.getAlerts(unread) : get('/alerts', unread ? { unread: true } : undefined),
+  markRead: (id: number): Promise<DelayAlert> => (env.useMockApi ? mockApi.markAlertRead(id) : patch(`/alerts/${id}/read`)),
 };
