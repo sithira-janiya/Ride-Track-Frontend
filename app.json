@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ride-track-frontend",
+    "name": "RideTrack",
     "slug": "ride-track-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,6 +11,8 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.ridetrack.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -65,7 +65,7 @@ export default function PassengerCountScreen() {
                 Route {shift.routeNo} · {vehicle.regNo ?? `Vehicle ${vehicle.vehicleId}`}
               </Text>
               <Card>
-                <Text accessibilityLiveRegion="polite" style={[styles.count, { color: c.text }]}>
+                <Text accessibilityLiveRegion="polite" maxFontSizeMultiplier={1.2} style={[styles.count, { color: c.text }]}>
                   {draft}
                   <Text style={[styles.of, { color: c.textSecondary }]}> / {capacity}</Text>
                 </Text>

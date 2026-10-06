@@ -15,10 +15,10 @@ export function ScanResultPanel({ outcome, onNext }: Props) {
   const bg = valid ? c.successBg : c.dangerBg;
   return (
     <View accessibilityLiveRegion="assertive" style={[styles.panel, { backgroundColor: bg, borderColor: fg }]}>
-      <Text accessibilityElementsHidden style={[styles.icon, { color: fg }]}>
+      <Text accessibilityElementsHidden maxFontSizeMultiplier={1.2} style={[styles.icon, { color: fg }]}>
         {valid ? '✓' : '✕'}
       </Text>
-      <Text accessibilityRole="header" style={[styles.verdict, { color: fg }]}>
+      <Text accessibilityRole="header" maxFontSizeMultiplier={1.2} style={[styles.verdict, { color: fg }]}>
         {valid ? 'VALID' : 'INVALID'}
       </Text>
       <Text style={[styles.reason, { color: c.text }]}>{valid ? 'Ticket accepted. Let the passenger board.' : outcome.reason ?? 'This ticket cannot be accepted.'}</Text>

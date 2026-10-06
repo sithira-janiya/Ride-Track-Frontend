@@ -18,7 +18,7 @@ export const palette = {
   warning: '#8A5A00',
   warningBg: '#FFF1D6',
   info: '#0B5FFF',
-  infoBg: '#E6EEFF',
+  infoBg: '#F0F5FF',
 } as const;
 
 export const lightColors: ThemeColors = {

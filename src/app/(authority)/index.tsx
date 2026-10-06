@@ -14,7 +14,7 @@ function Tile({ label, value, hint }: { label: string; value: string; hint?: str
   const c = useColors();
   return (
     <Card style={styles.tile}>
-      <Text style={[styles.tileValue, { color: c.text }]}>{value}</Text>
+      <Text maxFontSizeMultiplier={1.3} style={[styles.tileValue, { color: c.text }]}>{value}</Text>
       <Text style={[styles.tileLabel, { color: c.text }]}>{label}</Text>
       {hint ? <Text style={[styles.caption, { color: c.textSecondary }]}>{hint}</Text> : null}
     </Card>

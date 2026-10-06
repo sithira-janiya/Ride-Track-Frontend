@@ -45,6 +45,7 @@ All use the password `Password1!`.
 npx tsc --noEmit    # typecheck
 npx expo lint       # lint
 npx expo-doctor     # check dependencies and config
+npm test            # run the automated tests (Jest)
 ```
 
 Run typecheck and lint before committing. Add packages with `npx expo install <package>`, not `npm install`, so versions match the SDK.
@@ -63,6 +64,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 5 | Staff: QR scanner, scan result, manual entry, passenger count, shift | Built; manual entry, shift and count checked in the browser; camera scan and haptics not tested on a device |
 | 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
 | 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
+| 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
 
 ## Features built so far
 
@@ -108,9 +110,27 @@ src/
 
 Rules: screens in `app/` stay thin and call hooks and components; all network calls live in `src/api/endpoints.ts` (never call axios from a screen); keep non-route code out of `src/app/`.
 
+## Testing
+
+Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
+
+- `src/utils/__tests__/validation.test.ts`: login and register rules.
+- `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
+- `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
+- `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
+
+Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
+
+## Release
+
+- Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards).
+- Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
+- To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
+- The app icon and splash images are still the Expo template's defaults. Replace the files in `assets/images/` with RideTrack artwork before release.
+
 ## Accessibility
 
-Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8).
+Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size.
 
 ## Known limitations
 
@@ -123,6 +143,7 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Language choice is saved to the account, but the app text is not translated yet; everything is still English.
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
 - Report and dashboard data in mock mode is fake (deterministic numbers); the real `GET /reports` and `GET /ops/dashboard` response shapes are assumed (see `Report` and `OpsDashboard` in `src/types/index.ts`). `GET /alerts` is documented for passengers only; the authority's "published alerts" list assumes the same endpoint works for them.
+- Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
 
 ## Keeping this README current
