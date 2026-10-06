@@ -19,6 +19,7 @@ export default function PassengerTabs() {
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
       {/* pushed from Home; keeps the tab bar but has no tab of its own */}
       <Tabs.Screen name="route/[id]" options={{ href: null }} />
+      <Tabs.Screen name="map/[id]" options={{ href: null }} />
     </Tabs>
   );
 }

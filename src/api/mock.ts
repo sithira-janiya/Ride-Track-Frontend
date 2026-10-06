@@ -29,6 +29,17 @@ const stopsFor = (routeId: number): Stop[] =>
     fareFromOrigin: fare,
   }));
 
+const vehiclesByRoute: Record<
+  number,
+  { vehicleId: number; regNo: string; offsetSec: number; periodSec: number; passengerCount: number; capacity: number }[]
+> = {
+  1: [
+    { vehicleId: 101, regNo: 'NB-1234', offsetSec: 0, periodSec: 240, passengerCount: 28, capacity: 52 },
+    { vehicleId: 102, regNo: 'NB-5678', offsetSec: 120, periodSec: 240, passengerCount: 50, capacity: 52 },
+  ],
+  2: [{ vehicleId: 201, regNo: 'TR-0042', offsetSec: 30, periodSec: 600, passengerCount: 310, capacity: 480 }],
+};
+
 const routes: Route[] = [
   { routeId: 1, routeNo: '138', name: 'Colombo - Kottawa', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kottawa' },
   { routeId: 2, routeNo: 'MAIN', name: 'Main Line - Colombo to Kandy', mode: 'TRAIN', origin: 'Colombo Fort', destination: 'Kandy' },
@@ -116,11 +127,34 @@ export const mockApi = {
     ]);
   },
 
-  getVehicles: (): Promise<VehiclePosition[]> =>
-    delay([
-      { vehicleId: 101, regNo: 'NB-1234', lat: 6.9, lng: 79.87, eta: minsFromNow(4), recordedAt: new Date().toISOString(), passengerCount: 28, capacity: 52 },
-      { vehicleId: 102, regNo: 'NB-5678', lat: 6.86, lng: 79.91, eta: minsFromNow(31), recordedAt: new Date().toISOString(), passengerCount: 50, capacity: 52 },
-    ]),
+  /** Vehicles drift along the route over time, so polling this shows them moving. */
+  getVehicles(routeId: number): Promise<VehiclePosition[]> {
+    const path = stopsFor(routeId);
+    if (path.length < 2) return delay([]);
+    const now = Date.now();
+    return delay(
+      (vehiclesByRoute[routeId] ?? []).map((v) => {
+        // ping-pong along the stops: 0 -> 1 -> 0 over `periodSec`
+        const t = ((now / 1000 + v.offsetSec) % v.periodSec) / v.periodSec;
+        const progress = t < 0.5 ? t * 2 : (1 - t) * 2;
+        const scaled = progress * (path.length - 1);
+        const seg = Math.min(Math.floor(scaled), path.length - 2);
+        const f = scaled - seg;
+        const a = path[seg];
+        const b = path[seg + 1];
+        return {
+          vehicleId: v.vehicleId,
+          regNo: v.regNo,
+          lat: a.latitude + (b.latitude - a.latitude) * f,
+          lng: a.longitude + (b.longitude - a.longitude) * f,
+          eta: new Date(now + (1 - progress) * v.periodSec * 500).toISOString(),
+          recordedAt: new Date(now).toISOString(),
+          passengerCount: v.passengerCount,
+          capacity: v.capacity,
+        };
+      }),
+    );
+  },
 
   getTickets: (): Promise<Ticket[]> => delay([]),
 };

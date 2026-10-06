@@ -57,6 +57,7 @@ export default function RouteDetailScreen() {
                   <StatusBadge label={modeLabel(route.data.mode)} tone="info" />
                 </View>
                 <Text style={[styles.sub, { color: c.textSecondary }]}>{route.data.name}</Text>
+                <Button title="Track live on map" onPress={() => router.push({ pathname: '/map/[id]', params: { id: String(routeId) } })} />
                 <Button
                   title={isFavourite ? '★ Saved to favourites' : '☆ Save to favourites'}
                   variant={isFavourite ? 'primary' : 'secondary'}

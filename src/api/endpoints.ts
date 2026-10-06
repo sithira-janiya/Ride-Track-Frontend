@@ -37,7 +37,7 @@ export const routesApi = {
   nearbyStops: (lat: number, lng: number, radius = 1500): Promise<Stop[]> =>
     env.useMockApi ? mockApi.nearbyStops(lat, lng) : get('/stops/nearby', { lat, lng, radius }),
   vehicles: (id: number): Promise<VehiclePosition[]> =>
-    env.useMockApi ? mockApi.getVehicles() : get(`/routes/${id}/vehicles`),
+    env.useMockApi ? mockApi.getVehicles(id) : get(`/routes/${id}/vehicles`),
 };
 
 export const ticketsApi = {
