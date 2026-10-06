@@ -135,3 +135,9 @@ export interface ClientToServerEvents {
   'route:subscribe': (p: { routeId: number }) => void;
   'route:unsubscribe': (p: { routeId: number }) => void;
 }
+
+export interface Occupancy {
+  vehicleId: number;
+  passengerCount: number;
+  capacity: number;
+}

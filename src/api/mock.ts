@@ -1,7 +1,7 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
 import type {
-  Arrival, AuthResult, PaymentSession, Route, RouteDetail, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  Arrival, AuthResult, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
 } from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
@@ -212,6 +212,32 @@ export const mockApi = {
       t.qrToken = `mock-qr-${t.ticketId}-${t.tripId}`;
     }
     return delay(undefined, 800);
+  },
+
+  /** Validates a ticket and, when valid, marks it used so a second scan is rejected. */
+  async scanTicket(input: { qrToken?: string; ticketId?: number }): Promise<ScanOutcome> {
+    const t = input.qrToken ? tickets.find((x) => x.qrToken === input.qrToken) : tickets.find((x) => x.ticketId === input.ticketId);
+    if (!t) return delay({ result: 'INVALID', reason: 'Ticket not found. This is not a RideTrack ticket.' }, 400);
+    const reasons: Partial<Record<TicketStatus, string>> = {
+      PENDING: 'Payment has not been completed.',
+      USED: 'This ticket has already been scanned.',
+      EXPIRED: 'This ticket has expired.',
+      CANCELLED: 'This ticket was cancelled.',
+    };
+    if (t.status !== 'ACTIVE') return delay({ result: 'INVALID', reason: reasons[t.status] }, 400);
+    t.status = 'USED';
+    return delay({ result: 'VALID' }, 400);
+  },
+
+  async setOccupancy(vehicleId: number, passengerCount: number): Promise<Occupancy> {
+    for (const list of Object.values(vehiclesByRoute)) {
+      const v = list.find((x) => x.vehicleId === vehicleId);
+      if (v) {
+        v.passengerCount = Math.max(0, Math.min(passengerCount, v.capacity));
+        return delay({ vehicleId, passengerCount: v.passengerCount, capacity: v.capacity });
+      }
+    }
+    throw new Error('Vehicle not found.');
   },
 
   async getTicket(ticketId: number): Promise<Ticket> {

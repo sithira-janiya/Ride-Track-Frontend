@@ -33,7 +33,13 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RideTrack uses the camera to scan passenger tickets."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

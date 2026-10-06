@@ -1,7 +1,7 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, PaymentSession, Route, RouteDetail, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
+import type { Arrival, AuthResult, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -53,4 +53,15 @@ export const ticketsApi = {
     return { items, nextPage: items.length >= TICKET_PAGE_SIZE ? page + 1 : null };
   },
   cancel: (id: number): Promise<Ticket> => (env.useMockApi ? mockApi.cancelTicket(id) : post(`/tickets/${id}/cancel`)),
+};
+
+export const scansApi = {
+  /** Validate by QR token or, when the QR will not scan, by typed ticket id (docs/07-api.md `POST /scans`). */
+  validate: (input: { qrToken?: string; ticketId?: number }): Promise<ScanOutcome> =>
+    env.useMockApi ? mockApi.scanTicket(input) : post('/scans', input),
+};
+
+export const vehiclesApi = {
+  setOccupancy: (vehicleId: number, passengerCount: number): Promise<Occupancy> =>
+    env.useMockApi ? mockApi.setOccupancy(vehicleId, passengerCount) : post(`/vehicles/${vehicleId}/occupancy`, { passengerCount }),
 };
