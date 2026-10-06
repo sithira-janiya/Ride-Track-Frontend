@@ -62,7 +62,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 4 | Passenger: buy ticket, payment, ticket list, QR, cancel, offline cache | Built, untested on a device; real payment gateway not exercised |
 | 5 | Staff: QR scanner, scan result, manual entry, passenger count, shift | Built; manual entry, shift and count checked in the browser; camera scan and haptics not tested on a device |
 | 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
-| 7 | Authority: dashboard, live fleet, reports, alerts | Not started |
+| 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
 
 ## Features built so far
 
@@ -80,6 +80,13 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Passengers tab: set the on-board passenger count for the shift's vehicle (+/- 1 and 5), sent to the server with Save.
 - Shift tab: choose route and trip (and so the vehicle) for the shift; remembered on the device.
 
+**Authority**
+- Dashboard: live tiles (vehicles live, active delays, passengers on board, nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time and occupancy. Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
+- Fleet tab: all vehicles on one map, filterable by route; selecting a card highlights its marker.
+- Reports tab: choose report type (route performance, delays, occupancy), route and period (last 7 or 30 days), then see a bar chart and a table.
+- Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
+- Log out is at the bottom of the Dashboard.
+
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear.
 
 ## Folder structure
@@ -90,9 +97,9 @@ src/
 │   ├── (auth)/           login, register
 │   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
 │   ├── (staff)/          scan (index), count, shift tabs
-│   └── (authority)/      authority home (dashboard arrives in Phase 7)
+│   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
 ├── api/                  axios client, typed endpoint wrappers, mock API
-├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/
+├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/
 ├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, ...
 ├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner
 ├── socket/               socket.io client
@@ -115,6 +122,7 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - In mock mode a ticket can only be scanned if it was bought in the same app session (the mock data lives in memory).
 - Language choice is saved to the account, but the app text is not translated yet; everything is still English.
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
+- Report and dashboard data in mock mode is fake (deterministic numbers); the real `GET /reports` and `GET /ops/dashboard` response shapes are assumed (see `Report` and `OpsDashboard` in `src/types/index.ts`). `GET /alerts` is documented for passengers only; the authority's "published alerts" list assumes the same endpoint works for them.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
 
 ## Keeping this README current

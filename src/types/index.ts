@@ -143,3 +143,38 @@ export interface Occupancy {
   passengerCount: number;
   capacity: number;
 }
+
+// Authority (docs/07-api.md, "Authority operations")
+export interface FleetVehicle extends VehiclePosition {
+  routeId: number;
+  routeNo: string;
+  mode: TransportMode;
+}
+
+export interface OpsDashboard {
+  vehicles: FleetVehicle[];
+  activeDelays: DelayAlert[];
+  occupancy: { totalPassengers: number; totalCapacity: number; fullVehicles: number };
+}
+
+export type ReportType = 'ROUTE_PERFORMANCE' | 'DELAYS' | 'OCCUPANCY';
+
+export interface Report {
+  type: ReportType;
+  title: string;
+  from: string;
+  to: string;
+  /** names of the value columns, in the order of each row's `values` */
+  columns: string[];
+  rows: { label: string; values: number[] }[];
+  /** which value column the bar chart draws */
+  chartColumn: number;
+  unit: string;
+}
+
+export interface NewAlert {
+  tripId: number;
+  type: AlertType;
+  message: string;
+  delayMinutes?: number;
+}

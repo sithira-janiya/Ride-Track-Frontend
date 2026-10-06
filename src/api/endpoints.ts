@@ -1,7 +1,7 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, DelayAlert, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
+import type { Arrival, AuthResult, DelayAlert, NewAlert, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -74,5 +74,12 @@ export const vehiclesApi = {
 export const alertsApi = {
   list: (unread?: boolean): Promise<DelayAlert[]> =>
     env.useMockApi ? mockApi.getAlerts(unread) : get('/alerts', unread ? { unread: true } : undefined),
+  publish: (input: NewAlert): Promise<DelayAlert> => (env.useMockApi ? mockApi.publishAlert(input) : post('/alerts', input)),
   markRead: (id: number): Promise<DelayAlert> => (env.useMockApi ? mockApi.markAlertRead(id) : patch(`/alerts/${id}/read`)),
+};
+
+export const opsApi = {
+  dashboard: (): Promise<OpsDashboard> => (env.useMockApi ? mockApi.getDashboard() : get('/ops/dashboard')),
+  report: (type: ReportType, routeId: number | undefined, from: string, to: string): Promise<Report> =>
+    env.useMockApi ? mockApi.getReport(type, routeId, from, to) : get('/reports', { type, routeId, from, to }),
 };

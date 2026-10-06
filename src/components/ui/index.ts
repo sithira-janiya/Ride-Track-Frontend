@@ -1,5 +1,6 @@
 export { Button } from './Button';
 export { Card } from './Card';
+export { Chips } from './Chips';
 export { TextField } from './TextField';
 export { StatusBadge, type Tone } from './StatusBadge';
 export { OccupancyBar, occupancyLevel } from './OccupancyBar';

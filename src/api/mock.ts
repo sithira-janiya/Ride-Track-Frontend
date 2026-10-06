@@ -1,7 +1,7 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
 import type {
-  Arrival, AuthResult, DelayAlert, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
 } from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
@@ -277,6 +277,65 @@ export const mockApi = {
     if (!u) throw new Error('Account not found.');
     Object.assign(u, input);
     return delay({ ...u });
+  },
+
+  async getDashboard(): Promise<OpsDashboard> {
+    const routeIds = Object.keys(vehiclesByRoute).map(Number);
+    const perRoute = await Promise.all(routeIds.map((id) => mockApi.getVehicles(id)));
+    const vehicles: FleetVehicle[] = perRoute.flatMap((list, i) => {
+      const route = routes.find((r) => r.routeId === routeIds[i])!;
+      return list.map((v) => ({ ...v, routeId: route.routeId, routeNo: route.routeNo, mode: route.mode }));
+    });
+    const totalPassengers = vehicles.reduce((n, v) => n + (v.passengerCount ?? 0), 0);
+    const totalCapacity = vehicles.reduce((n, v) => n + (v.capacity ?? 0), 0);
+    const fullVehicles = vehicles.filter((v) => v.capacity && (v.passengerCount ?? 0) / v.capacity >= 0.9).length;
+    const activeDelays = alerts.filter((a) => a.type !== 'ROUTE_CHANGE' && Date.now() - new Date(a.createdAt).getTime() < 12 * 3600000);
+    return { vehicles, activeDelays: activeDelays.map((a) => ({ ...a })), occupancy: { totalPassengers, totalCapacity, fullVehicles } };
+  },
+
+  /** Deterministic fake numbers, so the same filters always give the same report. */
+  async getReport(type: ReportType, routeId: number | undefined, from: string, to: string): Promise<Report> {
+    const seed = (key: string) => {
+      let h = 0;
+      for (const ch of `${type}|${key}|${from}|${to}`) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return (n: number) => ((h = (h * 1664525 + 1013904223) >>> 0) % n);
+    };
+    const scope = routes.filter((r) => !routeId || r.routeId === routeId);
+    const base = { type, from, to };
+    if (type === 'DELAYS') {
+      const days = Math.min(14, Math.max(1, Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000) + 1));
+      const rows = Array.from({ length: days }, (_, i) => {
+        const r = seed(`${routeId ?? 'all'}-${i}`);
+        const d = new Date(new Date(to).getTime() - (days - 1 - i) * 86400000);
+        return { label: d.toLocaleDateString([], { month: 'short', day: 'numeric' }), values: [r(9), 4 + r(14)] };
+      });
+      return delay({ ...base, title: 'Delays by day', columns: ['Delayed trips', 'Avg delay (min)'], rows, chartColumn: 0, unit: 'trips' });
+    }
+    const rows = scope.map((rt) => {
+      const r = seed(String(rt.routeId));
+      return type === 'OCCUPANCY'
+        ? { label: `${rt.routeNo} ${rt.name}`, values: [35 + r(45), 70 + r(30)] }
+        : { label: `${rt.routeNo} ${rt.name}`, values: [72 + r(26), 40 + r(120), 500 + r(4000)] };
+    });
+    return delay(
+      type === 'OCCUPANCY'
+        ? { ...base, title: 'Occupancy by route', columns: ['Average %', 'Peak %'], rows, chartColumn: 0, unit: '%' }
+        : { ...base, title: 'Route performance', columns: ['On-time %', 'Trips', 'Tickets sold'], rows, chartColumn: 0, unit: '%' },
+    );
+  },
+
+  async publishAlert(input: NewAlert): Promise<DelayAlert> {
+    const a: DelayAlert = {
+      alertId: nextAlertId++,
+      tripId: input.tripId,
+      type: input.type,
+      message: input.message,
+      delayMinutes: input.delayMinutes ?? null,
+      createdAt: new Date().toISOString(),
+      isRead: false,
+    };
+    alerts.unshift(a);
+    return delay({ ...a });
   },
 
   async getTicket(ticketId: number): Promise<Ticket> {
