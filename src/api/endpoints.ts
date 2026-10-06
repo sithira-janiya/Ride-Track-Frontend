@@ -1,7 +1,7 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, Route, RouteDetail, Ticket, User, VehiclePosition } from '@/types';
+import type { Arrival, AuthResult, Route, RouteDetail, Stop, Ticket, User, VehiclePosition } from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -33,7 +33,9 @@ export const routesApi = {
     env.useMockApi ? mockApi.searchRoutes(q, mode) : get('/routes', { q, mode }),
   detail: (id: number): Promise<RouteDetail> => (env.useMockApi ? mockApi.getRoute(id) : get(`/routes/${id}`)),
   arrivals: (id: number, stopId: number): Promise<Arrival[]> =>
-    env.useMockApi ? mockApi.getArrivals(id) : get(`/routes/${id}/arrivals`, { stopId }),
+    env.useMockApi ? mockApi.getArrivals(id, stopId) : get(`/routes/${id}/arrivals`, { stopId }),
+  nearbyStops: (lat: number, lng: number, radius = 1500): Promise<Stop[]> =>
+    env.useMockApi ? mockApi.nearbyStops(lat, lng) : get('/stops/nearby', { lat, lng, radius }),
   vehicles: (id: number): Promise<VehiclePosition[]> =>
     env.useMockApi ? mockApi.getVehicles() : get(`/routes/${id}/vehicles`),
 };

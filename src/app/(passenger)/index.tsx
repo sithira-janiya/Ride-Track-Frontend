@@ -1,11 +1,153 @@
-import { RoleHome } from '@/components/auth/RoleHome';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { errorMessage } from '@/api/client';
+import { routesApi } from '@/api/endpoints';
+import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
+import { RouteCard } from '@/components/routes/RouteCard';
+import { Button, Card, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { useColors } from '@/hooks/use-colors';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useNearbyStops } from '@/hooks/use-nearby-stops';
+import { useFavourites } from '@/store/favourites';
+import { minTouchTarget, spacing, typography } from '@/theme';
+import { formatDistance } from '@/utils/format';
 
 export default function PassengerHome() {
+  const c = useColors();
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [mode, setMode] = useState<ModeValue>('ALL');
+  const debouncedQuery = useDebounce(query.trim(), 300);
+  const searching = debouncedQuery.length > 0 || mode !== 'ALL';
+
+  const openRoute = (id: number, stopId?: number) =>
+    router.push({ pathname: '/route/[id]', params: stopId ? { id: String(id), stopId: String(stopId) } : { id: String(id) } });
+
+  // Route search (FR3): keyed on the debounced text so typing does not fire a request per keystroke.
+  const results = useQuery({
+    queryKey: ['routes', debouncedQuery, mode],
+    queryFn: () => routesApi.search(debouncedQuery, mode === 'ALL' ? undefined : mode),
+    enabled: searching,
+  });
+
+  const favouriteIds = useFavourites((s) => s.routeIds);
+  const allRoutes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const favourites = (allRoutes.data ?? []).filter((r) => favouriteIds.includes(r.routeId));
+
+  const nearby = useNearbyStops();
+
   return (
-    <RoleHome
-      heading="Home"
-      note="Route search, live map and tickets are coming in the next phases."
-      showLogout={false}
-    />
+    <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <View style={styles.content}>
+          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
+            Where to?
+          </Text>
+
+          <TextField
+            label="Search routes"
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Route number, name or place"
+            autoCapitalize="none"
+            returnKeyType="search"
+          />
+          <ModeFilter value={mode} onChange={setMode} />
+
+          {searching ? (
+            <Section title="Results">
+              {results.isPending ? (
+                <Loading label="Searching routes…" />
+              ) : results.isError ? (
+                <ErrorMessage message={errorMessage(results.error)} onRetry={() => results.refetch()} />
+              ) : results.data.length === 0 ? (
+                <EmptyState title="No routes found" message="Try a different route number, place or mode." />
+              ) : (
+                results.data.map((r) => <RouteCard key={r.routeId} route={r} onPress={() => openRoute(r.routeId)} />)
+              )}
+            </Section>
+          ) : (
+            <>
+              <Section title="Favourite routes">
+                {favourites.length === 0 ? (
+                  <Text style={[styles.hint, { color: c.textSecondary }]}>
+                    Open a route and tap Save to keep it here for quick access.
+                  </Text>
+                ) : (
+                  favourites.map((r) => <RouteCard key={r.routeId} route={r} onPress={() => openRoute(r.routeId)} />)
+                )}
+              </Section>
+
+              <Section title="Stops near you">
+                {nearby.permission === 'checking' ? (
+                  <Loading label="Checking location…" />
+                ) : nearby.permission === 'denied' ? (
+                  <Card>
+                    <Text style={[styles.hint, { color: c.text }]}>
+                      Allow location access to see the bus stops and stations closest to you.
+                    </Text>
+                    <Button title="Use my location" variant="secondary" onPress={nearby.request} />
+                  </Card>
+                ) : nearby.locationError ? (
+                  <ErrorMessage message="We could not get your location. Check that GPS is on." onRetry={nearby.retryLocate} />
+                ) : nearby.stops.isPending ? (
+                  <Loading label="Finding stops near you…" />
+                ) : nearby.stops.isError ? (
+                  <ErrorMessage message={errorMessage(nearby.stops.error)} onRetry={() => nearby.stops.refetch()} />
+                ) : nearby.stops.data.length === 0 ? (
+                  <EmptyState title="No stops nearby" message="There are no stops within 1.5 km of you." />
+                ) : (
+                  nearby.stops.data.map((s) => (
+                    <Pressable
+                      key={s.stopId}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${s.name}, ${formatDistance(s.distanceMeters ?? 0)} away`}
+                      disabled={!s.routeIds?.length}
+                      onPress={() => openRoute(s.routeIds![0], s.stopId)}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+                      <Card style={styles.stopCard}>
+                        <Text style={[styles.stopName, { color: c.text }]}>{s.name}</Text>
+                        <Text style={[styles.hint, { color: c.textSecondary }]}>
+                          {formatDistance(s.distanceMeters ?? 0)}
+                          {s.routeIds?.length ? ` · ${s.routeIds.length} route${s.routeIds.length > 1 ? 's' : ''}` : ''}
+                        </Text>
+                      </Card>
+                    </Pressable>
+                  ))
+                )}
+              </Section>
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const c = useColors();
+  return (
+    <View style={styles.section}>
+      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: c.text }]}>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  scroll: { padding: spacing.lg },
+  content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
+  heading: { ...typography.heading },
+  section: { gap: spacing.sm, marginTop: spacing.sm },
+  sectionTitle: { ...typography.title },
+  hint: { ...typography.body },
+  stopCard: { minHeight: minTouchTarget },
+  stopName: { ...typography.bodyLarge, fontWeight: '600' },
+});

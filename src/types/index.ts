@@ -51,6 +51,9 @@ export interface Stop {
   longitude: number;
   stopSequence?: number;
   fareFromOrigin?: number;
+  /** only on /stops/nearby results */
+  distanceMeters?: number;
+  routeIds?: number[];
 }
 
 export interface RouteDetail extends Route {
