@@ -1,0 +1,13 @@
+{
+  "installCommand": "cd .. && npm install",
+  "buildCommand": "cd .. && npx expo export -p web --output-dir src/dist",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/"
+    }
+  ]
+}
