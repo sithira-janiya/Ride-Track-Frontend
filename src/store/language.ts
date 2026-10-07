@@ -15,8 +15,11 @@ type LanguageState = {
   language: string;
   /** Google Translate results, kept on the device so each string is only translated once: language → English text → translation */
   translations: Record<string, Record<string, string>>;
+  /** why the last Google Translate request failed (bad key, API not enabled, offline); not saved on the device */
+  translationError: string | null;
   setLanguage: (language: string) => void;
   addTranslations: (language: string, entries: Record<string, string>) => void;
+  setTranslationError: (error: string | null) => void;
 };
 
 /** UI language, kept on the device so the login screen opens in the last language used. */
@@ -25,10 +28,16 @@ export const useLanguage = create<LanguageState>()(
     (set) => ({
       language: SOURCE_LANGUAGE,
       translations: {},
+      translationError: null,
       setLanguage: (language) => set({ language }),
       addTranslations: (language, entries) =>
         set((s) => ({ translations: { ...s.translations, [language]: { ...s.translations[language], ...entries } } })),
+      setTranslationError: (translationError) => set({ translationError }),
     }),
-    { name: 'ridetrack.language', storage: createJSONStorage(() => AsyncStorage) },
+    {
+      name: 'ridetrack.language',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (s) => ({ language: s.language, translations: s.translations }),
+    },
   ),
 );
