@@ -1,4 +1,7 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
@@ -8,9 +11,14 @@ import { useAuth } from '@/store/auth';
 
 SplashScreen.preventAutoHideAsync();
 
+const DAY = 24 * 60 * 60 * 1000;
+/** Only public transport data is kept on the device, like LMT GO's offline routes and timetables. Alerts, tickets and live vehicles are not. */
+const OFFLINE_KEYS = ['routes', 'route', 'arrivals', 'nearby-stops'];
+const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'ridetrack.query-cache' });
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } }));
+  const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000, gcTime: DAY } } }));
   const { hydrate, hydrated, user } = useAuth();
 
   // restore the saved session on app start
@@ -27,7 +35,13 @@ export default function RootLayout() {
 
   const role = user?.role;
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: DAY,
+        dehydrateOptions: { shouldDehydrateQuery: (q) => q.state.status === 'success' && OFFLINE_KEYS.includes(String(q.queryKey[0])) },
+      }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         {/* Each group is only reachable for the matching state; guarded routes redirect to the first allowed route. */}
         <Stack screenOptions={{ headerShown: false }}>
@@ -45,6 +59,6 @@ export default function RootLayout() {
           </Stack.Protected>
         </Stack>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

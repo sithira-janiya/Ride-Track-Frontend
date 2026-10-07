@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 import { alertsApi, userApi } from '@/api/endpoints';
 import { env } from '@/config/env';
@@ -51,10 +51,29 @@ export function useAlertSocket() {
   }, [enabled, queryClient, show]);
 }
 
-// show system notifications as a banner while the app is open, too
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({ shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true }),
-});
+type NotificationsModule = typeof import('expo-notifications');
+
+/**
+ * expo-notifications throws as soon as it is imported in Expo Go on Android, so it is loaded lazily and
+ * skipped there. Returns null when it is unavailable; the in-app banner and Alerts tab still work.
+ */
+let notifications: NotificationsModule | null | undefined;
+function getNotifications(): NotificationsModule | null {
+  if (notifications !== undefined) return notifications;
+  const inExpoGoAndroid = Platform.OS === 'android' && Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+  if (Platform.OS === 'web' || inExpoGoAndroid) return (notifications = null);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    notifications = require('expo-notifications') as NotificationsModule;
+    // show system notifications as a banner while the app is open, too
+    notifications.setNotificationHandler({
+      handleNotification: async () => ({ shouldPlaySound: false, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true }),
+    });
+  } catch {
+    notifications = null;
+  }
+  return notifications;
+}
 
 /**
  * Asks for notification permission and sends the device token to the server (`PUT /users/me/push-token`).
@@ -65,6 +84,8 @@ export function usePushRegistration() {
   const enabled = useAuth((s) => s.user?.notificationsEnabled !== false);
   useEffect(() => {
     if (!enabled || env.useMockApi || Platform.OS === 'web') return;
+    const Notifications = getNotifications();
+    if (!Notifications) return;
     (async () => {
       try {
         if (Platform.OS === 'android') {

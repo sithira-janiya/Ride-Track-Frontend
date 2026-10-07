@@ -16,7 +16,7 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 | Maps | react-native-maps (native only; web shows a notice) |
 | Tickets / scanning | react-native-qrcode-svg, expo-brightness, expo-web-browser, expo-camera, expo-haptics |
 | Alerts | expo-notifications (push registration), socket `alert:new` |
-| Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache) |
+| Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache, offline route cache) |
 | Forms | React Hook Form |
 
 ## Getting started
@@ -33,11 +33,19 @@ By default the app runs against a **built-in mock API** (`EXPO_PUBLIC_USE_MOCK_A
 
 All use the password `Password1!`.
 
-| Role | Email |
-|---|---|
-| Passenger | `passenger@ridetrack.test` |
-| Staff | `staff@ridetrack.test` |
-| Authority | `officer@ridetrack.test` |
+| Role | Email | Lands on |
+|---|---|---|
+| Passenger | `passenger@ridetrack.test` | Passenger tabs (home, tickets, alerts, profile) |
+| Staff | `staff@ridetrack.test` | Staff tabs (scan, passengers, shift) |
+| Authority | `officer@ridetrack.test` | Authority tabs (dashboard, fleet, reports, alerts) |
+
+Notes:
+- These accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). They do not exist on a real backend.
+- The login field accepts an email or a mobile number, but the demo accounts have no phone number, so log in with the email.
+- Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
+- Registered accounts live in memory only and disappear when the app reloads.
+- A wrong email or wrong password gives the same error, "Invalid email/phone or password."
+- Passwords need at least 8 characters with a letter and a number when registering.
 
 ### Useful commands
 
@@ -89,6 +97,8 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
 - Log out is at the bottom of the Dashboard.
 
+**Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
+
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear.
 
 ## Folder structure
@@ -126,6 +136,7 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 - Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards).
 - Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
 - To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
+- Web (Vercel): `vercel.json` tells Vercel to run `expo export -p web` and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
 - The app icon and splash images are still the Expo template's defaults. Replace the files in `assets/images/` with RideTrack artwork before release.
 
 ## Accessibility
@@ -144,7 +155,27 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
 - Report and dashboard data in mock mode is fake (deterministic numbers); the real `GET /reports` and `GET /ops/dashboard` response shapes are assumed (see `Report` and `OpsDashboard` in `src/types/index.ts`). `GET /alerts` is documented for passengers only; the authority's "published alerts" list assumes the same endpoint works for them.
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
+- Offline route data can be up to 24 hours old; arrivals shown offline are the last ones fetched.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
+
+## Comparison with LMT GO (Lanka Metro Transit)
+
+Reference: the public LMT GO app description ([store listing summary](https://mwm.ai/apps/lmt-go/6761980523), [GPS tracking news](https://www.newswire.lk/9mzi)). Only the public description was used, not the app itself.
+
+| LMT GO feature | RideTrack |
+|---|---|
+| Live bus map and arrival times | Done |
+| Live occupancy | Done |
+| QR tickets, valid offline | Done |
+| Offline routes and timetables | Done (24 h cache) |
+| Service alerts | Done (delays, cancellations, route changes); no "bus approaching" alert yet |
+| Sinhala, Tamil, English | Language saved, text not translated yet |
+| Browse stops and routes without an account | Not done: the app needs login first |
+| E-wallet balance, day/week/month passes | Not done: needs new screens and backend support |
+| Journey planner (transfers, walking, fare) | Not done: needs a new screen and backend support |
+| Book wheelchair space | Not done: needs a new screen and backend support |
+
+The "not done" rows all need new screens or API endpoints, so they were left out to keep the current UI unchanged.
 
 ## Keeping this README current
 
