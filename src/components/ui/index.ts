@@ -7,4 +7,5 @@ export { OccupancyBar, occupancyLevel } from './OccupancyBar';
 export { ETAChip, minutesUntil } from './ETAChip';
 export { EmptyState } from './EmptyState';
 export { ErrorMessage } from './ErrorMessage';
+export { LanguagePicker } from './LanguagePicker';
 export { Loading } from './Loading';

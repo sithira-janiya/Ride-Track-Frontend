@@ -11,12 +11,13 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 | Framework | React Native + Expo SDK 57 (managed workflow), TypeScript |
 | Navigation | Expo Router (file-based, routes in `src/app/`) |
 | Server state | TanStack Query |
-| Client state | Zustand (auth, favourites, ticket cache) |
+| Client state | Zustand (auth, favourites, ticket cache, language) |
+| Translation | Google Cloud Translation API (v2, Basic) over `fetch` |
 | HTTP / real-time | Axios, socket.io-client |
 | Maps | react-native-maps (native only; web shows a notice) |
 | Tickets / scanning | react-native-qrcode-svg, expo-brightness, expo-web-browser, expo-camera, expo-haptics |
 | Alerts | expo-notifications (push registration), socket `alert:new` |
-| Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache, offline route cache) |
+| Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache, offline route cache, language and translations) |
 | Forms | React Hook Form |
 
 ## Getting started
@@ -26,6 +27,8 @@ npm install
 cp .env.example .env.local   # then edit if needed
 npx expo start               # scan the QR code with Expo Go, or press w for web
 ```
+
+To show the app in Sinhala or Tamil, set `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` in `.env.local` (see [Languages](#languages-google-translate)). Without it the app stays in English.
 
 By default the app runs against a **built-in mock API** (`EXPO_PUBLIC_USE_MOCK_API=true`), so no backend is needed. Set it to `false` and point `EXPO_PUBLIC_API_URL` / `EXPO_PUBLIC_SOCKET_URL` at the real backend to use live data.
 
@@ -83,7 +86,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Tickets: pick boarding stop, drop-off stop and trip, see the fare, pay. A pending payment is saved on the device and re-checked when the app resumes, so it is never lost. Ticket list with filters and paging, QR screen with a screen-brightness boost, cancel an unused ticket. Tickets are cached on the device so they still show offline, and cleared on logout.
 
 - Alerts tab: delay, cancellation and route-change alerts with unread highlighting, a tab badge with the unread count, "Mark as read" and "Mark all as read". A banner slides in over any screen when the server sends `alert:new`. The device is registered for push notifications on login (skipped in mock mode, on web, and when notifications are off). In mock mode a "Demo: simulate a new alert" button stands in for the server.
-- Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out.
+- Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out. Saving a new language switches the app to it (see Languages below).
 
 **Staff**
 - Scan tab: camera permission flow, QR scanning, then a large VALID / INVALID result with the reason (icon, word and colour) and haptic feedback. "Scan next ticket" resets for the next passenger. If a QR will not scan, type the ticket number instead.
@@ -99,7 +102,19 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 
 **Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
 
-**Auth**: email or phone login, register, session restored on app start, role decides which screens appear.
+**Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
+
+### Languages (Google Translate)
+
+The app is written in English and translated at run time with the Google Cloud Translation API (`src/i18n/`).
+
+- `useT()` returns `t(text, params?)`. Values that change go in `{placeholders}` (`t('Pay {amount}', { amount })`), so each sentence is translated once, not once per value.
+- Strings a screen asks for are batched into one request (up to 100 per call). Results are kept on the device (`ridetrack.language` in AsyncStorage), so each string is only translated once per language and works offline afterwards.
+- English shows until the translation arrives, when there is no API key, or when the request fails (retried after a minute). If Google drops a `{placeholder}`, that string stays in English rather than showing a broken sentence.
+- Shared components (`Button`, `TextField`, `EmptyState`, `ErrorMessage`, `Loading`, `StatusBadge`, `Chips`, ...) translate their text props themselves, so screens pass English. Language names in the picker are never translated.
+- Which language: the signed-in account's `language` wins; before login the device keeps the last language picked. Profile → Save sends it to the account.
+- Translated: auth screens and all passenger screens, plus alert messages from the server. Staff and Authority screens only get the shared components translated (they have no language setting).
+- Setup: in Google Cloud Console enable the **Cloud Translation API**, create an API key, and set it as `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` (in `.env.local`, EAS and Vercel). The key is built into the app, so restrict it to the Cloud Translation API and to the app's Android package / web domain. Google bills per character after the free tier.
 
 ## Folder structure
 
@@ -112,8 +127,9 @@ src/
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
 ├── api/                  axios client, typed endpoint wrappers, mock API
 ├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/
+├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
 ├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, ...
-├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner
+├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
 ```
@@ -128,6 +144,8 @@ Automated tests run with Jest, `jest-expo` and React Native Testing Library (`np
 - `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
 - `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
+- `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
+- `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request (fetch mocked).
 
 Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
 
@@ -151,7 +169,9 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - The real backend does not exist yet; the shapes of `POST /tickets` and the `GET /tickets` paging are assumed (see `src/api/endpoints.ts`).
 - The real backend's response to `POST /scans` and `POST /vehicles/:id/occupancy` is assumed (`{result, reason}` and `{vehicleId, passengerCount, capacity}`).
 - In mock mode a ticket can only be scanned if it was bought in the same app session (the mock data lives in memory).
-- Language choice is saved to the account, but the app text is not translated yet; everything is still English.
+- Translation is machine translation from Google Translate, not reviewed by a Sinhala or Tamil speaker. The first time a screen opens in a new language it shows English for a moment until the translation arrives, and stays English offline until it has been translated once. Real Google translation has not yet been checked with a live API key.
+- The Google Translate API key ships inside the app. Restrict it in Google Cloud Console; a backend proxy would hide it completely.
+- Dates and times still use the device's locale format, not the chosen language.
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
 - Report and dashboard data in mock mode is fake (deterministic numbers); the real `GET /reports` and `GET /ops/dashboard` response shapes are assumed (see `Report` and `OpsDashboard` in `src/types/index.ts`). `GET /alerts` is documented for passengers only; the authority's "published alerts" list assumes the same endpoint works for them.
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.

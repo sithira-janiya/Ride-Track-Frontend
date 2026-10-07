@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { radius, spacing, typography } from '@/theme';
 
 type Props = { passengerCount?: number; capacity?: number };
@@ -15,17 +16,18 @@ export function occupancyLevel(count: number, capacity: number) {
 /** Shows how full a vehicle is, with a text fallback when no count is reported (FR7). */
 export function OccupancyBar({ passengerCount, capacity }: Props) {
   const c = useColors();
+  const t = useT();
   if (passengerCount == null || !capacity) {
-    return <Text style={[styles.text, { color: c.textSecondary }]}>Occupancy not available</Text>;
+    return <Text style={[styles.text, { color: c.textSecondary }]}>{t('Occupancy not available')}</Text>;
   }
   const { ratio, label, tone } = occupancyLevel(passengerCount, capacity);
   return (
-    <View accessible accessibilityLabel={`${label}, ${passengerCount} of ${capacity} passengers`} style={styles.wrap}>
+    <View accessible accessibilityLabel={`${t(label)}, ${t('{count} of {capacity} passengers', { count: passengerCount, capacity })}`} style={styles.wrap}>
       <View style={[styles.track, { backgroundColor: c.border }]}>
         <View style={[styles.fill, { width: `${Math.min(ratio, 1) * 100}%`, backgroundColor: c[tone] }]} />
       </View>
       <Text style={[styles.text, { color: c.text }]}>
-        {label} · {passengerCount}/{capacity}
+        {t(label)} · {passengerCount}/{capacity}
       </Text>
     </View>
   );

@@ -9,12 +9,14 @@ import { errorMessage } from '@/api/client';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { typography } from '@/theme';
 import { loginSchema, normalizePhone, isEmail, type LoginForm } from '@/utils/validation';
 
 export default function LoginScreen() {
   const c = useColors();
+  const t = useT();
   const setSession = useAuth((s) => s.setSession);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -74,9 +76,9 @@ export default function LoginScreen() {
       {formError ? <ErrorMessage message={formError} /> : null}
       <Button title="Log in" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
-        New to RideTrack?{' '}
+        {t('New to RideTrack?')}{' '}
         <Link href="/register" style={{ color: c.primary, fontWeight: '700' }}>
-          Create an account
+          {t('Create an account')}
         </Link>
       </Text>
     </AuthScreen>

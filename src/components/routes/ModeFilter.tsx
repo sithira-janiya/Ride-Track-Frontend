@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
 import type { TransportMode } from '@/types';
 
@@ -16,6 +17,7 @@ type Props = { value: ModeValue; onChange: (v: ModeValue) => void };
 
 export function ModeFilter({ value, onChange }: Props) {
   const c = useColors();
+  const t = useT();
   return (
     <View accessibilityRole="radiogroup" style={styles.row}>
       {OPTIONS.map((o) => {
@@ -25,13 +27,13 @@ export function ModeFilter({ value, onChange }: Props) {
             key={o.value}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            accessibilityLabel={o.label}
+            accessibilityLabel={t(o.label)}
             onPress={() => onChange(o.value)}
             style={[
               styles.chip,
               { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border },
             ]}>
-            <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>{o.label}</Text>
+            <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>{t(o.label)}</Text>
           </Pressable>
         );
       })}

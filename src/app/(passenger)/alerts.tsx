@@ -8,6 +8,7 @@ import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone
 import { env } from '@/config/env';
 import { useAlerts, useMarkRead } from '@/hooks/use-alerts';
 import { useColors } from '@/hooks/use-colors';
+import { useT, type Translate } from '@/i18n';
 import { useAlertBanner } from '@/store/alert-banner';
 import { spacing, typography } from '@/theme';
 import type { AlertType } from '@/types';
@@ -18,16 +19,17 @@ const TYPE: Record<AlertType, { label: string; tone: Tone }> = {
   ROUTE_CHANGE: { label: 'Route change', tone: 'info' },
 };
 
-function when(iso: string) {
+function when(iso: string, t: Translate) {
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins} min ago`;
-  if (mins < 1440) return `${Math.round(mins / 60)} h ago`;
+  if (mins < 1) return t('Just now');
+  if (mins < 60) return t('{n} min ago', { n: mins });
+  if (mins < 1440) return t('{n} h ago', { n: Math.round(mins / 60) });
   return new Date(iso).toLocaleDateString();
 }
 
 export default function AlertsScreen() {
   const c = useColors();
+  const t = useT();
   const alerts = useAlerts();
   const markRead = useMarkRead();
   const queryClient = useQueryClient();
@@ -39,7 +41,7 @@ export default function AlertsScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Alerts
+            {t('Alerts')}
           </Text>
 
           {alerts.isPending ? (
@@ -52,25 +54,27 @@ export default function AlertsScreen() {
             <>
               {unread.length > 1 ? (
                 <Button
-                  title={`Mark all ${unread.length} as read`}
+                  title={t('Mark all {count} as read', { count: unread.length })}
                   variant="secondary"
                   onPress={() => unread.forEach((a) => markRead.mutate(a.alertId))}
                 />
               ) : null}
               {alerts.data.map((a) => {
-                const t = TYPE[a.type];
+                const type = TYPE[a.type];
                 return (
                   <Card key={a.alertId} style={!a.isRead ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
                     <View style={styles.row}>
-                      <StatusBadge label={t.label} tone={t.tone} />
+                      <StatusBadge label={type.label} tone={type.tone} />
                       <Text style={[styles.caption, { color: c.textSecondary }]}>
-                        {!a.isRead ? '● New · ' : ''}
-                        {when(a.createdAt)}
+                        {!a.isRead ? `● ${t('New')} · ` : ''}
+                        {when(a.createdAt, t)}
                       </Text>
                     </View>
-                    <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>
+                    <Text style={[styles.body, { color: c.text }]}>{t(a.message)}</Text>
                     {a.delayMinutes ? (
-                      <Text style={[styles.caption, { color: c.textSecondary }]}>Delay: about {a.delayMinutes} minutes</Text>
+                      <Text style={[styles.caption, { color: c.textSecondary }]}>
+                        {t('Delay: about {n} minutes', { n: a.delayMinutes })}
+                      </Text>
                     ) : null}
                     {!a.isRead ? <Button title="Mark as read" variant="secondary" onPress={() => markRead.mutate(a.alertId)} /> : null}
                   </Card>

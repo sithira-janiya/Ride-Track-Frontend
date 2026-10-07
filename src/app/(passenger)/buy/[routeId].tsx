@@ -10,6 +10,7 @@ import { ArrivalRow } from '@/components/routes/ArrivalRow';
 import { StopRow } from '@/components/routes/StopRow';
 import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useTicketCache } from '@/store/tickets';
 import { spacing, typography } from '@/theme';
 import { formatClock, formatFare } from '@/utils/format';
@@ -17,6 +18,7 @@ import { startPayment } from '@/utils/payment';
 
 export default function BuyTicketScreen() {
   const c = useColors();
+  const t = useT();
   const router = useRouter();
   const queryClient = useQueryClient();
   const routeId = Number(useLocalSearchParams<{ routeId: string }>().routeId);
@@ -67,7 +69,8 @@ export default function BuyTicketScreen() {
         <View style={styles.content}>
           <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Buy a ticket{route.data ? ` · ${route.data.routeNo}` : ''}
+            {t('Buy a ticket')}
+            {route.data ? ` · ${route.data.routeNo}` : ''}
           </Text>
 
           {route.isPending ? (
@@ -77,7 +80,7 @@ export default function BuyTicketScreen() {
           ) : (
             <>
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                1. Where do you board?
+                {t('1. Where do you board?')}
               </Text>
               <View style={styles.list}>
                 {stops.slice(0, -1).map((s) => (
@@ -97,7 +100,7 @@ export default function BuyTicketScreen() {
               {board ? (
                 <>
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    2. Where do you get off?
+                    {t('2. Where do you get off?')}
                   </Text>
                   <View style={styles.list}>
                     {alightOptions.map((s) => (
@@ -106,7 +109,7 @@ export default function BuyTicketScreen() {
                   </View>
 
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    3. Which trip?
+                    {t('3. Which trip?')}
                   </Text>
                   {arrivals.isPending ? (
                     <Loading label="Loading trips…" />
@@ -122,7 +125,7 @@ export default function BuyTicketScreen() {
                           <View key={a.tripId} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
                             <ArrivalRow arrival={a} />
                             <Button
-                              title={a.tripId === tripId ? `Selected: ${formatClock(a.eta)}` : `Choose ${formatClock(a.eta)} trip`}
+                              title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta) })}
                               variant={a.tripId === tripId ? 'primary' : 'secondary'}
                               onPress={() => setTripId(a.tripId)}
                               style={styles.pick}
@@ -137,16 +140,16 @@ export default function BuyTicketScreen() {
               {ready ? (
                 <Card>
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    Fare summary
+                    {t('Fare summary')}
                   </Text>
                   <Text style={[styles.body, { color: c.text }]}>
                     {board!.name} → {alight!.name}
                   </Text>
                   <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!)}</Text>
                   {pay.isError ? <ErrorMessage message={errorMessage(pay.error)} /> : null}
-                  <Button title={`Pay ${formatFare(fare!)}`} loading={pay.isPending} onPress={() => pay.mutate()} />
+                  <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} loading={pay.isPending} onPress={() => pay.mutate()} />
                   <Text style={[styles.caption, { color: c.textSecondary }]}>
-                    You will be taken to the secure payment page. Your ticket appears once payment is confirmed.
+                    {t('You will be taken to the secure payment page. Your ticket appears once payment is confirmed.')}
                   </Text>
                 </Card>
               ) : null}

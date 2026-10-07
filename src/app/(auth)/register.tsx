@@ -9,12 +9,14 @@ import { errorMessage } from '@/api/client';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { typography } from '@/theme';
 import { registerSchema, splitIdentifier, type RegisterForm } from '@/utils/validation';
 
 export default function RegisterScreen() {
   const c = useColors();
+  const t = useT();
   const setSession = useAuth((s) => s.setSession);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -105,9 +107,9 @@ export default function RegisterScreen() {
       {formError ? <ErrorMessage message={formError} /> : null}
       <Button title="Create account" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
-        Already have an account?{' '}
+        {t('Already have an account?')}{' '}
         <Link href="/login" style={{ color: c.primary, fontWeight: '700' }}>
-          Log in
+          {t('Log in')}
         </Link>
       </Text>
     </AuthScreen>

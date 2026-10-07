@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { useAuth } from '@/store/auth';
+import { useLanguage } from '@/store/language';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +26,16 @@ export default function RootLayout() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  // the account's language wins once signed in; before that the device keeps the last one picked
+  const userLanguage = user?.language;
+  useEffect(() => {
+    if (!userLanguage) return;
+    const apply = () => useLanguage.getState().setLanguage(userLanguage);
+    // the saved device language loads asynchronously; apply after it so it cannot overwrite the account's
+    if (useLanguage.persist.hasHydrated()) apply();
+    return useLanguage.persist.onFinishHydration(apply);
+  }, [userLanguage]);
 
   // hold the splash screen until we know whether a session exists, so the login screen never flashes
   useEffect(() => {

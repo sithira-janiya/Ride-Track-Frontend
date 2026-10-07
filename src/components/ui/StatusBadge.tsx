@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { radius, spacing, typography } from '@/theme';
 
 export type Tone = 'success' | 'danger' | 'warning' | 'info';
@@ -12,12 +13,13 @@ type Props = { label: string; tone: Tone };
 /** Status is conveyed by icon AND text, never colour alone (NFR8). */
 export function StatusBadge({ label, tone }: Props) {
   const c = useColors();
+  const t = useT();
   const fg = c[tone];
   const bg = c[`${tone}Bg` as const];
   return (
-    <View accessible accessibilityLabel={label} style={[styles.badge, { backgroundColor: bg, borderColor: fg }]}>
+    <View accessible accessibilityLabel={t(label)} style={[styles.badge, { backgroundColor: bg, borderColor: fg }]}>
       <Text style={[styles.icon, { color: fg }]}>{ICON[tone]}</Text>
-      <Text style={[styles.text, { color: fg }]}>{label}</Text>
+      <Text style={[styles.text, { color: fg }]}>{t(label)}</Text>
     </View>
   );
 }

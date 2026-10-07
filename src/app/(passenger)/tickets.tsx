@@ -7,6 +7,7 @@ import { errorMessage } from '@/api/client';
 import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
 import { TicketCard } from '@/components/tickets/TicketCard';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { usePendingPaymentCheck, useTicketList } from '@/hooks/use-tickets';
 import { useTicketCache } from '@/store/tickets';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
@@ -21,6 +22,7 @@ const FILTERS = [
 
 export default function TicketsScreen() {
   const c = useColors();
+  const t = useT();
   const router = useRouter();
   const [status, setStatus] = useState<string | undefined>('ACTIVE');
   const list = useTicketList(status);
@@ -41,14 +43,18 @@ export default function TicketsScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            My tickets
+            {t('My tickets')}
           </Text>
 
           {pendingIds.length > 0 ? (
             <Card style={{ borderColor: c.warning, backgroundColor: c.warningBg }}>
               <Text style={[styles.body, { color: c.text }]}>
-                {pendingIds.length === 1 ? '1 payment is' : `${pendingIds.length} payments are`} waiting to be confirmed. Your ticket
-                will appear here once the payment goes through.
+                {t(
+                  pendingIds.length === 1
+                    ? '1 payment is waiting to be confirmed. Your ticket will appear here once the payment goes through.'
+                    : '{count} payments are waiting to be confirmed. Your tickets will appear here once the payments go through.',
+                  { count: pendingIds.length },
+                )}
               </Text>
               <Button title="Check payment status" variant="secondary" onPress={recheck} />
             </Card>
@@ -62,10 +68,10 @@ export default function TicketsScreen() {
                   key={f.label}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={f.label}
+                  accessibilityLabel={t(f.label)}
                   onPress={() => setStatus(f.value)}
                   style={[styles.chip, { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border }]}>
-                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>{f.label}</Text>
+                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>{t(f.label)}</Text>
                 </Pressable>
               );
             })}
@@ -76,7 +82,7 @@ export default function TicketsScreen() {
           ) : (
             <>
               {list.isError ? (
-                <ErrorMessage message={`${errorMessage(list.error)} Showing tickets saved on this device.`} onRetry={() => list.refetch()} />
+                <ErrorMessage message={`${t(errorMessage(list.error))} ${t('Showing tickets saved on this device.')}`} onRetry={() => list.refetch()} />
               ) : null}
               {tickets.length === 0 ? (
                 <EmptyState title="No tickets here" message="Buy a ticket from any route and it will show up here." />

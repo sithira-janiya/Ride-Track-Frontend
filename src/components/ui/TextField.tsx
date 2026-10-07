@@ -1,12 +1,15 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
 
 type Props = TextInputProps & { label: string; error?: string };
 
-export function TextField({ label, error, style, ...rest }: Props) {
+export function TextField({ label: english, error, placeholder, style, ...rest }: Props) {
   const c = useColors();
+  const t = useT();
+  const label = t(english);
   return (
     <View style={styles.wrap}>
       <Text style={[styles.label, { color: c.text }]}>{label}</Text>
@@ -14,6 +17,7 @@ export function TextField({ label, error, style, ...rest }: Props) {
         accessibilityLabel={label}
         placeholderTextColor={c.textSecondary}
         {...rest}
+        placeholder={placeholder ? t(placeholder) : undefined}
         style={[
           styles.input,
           { color: c.text, backgroundColor: c.background, borderColor: error ? c.danger : c.border },
@@ -22,7 +26,7 @@ export function TextField({ label, error, style, ...rest }: Props) {
       />
       {error ? (
         <Text accessibilityLiveRegion="polite" style={[styles.error, { color: c.danger }]}>
-          ⚠ {error}
+          ⚠ {t(error)}
         </Text>
       ) : null}
     </View>

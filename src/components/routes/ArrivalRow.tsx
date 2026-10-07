@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Card, ETAChip, StatusBadge, type Tone } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { spacing, typography } from '@/theme';
 import type { Arrival, TripStatus } from '@/types';
 import { formatClock } from '@/utils/format';
@@ -16,6 +17,7 @@ const STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
 
 export function ArrivalRow({ arrival }: { arrival: Arrival }) {
   const c = useColors();
+  const t = useT();
   const status = STATUS[arrival.status];
   return (
     <Card>
@@ -24,8 +26,9 @@ export function ArrivalRow({ arrival }: { arrival: Arrival }) {
         <StatusBadge label={status.label} tone={status.tone} />
       </View>
       <Text style={[styles.meta, { color: c.textSecondary }]}>
-        Arrives about {formatClock(arrival.eta)}
-        {arrival.scheduled ? ' (timetable, no live position yet)' : ''}
+        {t(arrival.scheduled ? 'Arrives about {time} (timetable, no live position yet)' : 'Arrives about {time}', {
+          time: formatClock(arrival.eta),
+        })}
       </Text>
     </Card>
   );

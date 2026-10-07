@@ -1,39 +1,39 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { userApi } from '@/api/endpoints';
-import { Button, Card, ErrorMessage, TextField } from '@/components/ui';
+import { Button, Card, ErrorMessage, LanguagePicker, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
-import { minTouchTarget, radius, spacing, typography } from '@/theme';
-
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'si', label: 'සිංහල' },
-  { value: 'ta', label: 'தமிழ்' },
-];
+import { useLanguage } from '@/store/language';
+import { spacing, typography } from '@/theme';
 
 export default function PassengerProfile() {
   const c = useColors();
+  const t = useT();
   const user = useAuth((s) => s.user)!;
   const setUser = useAuth((s) => s.setUser);
   const logout = useAuth((s) => s.logout);
 
   const [name, setName] = useState(user.name);
-  const [language, setLanguage] = useState(user.language ?? 'en');
+  const currentLanguage = useLanguage((s) => s.language);
+  const savedLanguage = user.language ?? currentLanguage;
+  const [language, setLanguage] = useState(savedLanguage);
   const [notifications, setNotifications] = useState(user.notificationsEnabled !== false);
   const [nameError, setNameError] = useState<string | undefined>();
 
   const dirty =
-    name.trim() !== user.name || language !== (user.language ?? 'en') || notifications !== (user.notificationsEnabled !== false);
+    name.trim() !== user.name || language !== savedLanguage || notifications !== (user.notificationsEnabled !== false);
 
   const save = useMutation({
     mutationFn: () => userApi.update(user.userId, { name: name.trim(), language, notificationsEnabled: notifications }),
-    onSuccess: (updated) => setUser({ ...user, ...updated }),
+    // the root layout switches the UI language when the saved user's language changes
+    onSuccess: (updated) => setUser({ ...user, ...updated, language }),
   });
 
   const submit = () => {
@@ -55,45 +55,28 @@ export default function PassengerProfile() {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Profile
+            {t('Profile')}
           </Text>
           <Text style={[styles.body, { color: c.textSecondary }]}>{user.email ?? user.phone}</Text>
 
           <TextField label="Name" value={name} onChangeText={setName} error={nameError} autoCapitalize="words" />
 
-          <Text style={[styles.label, { color: c.text }]}>Language</Text>
-          <View accessibilityRole="radiogroup" style={styles.chips}>
-            {LANGUAGES.map((l) => {
-              const selected = l.value === language;
-              return (
-                <Pressable
-                  key={l.value}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={l.label}
-                  onPress={() => setLanguage(l.value)}
-                  style={[
-                    styles.chip,
-                    { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border },
-                  ]}>
-                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>{l.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <LanguagePicker value={language} onChange={setLanguage} />
 
           <Card>
             <View style={styles.switchRow}>
               <View style={styles.switchText}>
-                <Text style={[styles.label, { color: c.text }]}>Alert notifications</Text>
+                <Text style={[styles.label, { color: c.text }]}>{t('Alert notifications')}</Text>
                 <Text style={[styles.caption, { color: c.textSecondary }]}>
-                  {notifications
-                    ? 'On: you will be told about delays, cancellations and route changes.'
-                    : 'Off: alerts still appear in the Alerts tab.'}
+                  {t(
+                    notifications
+                      ? 'On: you will be told about delays, cancellations and route changes.'
+                      : 'Off: alerts still appear in the Alerts tab.',
+                  )}
                 </Text>
               </View>
               <Switch
-                accessibilityLabel="Alert notifications"
+                accessibilityLabel={t('Alert notifications')}
                 value={notifications}
                 onValueChange={setNotifications}
                 trackColor={{ true: c.primary, false: c.border }}
@@ -104,7 +87,7 @@ export default function PassengerProfile() {
           {save.isError ? <ErrorMessage message={errorMessage(save.error)} /> : null}
           {save.isSuccess && !dirty ? (
             <Text accessibilityLiveRegion="polite" style={[styles.body, { color: c.success }]}>
-              ✓ Profile saved
+              ✓ {t('Profile saved')}
             </Text>
           ) : null}
           <Button title="Save changes" loading={save.isPending} disabled={!dirty} onPress={submit} />
@@ -123,9 +106,6 @@ const styles = StyleSheet.create({
   body: { ...typography.body },
   caption: { ...typography.caption },
   label: { ...typography.body, fontWeight: '700' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { minHeight: minTouchTarget, justifyContent: 'center', borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: spacing.md },
-  chipText: { ...typography.body, fontWeight: '600' },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   switchText: { flex: 1, gap: spacing.xs },
 });

@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { radius, spacing, typography } from '@/theme';
 
 type Props = {
@@ -16,15 +17,16 @@ export function minutesUntil(iso: string, now = Date.now()) {
 
 export function ETAChip({ eta, scheduled }: Props) {
   const c = useColors();
+  const t = useT();
   const mins = eta ? minutesUntil(eta) : null;
-  const text = mins == null ? '—' : mins === 0 ? 'Arriving now' : `${mins} min`;
+  const text = mins == null ? '—' : mins === 0 ? t('Arriving now') : t('{mins} min', { mins });
   return (
     <View
       accessible
-      accessibilityLabel={`Arrives in ${text}${scheduled ? ', scheduled time' : ', live'}`}
+      accessibilityLabel={t(scheduled ? 'Arrives in {time}, scheduled time' : 'Arrives in {time}, live', { time: text })}
       style={[styles.chip, { backgroundColor: scheduled ? c.surface : c.infoBg, borderColor: scheduled ? c.border : c.info }]}>
       <Text style={[styles.time, { color: c.text }]}>{text}</Text>
-      <Text style={[styles.kind, { color: c.textSecondary }]}>{scheduled ? 'Scheduled' : 'Live'}</Text>
+      <Text style={[styles.kind, { color: c.textSecondary }]}>{t(scheduled ? 'Scheduled' : 'Live')}</Text>
     </View>
   );
 }

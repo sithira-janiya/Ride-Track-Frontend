@@ -11,6 +11,7 @@ import { ticketsApi } from '@/api/endpoints';
 import { TICKET_STATUS, ticketJourney, ticketTitle } from '@/components/tickets/TicketCard';
 import { Button, Card, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useTicket } from '@/hooks/use-tickets';
 import { useTicketCache } from '@/store/tickets';
 import { spacing, typography } from '@/theme';
@@ -37,6 +38,7 @@ function useBrightnessBoost(active: boolean) {
 
 export default function TicketScreen() {
   const c = useColors();
+  const tr = useT();
   const router = useRouter();
   const queryClient = useQueryClient();
   const id = Number(useLocalSearchParams<{ id: string }>().id);
@@ -61,12 +63,12 @@ export default function TicketScreen() {
   const confirmCancel = () => {
     const run = () => cancel.mutate();
     if (Platform.OS === 'web') {
-      if (window.confirm('Cancel this ticket? Refund rules apply.')) run();
+      if (window.confirm(tr('Cancel this ticket? Refund rules apply.'))) run();
       return;
     }
-    Alert.alert('Cancel this ticket?', 'Refund rules apply. This cannot be undone.', [
-      { text: 'Keep ticket', style: 'cancel' },
-      { text: 'Cancel ticket', style: 'destructive', onPress: run },
+    Alert.alert(tr('Cancel this ticket?'), tr('Refund rules apply. This cannot be undone.'), [
+      { text: tr('Keep ticket'), style: 'cancel' },
+      { text: tr('Cancel ticket'), style: 'destructive', onPress: run },
     ]);
   };
 
@@ -83,36 +85,42 @@ export default function TicketScreen() {
           ) : (
             <>
               <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-                {ticketTitle(t)}
+                {ticketTitle(t, tr)}
               </Text>
               <StatusBadge label={TICKET_STATUS[t.status].label} tone={TICKET_STATUS[t.status].tone} />
               {ticket.isError ? (
-                <Text style={[styles.caption, { color: c.textSecondary }]}>You are offline. Showing the copy saved on this device.</Text>
+                <Text style={[styles.caption, { color: c.textSecondary }]}>
+                  {tr('You are offline. Showing the copy saved on this device.')}
+                </Text>
               ) : null}
 
               {t.status === 'ACTIVE' && t.qrToken ? (
                 <View style={styles.qrWrap}>
                   {/* scanners need dark-on-white regardless of theme */}
-                  <View accessible accessibilityLabel="Ticket QR code. Show this to the conductor." style={styles.qrBox}>
+                  <View accessible accessibilityLabel={tr('Ticket QR code. Show this to the conductor.')} style={styles.qrBox}>
                     <QRCode value={t.qrToken} size={240} />
                   </View>
-                  <Text style={[styles.caption, { color: c.textSecondary }]}>Ticket number {t.ticketId}. Show this code to the conductor.</Text>
+                  <Text style={[styles.caption, { color: c.textSecondary }]}>
+                    {tr('Ticket number {id}. Show this code to the conductor.', { id: t.ticketId })}
+                  </Text>
                 </View>
               ) : t.status === 'PENDING' ? (
                 <Card style={{ borderColor: c.warning, backgroundColor: c.warningBg }}>
                   <Text style={[styles.body, { color: c.text }]}>
-                    We are waiting for your payment to be confirmed. Your QR code will appear here as soon as it is.
+                    {tr('We are waiting for your payment to be confirmed. Your QR code will appear here as soon as it is.')}
                   </Text>
                   <Button title="Check again" variant="secondary" loading={ticket.isFetching} onPress={() => ticket.refetch()} />
                 </Card>
               ) : (
-                <Text style={[styles.body, { color: c.textSecondary }]}>This ticket can no longer be scanned.</Text>
+                <Text style={[styles.body, { color: c.textSecondary }]}>{tr('This ticket can no longer be scanned.')}</Text>
               )}
 
               <Card>
-                <Text style={[styles.body, { color: c.text }]}>{ticketJourney(t)}</Text>
-                <Text style={[styles.body, { color: c.text }]}>Fare: {formatFare(t.fare)}</Text>
-                <Text style={[styles.caption, { color: c.textSecondary }]}>Bought {new Date(t.issuedAt).toLocaleString()}</Text>
+                <Text style={[styles.body, { color: c.text }]}>{ticketJourney(t, tr)}</Text>
+                <Text style={[styles.body, { color: c.text }]}>{tr('Fare: {amount}', { amount: formatFare(t.fare) })}</Text>
+                <Text style={[styles.caption, { color: c.textSecondary }]}>
+                  {tr('Bought {date}', { date: new Date(t.issuedAt).toLocaleString() })}
+                </Text>
               </Card>
 
               {t.status === 'ACTIVE' ? (

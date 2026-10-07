@@ -10,6 +10,7 @@ import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
 import { RouteCard } from '@/components/routes/RouteCard';
 import { Button, Card, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useNearbyStops } from '@/hooks/use-nearby-stops';
 import { useFavourites } from '@/store/favourites';
@@ -18,6 +19,7 @@ import { formatDistance } from '@/utils/format';
 
 export default function PassengerHome() {
   const c = useColors();
+  const t = useT();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<ModeValue>('ALL');
@@ -45,7 +47,7 @@ export default function PassengerHome() {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Where to?
+            {t('Where to?')}
           </Text>
 
           <TextField
@@ -75,7 +77,7 @@ export default function PassengerHome() {
               <Section title="Favourite routes">
                 {favourites.length === 0 ? (
                   <Text style={[styles.hint, { color: c.textSecondary }]}>
-                    Open a route and tap Save to keep it here for quick access.
+                    {t('Open a route and tap Save to keep it here for quick access.')}
                   </Text>
                 ) : (
                   favourites.map((r) => <RouteCard key={r.routeId} route={r} onPress={() => openRoute(r.routeId)} />)
@@ -88,7 +90,7 @@ export default function PassengerHome() {
                 ) : nearby.permission === 'denied' ? (
                   <Card>
                     <Text style={[styles.hint, { color: c.text }]}>
-                      Allow location access to see the bus stops and stations closest to you.
+                      {t('Allow location access to see the bus stops and stations closest to you.')}
                     </Text>
                     <Button title="Use my location" variant="secondary" onPress={nearby.request} />
                   </Card>
@@ -105,7 +107,7 @@ export default function PassengerHome() {
                     <Pressable
                       key={s.stopId}
                       accessibilityRole="button"
-                      accessibilityLabel={`${s.name}, ${formatDistance(s.distanceMeters ?? 0)} away`}
+                      accessibilityLabel={`${s.name}, ${t('{distance} away', { distance: formatDistance(s.distanceMeters ?? 0) })}`}
                       disabled={!s.routeIds?.length}
                       onPress={() => openRoute(s.routeIds![0], s.stopId)}
                       style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
@@ -113,7 +115,9 @@ export default function PassengerHome() {
                         <Text style={[styles.stopName, { color: c.text }]}>{s.name}</Text>
                         <Text style={[styles.hint, { color: c.textSecondary }]}>
                           {formatDistance(s.distanceMeters ?? 0)}
-                          {s.routeIds?.length ? ` · ${s.routeIds.length} route${s.routeIds.length > 1 ? 's' : ''}` : ''}
+                          {s.routeIds?.length
+                            ? ` · ${t(s.routeIds.length > 1 ? '{count} routes' : '{count} route', { count: s.routeIds.length })}`
+                            : ''}
                         </Text>
                       </Card>
                     </Pressable>
@@ -130,10 +134,11 @@ export default function PassengerHome() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const c = useColors();
+  const t = useT();
   return (
     <View style={styles.section}>
       <Text accessibilityRole="header" style={[styles.sectionTitle, { color: c.text }]}>
-        {title}
+        {t(title)}
       </Text>
       {children}
     </View>

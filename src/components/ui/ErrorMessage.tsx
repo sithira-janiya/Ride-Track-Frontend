@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { radius, spacing, typography } from '@/theme';
 
 import { Button } from './Button';
@@ -10,9 +11,10 @@ type Props = { message: string; onRetry?: () => void };
 /** Clear, non-technical error text (NFR7). */
 export function ErrorMessage({ message, onRetry }: Props) {
   const c = useColors();
+  const t = useT();
   return (
     <View accessibilityRole="alert" style={[styles.box, { backgroundColor: c.dangerBg, borderColor: c.danger }]}>
-      <Text style={[styles.text, { color: c.danger }]}>⚠ {message}</Text>
+      <Text style={[styles.text, { color: c.danger }]}>⚠ {t(message)}</Text>
       {onRetry ? <Button title="Try again" variant="secondary" onPress={onRetry} /> : null}
     </View>
   );

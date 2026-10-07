@@ -10,12 +10,14 @@ import { ArrivalRow } from '@/components/routes/ArrivalRow';
 import { StopRow } from '@/components/routes/StopRow';
 import { Button, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useT } from '@/i18n';
 import { useFavourites } from '@/store/favourites';
 import { spacing, typography } from '@/theme';
 import { modeLabel } from '@/utils/format';
 
 export default function RouteDetailScreen() {
   const c = useColors();
+  const t = useT();
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string; stopId?: string }>();
   const routeId = Number(params.id);
@@ -67,9 +69,9 @@ export default function RouteDetailScreen() {
               </View>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                Stops and fares
+                {t('Stops and fares')}
               </Text>
-              <Text style={[styles.sub, { color: c.textSecondary }]}>Tap a stop to see upcoming arrivals there.</Text>
+              <Text style={[styles.sub, { color: c.textSecondary }]}>{t('Tap a stop to see upcoming arrivals there.')}</Text>
               <View style={styles.list}>
                 {route.data.stops.map((s) => (
                   <StopRow key={s.stopId} stop={s} selected={s.stopId === selectedStopId} onPress={() => setPickedStopId(s.stopId)} />
@@ -77,7 +79,7 @@ export default function RouteDetailScreen() {
               </View>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                Upcoming at {selectedStop?.name ?? '…'}
+                {t('Upcoming at {stop}', { stop: selectedStop?.name ?? '…' })}
               </Text>
               {arrivals.isPending ? (
                 <Loading label="Loading arrivals…" />
