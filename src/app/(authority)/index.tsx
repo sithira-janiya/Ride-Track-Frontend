@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
+import { StatTile as Tile } from '@/components/ops/StatTile';
 import { VehicleCard } from '@/components/ops/VehicleCard';
 import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
@@ -9,17 +10,6 @@ import { useOpsDashboard } from '@/hooks/use-ops';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { spacing, typography } from '@/theme';
-
-function Tile({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  const c = useColors();
-  return (
-    <Card style={styles.tile}>
-      <Text maxFontSizeMultiplier={1.3} style={[styles.tileValue, { color: c.text }]}>{value}</Text>
-      <Text style={[styles.tileLabel, { color: c.text }]}>{label}</Text>
-      {hint ? <Text style={[styles.caption, { color: c.textSecondary }]}>{hint}</Text> : null}
-    </Card>
-  );
-}
 
 export default function AuthorityDashboard() {
   const c = useColors();
@@ -99,7 +89,4 @@ const styles = StyleSheet.create({
   body: { ...typography.body },
   caption: { ...typography.caption },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  tile: { flexGrow: 1, flexBasis: '45%' },
-  tileValue: { fontSize: 36, lineHeight: 42, fontWeight: '800' },
-  tileLabel: { ...typography.body, fontWeight: '600' },
 });

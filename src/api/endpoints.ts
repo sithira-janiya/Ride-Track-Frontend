@@ -1,7 +1,9 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
-import type { Arrival, AuthResult, DelayAlert, NewAlert, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, User, VehiclePosition } from '@/types';
+import type {
+  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, NewAlert, NewStaffAccount, NewVehicle, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+} from '@/types';
 
 import { api } from './client';
 import { mockApi } from './mock';
@@ -76,6 +78,27 @@ export const alertsApi = {
     env.useMockApi ? mockApi.getAlerts(unread) : get('/alerts', unread ? { unread: true } : undefined),
   publish: (input: NewAlert): Promise<DelayAlert> => (env.useMockApi ? mockApi.publishAlert(input) : post('/alerts', input)),
   markRead: (id: number): Promise<DelayAlert> => (env.useMockApi ? mockApi.markAlertRead(id) : patch(`/alerts/${id}/read`)),
+};
+
+/** Back office for authority officers (RideTrack-API `/admin/*`). */
+export const adminApi = {
+  overview: (): Promise<AdminOverview> => (env.useMockApi ? mockApi.adminOverview() : get('/admin/overview')),
+  users: (filters: { q?: string; role?: Role; page: number; limit: number }): Promise<AdminUserPage> =>
+    env.useMockApi ? mockApi.adminUsers(filters) : get('/admin/users', { ...filters, q: filters.q || undefined }),
+  createUser: (input: NewStaffAccount): Promise<User> => (env.useMockApi ? mockApi.adminCreateUser(input) : post('/admin/users', input)),
+  updateUser: (userId: number, input: { isActive?: boolean; vehicleId?: number | null }): Promise<User> =>
+    env.useMockApi ? mockApi.adminUpdateUser(userId, input) : patch(`/admin/users/${userId}`, input),
+  routes: (): Promise<AdminRoute[]> => (env.useMockApi ? mockApi.adminRoutes() : get('/admin/routes')),
+  vehicles: (): Promise<AdminVehicle[]> => (env.useMockApi ? mockApi.adminVehicles() : get('/admin/vehicles')),
+  createVehicle: (input: NewVehicle): Promise<AdminVehicle> =>
+    env.useMockApi ? mockApi.adminCreateVehicle(input) : post('/admin/vehicles', input),
+  updateVehicle: (vehicleId: number, input: Partial<Pick<AdminVehicle, 'regNo' | 'capacity' | 'routeId' | 'isActive'>>): Promise<AdminVehicle> =>
+    env.useMockApi ? mockApi.adminUpdateVehicle(vehicleId, input) : patch(`/admin/vehicles/${vehicleId}`, input),
+  /** `date` is a UTC day, YYYY-MM-DD */
+  trips: (date: string, routeId?: number): Promise<AdminTrip[]> =>
+    env.useMockApi ? mockApi.adminTrips(date, routeId) : get('/admin/trips', { date, routeId }),
+  tickets: (filters: { status?: TicketStatus; page: number; limit: number }): Promise<AdminTicketPage> =>
+    env.useMockApi ? mockApi.adminTickets(filters) : get('/admin/tickets', filters),
 };
 
 export const opsApi = {

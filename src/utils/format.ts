@@ -10,4 +10,7 @@ export function formatClock(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export const modeLabel = (mode: 'BUS' | 'TRAIN') => (mode === 'BUS' ? 'Bus' : 'Train');
+/** "1 vehicle", "3 vehicles". Pass the plural when it is not just the singular plus "s". */
+export const countOf = (n: number, singular: string, plural = `${singular}s`) => `${n} ${n === 1 ? singular : plural}`;
+
+export const modeLabel =(mode: 'BUS' | 'TRAIN') => (mode === 'BUS' ? 'Bus' : 'Train');

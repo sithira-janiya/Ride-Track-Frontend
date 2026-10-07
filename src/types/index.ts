@@ -178,3 +178,94 @@ export interface NewAlert {
   message: string;
   delayMinutes?: number;
 }
+
+// Admin panel (RideTrack-API `/admin/*`, authority officers only)
+export type StaffType = 'CONDUCTOR' | 'INSPECTOR';
+
+export interface AdminOverview {
+  users: { total: number; passengers: number; staff: number; officers: number; disabled: number };
+  fleet: { routes: number; vehicles: number; stops: number };
+  tripsToday: { total: number; ongoing: number; delayed: number; cancelled: number };
+  salesToday: { tickets: number; revenue: number };
+}
+
+export interface AdminUser extends User {
+  createdAt: string | null;
+  employeeNo: string | null;
+  /** staff organisation, or the officer's department */
+  organisation: string | null;
+  staffType: StaffType | null;
+  vehicleId: number | null;
+}
+
+export interface AdminUserPage {
+  total: number;
+  users: AdminUser[];
+}
+
+/** Staff and officer accounts are created here; passengers sign themselves up. */
+export interface NewStaffAccount {
+  name: string;
+  email?: string;
+  phone?: string;
+  password: string;
+  role: 'STAFF' | 'AUTHORITY';
+  employeeNo: string;
+  organisation: string;
+  staffType?: StaffType;
+  vehicleId?: number;
+}
+
+export interface AdminRoute extends Route {
+  isActive: boolean;
+  /** counts */
+  stops: number;
+  vehicles: number;
+}
+
+export interface AdminVehicle {
+  vehicleId: number;
+  regNo: string;
+  type: TransportMode;
+  capacity: number;
+  routeId: number;
+  routeNo: string;
+  isActive: boolean;
+}
+
+export interface NewVehicle {
+  regNo: string;
+  type: TransportMode;
+  capacity: number;
+  routeId: number;
+}
+
+export interface AdminTrip {
+  tripId: number;
+  routeId: number;
+  routeNo: string;
+  vehicleId: number;
+  regNo: string;
+  startTime: string;
+  endTime: string | null;
+  status: TripStatus;
+  /** tickets sold (active or used) */
+  tickets: number;
+}
+
+export interface AdminTicket {
+  ticketId: number;
+  passenger: string;
+  tripId: number;
+  routeNo: string;
+  fare: number;
+  status: TicketStatus;
+  paymentStatus: PaymentStatus | null;
+  paymentMethod: string | null;
+  issuedAt: string;
+}
+
+export interface AdminTicketPage {
+  total: number;
+  tickets: AdminTicket[];
+}

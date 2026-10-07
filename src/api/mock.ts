@@ -1,7 +1,7 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
 import type {
-  Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUser, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, NewStaffAccount, NewVehicle, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, TripStatus, User, VehiclePosition,
 } from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
@@ -83,6 +83,21 @@ const users: User[] = [
   { userId: 3, name: 'Demo Officer', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
 ];
 
+// admin-only details per account: staff and officer profile rows, and passwords set by an officer
+type AccountInfo = Pick<AdminUser, 'createdAt' | 'employeeNo' | 'organisation' | 'staffType' | 'vehicleId'>;
+const accountInfo: Record<number, AccountInfo> = {
+  2: { createdAt: null, employeeNo: 'C-1001', organisation: 'SLTB Maharagama Depot', staffType: 'CONDUCTOR', vehicleId: 101 },
+  3: { createdAt: null, employeeNo: 'A-2001', organisation: 'NTC Operations', staffType: null, vehicleId: null },
+};
+const passwords: Record<number, string> = {};
+
+const adminVehicles: AdminVehicle[] = Object.entries(vehiclesByRoute).flatMap(([routeId, list]) => {
+  const route = routes.find((r) => r.routeId === Number(routeId))!;
+  return list.map((v) => ({ vehicleId: v.vehicleId, regNo: v.regNo, type: route.mode, capacity: v.capacity, routeId: route.routeId, routeNo: route.routeNo, isActive: true }));
+});
+
+const utcDay = (d: Date) => d.toISOString().slice(0, 10);
+
 const hoursAgo = (h: number) => new Date(Date.now() - h * 3600000).toISOString();
 const alerts: DelayAlert[] = [
   { alertId: 3, tripId: 11, type: 'DELAY', message: 'Route 138 is running about 12 minutes late because of traffic near Nugegoda.', delayMinutes: 12, createdAt: hoursAgo(0.5), isRead: false },
@@ -97,8 +112,8 @@ export const MOCK_PASSWORD = 'Password1!';
 export const mockApi = {
   async login(identifier: string, password: string): Promise<AuthResult> {
     const user = users.find((u) => u.email === identifier || u.phone === identifier);
-    // same message for unknown account and wrong password (docs/03-dfd.md, security note)
-    if (!user || password !== MOCK_PASSWORD) throw new Error('Invalid email/phone or password.');
+    // same message for unknown account, wrong password and disabled account (docs/03-dfd.md, security note)
+    if (!user || password !== (passwords[user.userId] ?? MOCK_PASSWORD) || !user.isActive) throw new Error('Invalid email/phone or password.');
     return delay({ user, accessToken: `mock-access-${user.userId}`, refreshToken: `mock-refresh-${user.userId}` });
   },
 
@@ -107,7 +122,7 @@ export const mockApi = {
       throw new Error('An account with these details already exists.');
     }
     const user: User = {
-      userId: users.length + 1,
+      userId: Math.max(...users.map((u) => u.userId)) + 1,
       name: input.name,
       email: input.email ?? null,
       phone: input.phone ?? null,
@@ -357,5 +372,160 @@ export const mockApi = {
     const all = tickets.filter((t) => !status || t.status === status);
     const items = all.slice((page - 1) * TICKET_PAGE_SIZE, page * TICKET_PAGE_SIZE);
     return delay({ items, nextPage: page * TICKET_PAGE_SIZE < all.length ? page + 1 : null });
+  },
+
+  // ---- admin panel ----
+
+  async adminOverview(): Promise<AdminOverview> {
+    const count = (role: Role) => users.filter((u) => u.role === role).length;
+    const trips = await mockApi.adminTrips(utcDay(new Date()));
+    const sold = tickets.filter((t) => t.paymentStatus === 'PAID' && utcDay(new Date(t.issuedAt)) === utcDay(new Date()));
+    return delay({
+      users: { total: users.length, passengers: count('PASSENGER'), staff: count('STAFF'), officers: count('AUTHORITY'), disabled: users.filter((u) => !u.isActive).length },
+      fleet: { routes: routes.length, vehicles: adminVehicles.filter((v) => v.isActive).length, stops: allStops.length },
+      tripsToday: {
+        total: trips.length,
+        ongoing: trips.filter((t) => t.status === 'ONGOING').length,
+        delayed: trips.filter((t) => t.status === 'DELAYED').length,
+        cancelled: trips.filter((t) => t.status === 'CANCELLED').length,
+      },
+      salesToday: { tickets: sold.length, revenue: sold.reduce((n, t) => n + t.fare, 0) },
+    });
+  },
+
+  adminUsers({ q, role, page, limit }: { q?: string; role?: Role; page: number; limit: number }): Promise<AdminUserPage> {
+    const needle = q?.trim().toLowerCase() ?? '';
+    const all = users
+      .filter((u) => (!role || u.role === role) && (!needle || [u.name, u.email, u.phone].some((v) => v?.toLowerCase().includes(needle))))
+      .sort((a, b) => b.userId - a.userId);
+    const blank: AccountInfo = { createdAt: null, employeeNo: null, organisation: null, staffType: null, vehicleId: null };
+    return delay({ total: all.length, users: all.slice((page - 1) * limit, page * limit).map((u) => ({ ...u, ...(accountInfo[u.userId] ?? blank) })) });
+  },
+
+  async adminCreateUser(input: NewStaffAccount): Promise<User> {
+    if (input.role === 'STAFF' && !input.staffType) throw new Error('staffType: Choose conductor or inspector.');
+    if (users.some((u) => (input.email && u.email === input.email) || (input.phone && u.phone === input.phone))) {
+      throw new Error('An account with this email, phone or employee number already exists.');
+    }
+    if (input.vehicleId && !adminVehicles.some((v) => v.vehicleId === input.vehicleId)) throw new Error('Vehicle not found.');
+    const user: User = {
+      userId: Math.max(...users.map((u) => u.userId)) + 1,
+      name: input.name,
+      email: input.email ?? null,
+      phone: input.phone ?? null,
+      role: input.role,
+      isActive: true,
+    };
+    users.push(user);
+    passwords[user.userId] = input.password;
+    accountInfo[user.userId] = {
+      createdAt: new Date().toISOString(),
+      employeeNo: input.employeeNo,
+      organisation: input.organisation,
+      staffType: input.role === 'STAFF' ? input.staffType! : null,
+      vehicleId: input.role === 'STAFF' ? (input.vehicleId ?? null) : null,
+    };
+    return delay({ ...user });
+  },
+
+  async adminUpdateUser(userId: number, input: { isActive?: boolean; vehicleId?: number | null }): Promise<User> {
+    const u = users.find((x) => x.userId === userId);
+    if (!u) throw new Error('Account not found.');
+    if (input.vehicleId !== undefined) {
+      if (u.role !== 'STAFF') throw new Error('Only staff can be assigned to a vehicle.');
+      if (input.vehicleId !== null && !adminVehicles.some((v) => v.vehicleId === input.vehicleId)) throw new Error('Vehicle not found.');
+      accountInfo[userId] = { ...accountInfo[userId], vehicleId: input.vehicleId };
+    }
+    if (input.isActive !== undefined) u.isActive = input.isActive;
+    return delay({ ...u });
+  },
+
+  adminRoutes: (): Promise<AdminRoute[]> =>
+    delay(
+      routes.map((r) => ({
+        ...r,
+        isActive: true,
+        stops: (routeStops[r.routeId] ?? []).length,
+        vehicles: adminVehicles.filter((v) => v.routeId === r.routeId && v.isActive).length,
+      })),
+    ),
+
+  adminVehicles: (): Promise<AdminVehicle[]> => delay(adminVehicles.map((v) => ({ ...v }))),
+
+  async adminCreateVehicle(input: NewVehicle): Promise<AdminVehicle> {
+    const route = routes.find((r) => r.routeId === input.routeId);
+    if (!route) throw new Error('Route not found.');
+    if (route.mode !== input.type) throw new Error(`A ${input.type.toLowerCase()} cannot run on a ${route.mode.toLowerCase()} route.`);
+    if (adminVehicles.some((v) => v.regNo.toLowerCase() === input.regNo.toLowerCase())) throw new Error('A vehicle with this registration number already exists.');
+    const v: AdminVehicle = { ...input, vehicleId: Math.max(...adminVehicles.map((x) => x.vehicleId)) + 1, routeNo: route.routeNo, isActive: true };
+    adminVehicles.push(v);
+    return delay({ ...v });
+  },
+
+  async adminUpdateVehicle(vehicleId: number, input: Partial<Pick<AdminVehicle, 'regNo' | 'capacity' | 'routeId' | 'isActive'>>): Promise<AdminVehicle> {
+    const v = adminVehicles.find((x) => x.vehicleId === vehicleId);
+    if (!v) throw new Error('Vehicle not found.');
+    if (input.routeId !== undefined) {
+      const route = routes.find((r) => r.routeId === input.routeId);
+      if (!route) throw new Error('Route not found.');
+      if (route.mode !== v.type) throw new Error(`A ${v.type.toLowerCase()} cannot run on a ${route.mode.toLowerCase()} route.`);
+      v.routeNo = route.routeNo;
+    }
+    if (input.regNo !== undefined && adminVehicles.some((x) => x !== v && x.regNo.toLowerCase() === input.regNo!.toLowerCase())) {
+      throw new Error('A vehicle with this registration number already exists.');
+    }
+    Object.assign(v, input);
+    return delay({ ...v });
+  },
+
+  /** Five trips a day per active vehicle; status follows the clock, with a few delays and cancellations. */
+  adminTrips(date: string, routeId?: number): Promise<AdminTrip[]> {
+    const dayStart = Date.parse(`${date}T00:00:00Z`);
+    const dayKey = Number(date.slice(2).replace(/-/g, ''));
+    const now = Date.now();
+    const trips = adminVehicles
+      .filter((v) => v.isActive && (!routeId || v.routeId === routeId))
+      .flatMap((v) =>
+        Array.from({ length: 5 }, (_, i): AdminTrip => {
+          const start = dayStart + ((1 + i * 3) * 60 + (v.vehicleId % 3) * 20) * 60000;
+          const end = start + (v.type === 'TRAIN' ? 180 : 75) * 60000;
+          const roll = (v.vehicleId + i + dayKey) % 7;
+          let status: TripStatus = end < now ? 'COMPLETED' : start <= now ? 'ONGOING' : 'SCHEDULED';
+          if (roll === 0) status = 'CANCELLED';
+          else if (roll === 3 && status !== 'COMPLETED') status = 'DELAYED';
+          const sold = status === 'CANCELLED' ? 0 : ((v.vehicleId * 7 + i * 13) % 40) + (status === 'SCHEDULED' ? 0 : 10);
+          return {
+            tripId: dayKey * 10000 + v.vehicleId * 10 + i,
+            routeId: v.routeId,
+            routeNo: v.routeNo,
+            vehicleId: v.vehicleId,
+            regNo: v.regNo,
+            startTime: new Date(start).toISOString(),
+            endTime: new Date(end).toISOString(),
+            status,
+            tickets: sold,
+          };
+        }),
+      )
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    return delay(trips);
+  },
+
+  adminTickets({ status, page, limit }: { status?: TicketStatus; page: number; limit: number }): Promise<AdminTicketPage> {
+    const all = tickets.filter((t) => !status || t.status === status).sort((a, b) => b.ticketId - a.ticketId);
+    return delay({
+      total: all.length,
+      tickets: all.slice((page - 1) * limit, page * limit).map((t) => ({
+        ticketId: t.ticketId,
+        passenger: 'Demo Passenger',
+        tripId: t.tripId,
+        routeNo: t.routeNo ?? '',
+        fare: t.fare,
+        status: t.status,
+        paymentStatus: t.paymentStatus ?? null,
+        paymentMethod: t.paymentStatus === 'PAID' || t.paymentStatus === 'REFUNDED' ? 'CARD' : null,
+        issuedAt: t.issuedAt,
+      })),
+    });
   },
 };
