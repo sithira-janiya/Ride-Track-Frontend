@@ -67,7 +67,7 @@ export default function PassengerHome() {
               ) : results.isError ? (
                 <ErrorMessage message={errorMessage(results.error)} onRetry={() => results.refetch()} />
               ) : results.data.length === 0 ? (
-                <EmptyState title="No routes found" message="Try a different route number, place or mode." />
+                <EmptyState illustration="routes" title="No routes found" message="Try a different route number, place or mode." />
               ) : (
                 results.data.map((r) => <RouteCard key={r.routeId} route={r} onPress={() => openRoute(r.routeId)} />)
               )}
@@ -101,7 +101,7 @@ export default function PassengerHome() {
                 ) : nearby.stops.isError ? (
                   <ErrorMessage message={errorMessage(nearby.stops.error)} onRetry={() => nearby.stops.refetch()} />
                 ) : nearby.stops.data.length === 0 ? (
-                  <EmptyState title="No stops nearby" message="There are no stops within 1.5 km of you." />
+                  <EmptyState illustration="routes" title="No stops nearby" message="There are no stops within 1.5 km of you." />
                 ) : (
                   nearby.stops.data.map((s) => (
                     <Pressable

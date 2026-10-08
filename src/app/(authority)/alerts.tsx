@@ -125,7 +125,7 @@ export default function AuthorityAlertsScreen() {
           ) : published.isError ? (
             <ErrorMessage message={errorMessage(published.error)} onRetry={() => published.refetch()} />
           ) : published.data.length === 0 ? (
-            <EmptyState title="Nothing published yet" message="Alerts you publish will be listed here." />
+            <EmptyState illustration="alerts" title="Nothing published yet" message="Alerts you publish will be listed here." />
           ) : (
             published.data.map((a) => (
               <Card key={a.alertId}>

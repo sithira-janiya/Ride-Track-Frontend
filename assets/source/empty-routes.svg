@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140" viewBox="0 0 200 140">
+  <!-- No routes or stops found: a folded map, a route and a magnifier. -->
+  <circle cx="100" cy="68" r="62" fill="#0B5FFF" fill-opacity=".08"/>
+  <ellipse cx="98" cy="120" rx="50" ry="6" fill="#0B5FFF" fill-opacity=".12"/>
+  <g fill="#0B5FFF" fill-opacity=".35">
+    <circle cx="30" cy="44" r="3"/>
+    <circle cx="170" cy="30" r="2.5"/>
+  </g>
+  <path d="M34 92v10M29 97h10" stroke="#FFB020" stroke-width="3" stroke-linecap="round"/>
+
+  <g stroke="#A9C4FF" stroke-width="2" stroke-linejoin="round">
+    <path d="M46 38l32-8v68l-32 8z" fill="#FFFFFF"/>
+    <path d="M78 30l34 8v68l-34-8z" fill="#E3ECFF"/>
+    <path d="M112 38l34-8v68l-34 8z" fill="#FFFFFF"/>
+  </g>
+  <path d="M50 62l26-6M82 76l28 6M116 58l26-6" stroke="#D6E4FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M56 92c14-22 34-2 44-22s22-20 32-22" fill="none" stroke="#0B5FFF" stroke-width="4" stroke-linecap="round" stroke-dasharray=".5 8"/>
+  <circle cx="56" cy="92" r="5" fill="#FFFFFF" stroke="#0B5FFF" stroke-width="3"/>
+  <path d="M132 58c-3-4-9-8-9-14a9 9 0 0 1 18 0c0 6-6 10-9 14z" fill="#FFB020"/>
+  <circle cx="132" cy="44" r="3.5" fill="#FFFFFF"/>
+
+  <path d="M153 100l13 13" stroke="#0847BF" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="140" cy="87" r="18" fill="#FFFFFF" fill-opacity=".6" stroke="#0847BF" stroke-width="6"/>
+  <path d="M131 82a10 10 0 0 1 8-6" fill="none" stroke="#0B5FFF" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
+</svg>

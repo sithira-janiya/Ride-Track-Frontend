@@ -1,8 +1,10 @@
+import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LanguagePicker } from '@/components/ui';
+import { illustrations } from '@/components/ui/illustrations';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useLanguage } from '@/store/language';
@@ -21,6 +23,7 @@ export function AuthScreen({ title, subtitle, children }: Props) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
+            <Image source={illustrations.authHero} style={styles.hero} contentFit="contain" accessibilityLabel="" />
             <Text accessibilityRole="header" style={[styles.brand, { color: c.primary }]}>
               RideTrack
             </Text>
@@ -42,6 +45,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
   content: { width: '100%', maxWidth: 440, alignSelf: 'center', gap: spacing.sm },
+  hero: { width: '100%', height: 140, marginBottom: spacing.sm },
   brand: { ...typography.title },
   title: { ...typography.heading },
   subtitle: { ...typography.body, marginBottom: spacing.sm },

@@ -49,7 +49,7 @@ export default function AlertsScreen() {
           ) : alerts.isError ? (
             <ErrorMessage message={errorMessage(alerts.error)} onRetry={() => alerts.refetch()} />
           ) : alerts.data.length === 0 ? (
-            <EmptyState title="No alerts" message="Delays, cancellations and route changes will show up here." />
+            <EmptyState illustration="alerts" title="No alerts" message="Delays, cancellations and route changes will show up here." />
           ) : (
             <>
               {unread.length > 1 ? (

@@ -85,7 +85,7 @@ export default function TicketsScreen() {
                 <ErrorMessage message={`${t(errorMessage(list.error))} ${t('Showing tickets saved on this device.')}`} onRetry={() => list.refetch()} />
               ) : null}
               {tickets.length === 0 ? (
-                <EmptyState title="No tickets here" message="Buy a ticket from any route and it will show up here." />
+                <EmptyState illustration="tickets" title="No tickets here" message="Buy a ticket from any route and it will show up here." />
               ) : (
                 <View style={styles.list}>
                   {tickets.map((t) => (

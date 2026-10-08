@@ -104,6 +104,8 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
 
+**Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
+
 ### Languages (Google Translate)
 
 The app is written in English and translated at run time with the Google Cloud Translation API (`src/i18n/`).
@@ -132,6 +134,12 @@ src/
 ├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
+assets/
+├── images/               app icon, adaptive icon layers, splash, favicon (PNG, used by app.json)
+│   └── illustrations/    auth-hero, empty-tickets, empty-alerts, empty-routes at @1x/@2x/@3x
+├── source/               SVG sources of the illustrations
+└── expo.icon/            iOS icon (Icon Composer format): pin and bus layers
+scripts/render-assets.js  draws the icon set and renders every SVG above to PNG
 ```
 
 Rules: screens in `app/` stay thin and call hooks and components; all network calls live in `src/api/endpoints.ts` (never call axios from a screen); keep non-route code out of `src/app/`.
@@ -155,7 +163,7 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 - Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
 - To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
 - Web (Vercel): `vercel.json` tells Vercel to run `npm install`, then `npx expo export -p web`, and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. The Vercel project's Root Directory is currently `src`, so `src/vercel.json` does the same from there (installs and builds from the repo root, outputs to `src/dist`); delete it once Root Directory is cleared. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
-- The app icon and splash images are still the Expo template's defaults. Replace the files in `assets/images/` with RideTrack artwork before release.
+- App icon and splash are RideTrack artwork. The splash is the brand blue (`#0B5FFF`), or `#0B0E14` in dark mode. To change the art, edit `assets/source/*.svg` (illustrations) or the mark in `scripts/render-assets.js` (icons), then run `npm install --no-save @resvg/resvg-js` and `node scripts/render-assets.js` from the project root. It rewrites the PNGs in `assets/images/` and the iOS layers in `assets/expo.icon/Assets/`.
 
 ## Accessibility
 
@@ -177,6 +185,8 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
 - Offline route data can be up to 24 hours old; arrivals shown offline are the last ones fetched.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
+- The new icons and splash have not been seen on a device yet: the splash only shows in a real build (not Expo Go), and the iOS Liquid Glass icon (`assets/expo.icon`) has not been opened in Icon Composer or built for iOS.
+- Unused Expo template images (`expo-badge*`, `expo-logo`, `react-logo*`, `logo-glow`, `tutorial-web`, `tabIcons/`) are still in `assets/images/`.
 
 ## Comparison with LMT GO (Lanka Metro Transit)
 

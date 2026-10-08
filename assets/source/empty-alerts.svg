@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140" viewBox="0 0 200 140">
+  <!-- No alerts: a quiet bell with an all-clear check. -->
+  <circle cx="100" cy="68" r="62" fill="#0B5FFF" fill-opacity=".08"/>
+  <ellipse cx="100" cy="122" rx="38" ry="5" fill="#0B5FFF" fill-opacity=".12"/>
+  <g fill="#0B5FFF" fill-opacity=".35">
+    <circle cx="38" cy="40" r="3"/>
+    <circle cx="164" cy="92" r="2.5"/>
+    <circle cx="44" cy="100" r="2.5"/>
+  </g>
+  <path d="M160 30v10M155 35h10" stroke="#FFB020" stroke-width="3" stroke-linecap="round"/>
+
+  <circle cx="100" cy="30" r="6" fill="#0847BF"/>
+  <path d="M100 32c-17 0-28 13-28 30v18c0 6-4 10-8 13h72c-4-3-8-7-8-13V62c0-17-11-30-28-30z" fill="#0B5FFF"/>
+  <path d="M82 62c0-9 5-16 12-19" fill="none" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>
+  <rect x="62" y="90" width="76" height="9" rx="4.5" fill="#0847BF"/>
+  <path d="M90 99a10 10 0 0 0 20 0z" fill="#0847BF"/>
+
+  <circle cx="130" cy="40" r="15" fill="#22A55B" stroke="#FFFFFF" stroke-width="3"/>
+  <path d="M123 40.5l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
