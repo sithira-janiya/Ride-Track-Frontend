@@ -7,7 +7,8 @@ import { spacing, typography } from '@/theme';
 import type { Arrival, TripStatus } from '@/types';
 import { formatClock } from '@/utils/format';
 
-const STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
+/** How a trip's status reads to people, with its badge tone. */
+export const TRIP_STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
   SCHEDULED: { label: 'On schedule', tone: 'info' },
   ONGOING: { label: 'On the way', tone: 'success' },
   DELAYED: { label: 'Delayed', tone: 'warning' },
@@ -18,7 +19,7 @@ const STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
 export function ArrivalRow({ arrival }: { arrival: Arrival }) {
   const c = useColors();
   const t = useT();
-  const status = STATUS[arrival.status];
+  const status = TRIP_STATUS[arrival.status];
   return (
     <Card>
       <View style={styles.row}>

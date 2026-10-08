@@ -27,6 +27,17 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Enter your password.'),
 });
 
+/** Bus drivers sign in with the code an admin issued them (e.g. DRV-4K7Q2M). Matches RideTrack-API `POST /driver/auth/login`. */
+export const driverLoginSchema = z.object({
+  driverCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(4, 'Enter your driver code, for example DRV-4K7Q2M.')
+    .max(12, 'Driver codes have at most 12 characters.'),
+  password: z.string().min(1, 'Enter your password.'),
+});
+
 export const registerSchema = z
   .object({
     name: z.string().trim().min(2, 'Enter your full name.'),
@@ -69,6 +80,7 @@ export const vehicleSchema = z.object({
 });
 
 export type LoginForm = z.infer<typeof loginSchema>;
+export type DriverLoginForm = z.infer<typeof driverLoginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type StaffAccountForm = z.infer<typeof staffAccountSchema>;
 export type VehicleForm = z.infer<typeof vehicleSchema>;

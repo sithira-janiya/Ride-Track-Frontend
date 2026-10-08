@@ -9,14 +9,10 @@ import { routesApi } from '@/api/endpoints';
 import { LiveMap } from '@/components/map/LiveMap';
 import { Button, Card, ErrorMessage, ETAChip, Loading, OccupancyBar, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
-import { useT, type Translate } from '@/i18n';
+import { useT } from '@/i18n';
 import { STALE_AFTER_MS, useLiveVehicles, useNow } from '@/hooks/use-live-vehicles';
 import { spacing, typography } from '@/theme';
-
-function ago(ms: number, t: Translate) {
-  const s = Math.max(0, Math.round(ms / 1000));
-  return s < 60 ? t('{n} s ago', { n: s }) : t('{n} min ago', { n: Math.round(s / 60) });
-}
+import { timeAgo } from '@/utils/format';
 
 export default function LiveMapScreen() {
   const c = useColors();
@@ -63,7 +59,7 @@ export default function LiveMapScreen() {
             <View style={styles.statusRow}>
               <StatusBadge label={connected ? 'Live' : 'Reconnecting…'} tone={connected ? 'success' : 'warning'} />
               <Text style={[styles.caption, { color: c.textSecondary }]}>
-                {lastUpdated ? t('Updated {ago}', { ago: ago(now - lastUpdated, t) }) : t('Waiting for first update…')}
+                {lastUpdated ? t('Updated {ago}', { ago: timeAgo(now - lastUpdated, t) }) : t('Waiting for first update…')}
               </Text>
             </View>
             {stale ? (

@@ -18,10 +18,12 @@ type Retryable = InternalAxiosRequestConfig & { _retried?: boolean };
 let refreshing: Promise<AuthTokens> | null = null;
 
 async function refreshTokens(): Promise<AuthTokens> {
-  const refreshToken = useAuth.getState().refreshToken;
+  const { refreshToken, user } = useAuth.getState();
   if (!refreshToken) throw new Error('No refresh token');
+  // driver sessions only refresh at the driver endpoint; the app endpoint refuses their tokens (and vice versa)
+  const path = user?.role === 'DRIVER' ? '/driver/auth/refresh' : '/auth/refresh';
   // plain axios: this call must not go through the interceptors below
-  const res = await axios.post<ApiSuccess<AuthTokens>>(`${env.apiUrl}/auth/refresh`, { refreshToken });
+  const res = await axios.post<ApiSuccess<AuthTokens>>(`${env.apiUrl}${path}`, { refreshToken });
   return res.data.data;
 }
 
@@ -29,7 +31,7 @@ api.interceptors.response.use(
   (r) => r,
   async (error: AxiosError<ApiError>) => {
     const original = error.config as Retryable | undefined;
-    const isAuthCall = original?.url?.startsWith('/auth/');
+    const isAuthCall = /^\/(driver\/)?auth\//.test(original?.url ?? '');
 
     if (error.response?.status === 401 && original && !original._retried && !isAuthCall) {
       original._retried = true;
@@ -55,4 +57,11 @@ export function errorMessage(e: unknown): string {
   }
   if (e instanceof Error && e.message) return e.message;
   return 'Something went wrong. Please try again.';
+}
+
+/** The API's error code (e.g. `OFF_DUTY`, `BUS_NOT_FOUND`), when there is one. Mock errors carry the same codes. */
+export function errorCode(e: unknown): string | null {
+  if (isAxiosError<ApiError>(e)) return e.response?.data?.error?.code ?? null;
+  const code = (e as { code?: unknown } | null)?.code;
+  return typeof code === 'string' ? code : null;
 }

@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { useInstallReferrerBus } from '@/hooks/use-bus';
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
 
@@ -21,6 +22,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000, gcTime: DAY } } }));
   const { hydrate, hydrated, user } = useAuth();
+  useInstallReferrerBus(); // Android: a bus scanned before the app was installed
 
   // restore the saved session on app start
   useEffect(() => {
@@ -68,6 +70,11 @@ export default function RootLayout() {
           <Stack.Protected guard={role === 'AUTHORITY'}>
             <Stack.Screen name="(authority)" />
           </Stack.Protected>
+          <Stack.Protected guard={role === 'DRIVER'}>
+            <Stack.Screen name="(driver)" />
+          </Stack.Protected>
+          {/* a scanned bus (rtexpo://bus/<code>): open to everyone, signed in or not */}
+          <Stack.Screen name="bus/[code]" />
         </Stack>
       </ThemeProvider>
     </PersistQueryClientProvider>

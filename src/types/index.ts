@@ -1,6 +1,7 @@
 // Shared types matching the REST/WebSocket contract in docs/07-api.md.
 
-export type Role = 'PASSENGER' | 'STAFF' | 'AUTHORITY';
+/** DRIVER accounts sign in with a driver code (`/driver/auth`), never through the app login. */
+export type Role = 'PASSENGER' | 'STAFF' | 'AUTHORITY' | 'DRIVER';
 export type TransportMode = 'BUS' | 'TRAIN';
 export type TripStatus = 'SCHEDULED' | 'ONGOING' | 'DELAYED' | 'CANCELLED' | 'COMPLETED';
 export type TicketStatus = 'PENDING' | 'ACTIVE' | 'USED' | 'EXPIRED' | 'CANCELLED';
@@ -123,6 +124,72 @@ export interface DelayAlert {
 export interface ScanOutcome {
   result: 'VALID' | 'INVALID';
   reason?: string;
+}
+
+/** A timetabled run of one vehicle (RideTrack-API `toTrip`). */
+export interface Trip {
+  tripId: number;
+  routeId: number;
+  vehicleId: number | null;
+  startTime: string;
+  endTime: string | null;
+  status: TripStatus;
+}
+
+// Bus QR (RideTrack-API `/buses`, `/b/:code`): every bus carries a sticker holding `${PUBLIC_URL}/b/<code>`.
+export interface BusQr {
+  code: string;
+  /** what the sticker encodes; the page there opens `rtexpo://bus/<code>` or the store */
+  url: string;
+}
+
+/** `GET /buses/:code`: what a passenger sees after scanning the QR inside a bus. Public, no login needed. */
+export interface BusView {
+  bus: { vehicleId: number; regNo: string; type: TransportMode; capacity: number; code: string };
+  route: RouteDetail;
+  /** the trip running now, or else the next one in the coming day */
+  trip: Trip | null;
+  /** null until the driver's phone has sent a position */
+  live: VehiclePosition | null;
+  driverOnDuty: boolean;
+}
+
+// Driver panel (RideTrack-API `/driver/*`): the driver runs one bus and their phone is its GPS.
+export interface DriverBus {
+  vehicleId: number;
+  regNo: string;
+  type: TransportMode;
+  capacity: number;
+  isActive: boolean;
+  qr: BusQr;
+}
+
+/** `GET /driver/me`. `bus` and the rest are null until an admin assigns a bus. */
+export interface DriverOverview extends User {
+  driverCode: string;
+  licenseNo: string;
+  onDuty: boolean;
+  bus: DriverBus | null;
+  route: RouteDetail | null;
+  trip: Trip | null;
+  live: VehiclePosition | null;
+}
+
+/** `GET /driver/trips/:id/passengers`: counts and stops only, never who the passengers are. */
+export interface TripPassengers {
+  tripId: number;
+  paid: number;
+  boarded: number;
+  revenue: number;
+  tickets: { ticketId: number; status: 'ACTIVE' | 'USED'; fare: number; boardStopName: string; alightStopName: string }[];
+}
+
+/** `POST /driver/alerts`. Without `tripId` the alert goes to the trip the bus is running now. */
+export interface DriverAlert {
+  tripId?: number;
+  type: AlertType;
+  message: string;
+  delayMinutes?: number;
 }
 
 // WebSocket events

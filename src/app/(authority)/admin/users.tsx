@@ -18,8 +18,9 @@ const ROLES: { value: Role | undefined; label: string }[] = [
   { value: 'PASSENGER', label: 'Passengers' },
   { value: 'STAFF', label: 'Staff' },
   { value: 'AUTHORITY', label: 'Officers' },
+  { value: 'DRIVER', label: 'Drivers' },
 ];
-const ROLE_LABEL: Record<Role, string> = { PASSENGER: 'Passenger', STAFF: 'Staff', AUTHORITY: 'Officer' };
+const ROLE_LABEL: Record<Role, string> = { PASSENGER: 'Passenger', STAFF: 'Staff', AUTHORITY: 'Officer', DRIVER: 'Driver' };
 
 function AccountCard({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
   const c = useColors();

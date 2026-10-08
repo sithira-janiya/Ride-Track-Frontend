@@ -43,7 +43,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "RideTrack uses the camera to scan passenger tickets."
+          "cameraPermission": "RideTrack uses the camera to scan the QR code inside a bus and, for staff, passenger tickets."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "RideTrack uses your location to show stops near you and, for drivers on duty, to show passengers where the bus is."
         }
       ]
     ],

@@ -3,17 +3,19 @@ import { View } from 'react-native';
 
 import { AlertBanner } from '@/components/alerts/AlertBanner';
 import { useAlertSocket, usePushRegistration, useUnreadCount } from '@/hooks/use-alerts';
+import { useOpenPendingBus } from '@/hooks/use-bus';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 
-// Passenger tabs per docs/08-frontend-react-native.md: Home · Map · Tickets · Alerts · Profile.
-// Map is not a tab: it opens from a route.
+// Passenger tabs: Home · Scan · Tickets · Alerts · Profile. Scan opens the bus you are on from the QR inside it
+// (the bus screen itself is /bus/[code], outside this group, so it also works before login). Map opens from a route.
 export default function PassengerTabs() {
   const c = useColors();
   const t = useT();
   const unread = useUnreadCount();
   useAlertSocket();
   usePushRegistration();
+  useOpenPendingBus('passenger'); // a bus scanned before login, or before the app was installed
 
   return (
     <View style={{ flex: 1 }}>
@@ -26,6 +28,7 @@ export default function PassengerTabs() {
           tabBarLabelStyle: { fontSize: 14 },
         }}>
         <Tabs.Screen name="index" options={{ title: t('Home') }} />
+        <Tabs.Screen name="scan" options={{ title: t('Scan') }} />
         <Tabs.Screen name="tickets" options={{ title: t('Tickets') }} />
         <Tabs.Screen
           name="alerts"

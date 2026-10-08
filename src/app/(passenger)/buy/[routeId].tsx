@@ -21,11 +21,15 @@ export default function BuyTicketScreen() {
   const t = useT();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const routeId = Number(useLocalSearchParams<{ routeId: string }>().routeId);
+  // from a scanned bus: its trip is fixed (`tripId`) and boarding defaults to the stop the bus is at (`boardStopId`)
+  const params = useLocalSearchParams<{ routeId: string; tripId?: string; boardStopId?: string; regNo?: string }>();
+  const routeId = Number(params.routeId);
+  const busTripId = params.tripId ? Number(params.tripId) : null;
 
-  const [boardId, setBoardId] = useState<number | null>(null);
+  const [boardId, setBoardId] = useState<number | null>(params.boardStopId ? Number(params.boardStopId) : null);
   const [alightId, setAlightId] = useState<number | null>(null);
-  const [tripId, setTripId] = useState<number | null>(null);
+  const [pickedTripId, setTripId] = useState<number | null>(null);
+  const tripId = busTripId ?? pickedTripId;
 
   const route = useQuery({ queryKey: ['route', routeId], queryFn: () => routesApi.detail(routeId), enabled: Number.isFinite(routeId) });
   const stops = route.data?.stops ?? [];
@@ -37,7 +41,7 @@ export default function BuyTicketScreen() {
   const arrivals = useQuery({
     queryKey: ['arrivals', routeId, boardId],
     queryFn: () => routesApi.arrivals(routeId, boardId!),
-    enabled: boardId != null,
+    enabled: boardId != null && busTripId == null,
   });
   const trips = (arrivals.data ?? []).filter((a) => a.status !== 'CANCELLED' && a.status !== 'COMPLETED');
 
@@ -61,7 +65,7 @@ export default function BuyTicketScreen() {
     },
   });
 
-  const ready = boardId != null && alightId != null && tripId != null && fare != null && fare >= 0;
+  const ready = board != null && alight != null && tripId != null && fare != null && fare >= 0;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
@@ -111,7 +115,13 @@ export default function BuyTicketScreen() {
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
                     {t('3. Which trip?')}
                   </Text>
-                  {arrivals.isPending ? (
+                  {busTripId != null ? (
+                    <Card>
+                      <Text style={[styles.body, { color: c.text }]}>
+                        {params.regNo ? t('Bus {regNo}, the one you scanned.', { regNo: params.regNo }) : t('The bus you scanned.')}
+                      </Text>
+                    </Card>
+                  ) : arrivals.isPending ? (
                     <Loading label="Loading trips…" />
                   ) : arrivals.isError ? (
                     <ErrorMessage message={errorMessage(arrivals.error)} onRetry={() => arrivals.refetch()} />

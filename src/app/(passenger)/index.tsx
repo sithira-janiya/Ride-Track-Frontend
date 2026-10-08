@@ -46,6 +46,16 @@ export default function PassengerHome() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
+          <Card style={{ borderColor: c.primary, backgroundColor: c.infoBg }}>
+            <Text accessibilityRole="header" style={[styles.sectionTitle, { color: c.text }]}>
+              {t('On a bus?')}
+            </Text>
+            <Text style={[styles.hint, { color: c.text }]}>
+              {t('Scan the QR code inside it to follow it live and buy your ticket for it.')}
+            </Text>
+            <Button title="Scan bus QR code" onPress={() => router.navigate('/scan')} />
+          </Card>
+
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
             {t('Where to?')}
           </Text>

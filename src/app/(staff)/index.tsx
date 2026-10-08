@@ -1,11 +1,11 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { scansApi } from '@/api/endpoints';
+import { QrCamera } from '@/components/scan/QrCamera';
 import { ScanResultPanel } from '@/components/scan/ScanResultPanel';
 import { Button, ErrorMessage, Loading, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
@@ -16,7 +16,6 @@ type Phase = { kind: 'scanning' } | { kind: 'checking' } | { kind: 'result'; out
 
 export default function ScanScreen() {
   const c = useColors();
-  const [permission, requestPermission] = useCameraPermissions();
   const [phase, setPhase] = useState<Phase>({ kind: 'scanning' });
   const [manual, setManual] = useState(false);
   const [ticketText, setTicketText] = useState('');
@@ -81,31 +80,13 @@ export default function ScanScreen() {
                   <Button title="Check ticket" onPress={submitManual} disabled={!ticketText.trim()} />
                   <Button title="Use camera instead" variant="secondary" onPress={() => setManual(false)} />
                 </View>
-              ) : !permission ? (
-                <Loading label="Checking camera access…" />
-              ) : !permission.granted ? (
-                <View style={styles.gap}>
-                  <Text style={[styles.body, { color: c.text }]}>
-                    RideTrack needs the camera to scan tickets.
-                    {!permission.canAskAgain && Platform.OS !== 'web' ? ' Camera access was blocked. Turn it on in your phone settings.' : ''}
-                  </Text>
-                  {permission.canAskAgain ? <Button title="Allow camera" onPress={requestPermission} /> : null}
-                  <Button title="Type ticket number instead" variant="secondary" onPress={() => setManual(true)} />
-                </View>
               ) : (
-                <View style={styles.gap}>
-                  <View style={[styles.camera, { borderColor: c.primary }]}>
-                    <CameraView
-                      style={StyleSheet.absoluteFill}
-                      facing="back"
-                      barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                      onBarcodeScanned={scanning ? ({ data }) => validate({ qrToken: data }) : undefined}
-                      accessibilityLabel="Camera view. Point at the passenger's QR code."
-                    />
-                  </View>
-                  <Text style={[styles.body, { color: c.textSecondary }]}>Point the camera at the passenger&apos;s QR code.</Text>
-                  <Button title="QR will not scan? Type ticket number" variant="secondary" onPress={() => setManual(true)} />
-                </View>
+                <QrCamera
+                  onScan={scanning ? (data) => validate({ qrToken: data }) : null}
+                  permissionMessage="RideTrack needs the camera to scan tickets."
+                  hint="Point the camera at the passenger's QR code."
+                  fallback={{ label: 'QR will not scan? Type ticket number', blockedLabel: 'Type ticket number instead', onPress: () => setManual(true) }}
+                />
               )}
             </>
           )}
@@ -121,6 +102,4 @@ const styles = StyleSheet.create({
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
   gap: { gap: spacing.md },
   heading: { ...typography.heading },
-  body: { ...typography.body },
-  camera: { aspectRatio: 1, width: '100%', overflow: 'hidden', borderRadius: 20, borderWidth: 3 },
 });

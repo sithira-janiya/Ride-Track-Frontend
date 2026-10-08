@@ -1,11 +1,14 @@
 // In-memory fake backend so screens can be built before the real API exists (see docs/11-frontend-tasks.md, Phase 0).
 // Enabled by EXPO_PUBLIC_USE_MOCK_API=true. Shapes follow docs/07-api.md.
+import { env } from '@/config/env';
 import type {
-  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUser, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, NewStaffAccount, NewVehicle, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, TripStatus, User, VehiclePosition,
+  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUser, AdminUserPage, AdminVehicle, Arrival, AuthResult, BusQr, BusView, DelayAlert, DriverAlert, DriverOverview, FleetVehicle, NewAlert, NewStaffAccount, NewVehicle, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, Trip, TripPassengers, TripStatus, User, VehiclePosition,
 } from '@/types';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 const minsFromNow = (m: number) => new Date(Date.now() + m * 60000).toISOString();
+/** An error carrying the API's error code, like a RideTrack-API `{ error: { code, message } }` response. */
+const apiError = (message: string, code: string) => Object.assign(new Error(message), { code });
 
 const allStops: Stop[] = [
   { stopId: 1, name: 'Colombo Fort', latitude: 6.9335, longitude: 79.8501 },
@@ -81,6 +84,7 @@ const users: User[] = [
   { userId: 1, name: 'Demo Passenger', email: 'passenger@ridetrack.test', phone: null, role: 'PASSENGER', isActive: true },
   { userId: 2, name: 'Demo Conductor', email: 'staff@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
   { userId: 3, name: 'Demo Officer', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
+  { userId: 4, name: 'Demo Driver', email: 'driver@ridetrack.test', phone: null, role: 'DRIVER', isActive: true },
 ];
 
 // admin-only details per account: staff and officer profile rows, and passwords set by an officer
@@ -109,11 +113,123 @@ let nextAlertId = 4;
 /** All demo accounts use this password. Mock mode only. */
 export const MOCK_PASSWORD = 'Password1!';
 
+// ---- bus QR codes and drivers (RideTrack-API `/buses`, `/driver`) ----
+
+/** The demo driver signs in with this code and MOCK_PASSWORD, and runs bus NB-1234 (same as RideTrack-API's seed). */
+export const MOCK_DRIVER_CODE = 'DRV-DEMO01';
+
+/** The code on each bus's QR sticker, as RideTrack-API's seed has them. */
+const busCodes: Record<number, string> = { 101: 'DEMOBUS101', 102: 'DEMOBUS102', 201: 'DEMOTRN201' };
+
+type Fix = { lat: number; lng: number; recordedAt: string };
+type DriverProfile = { driverCode: string; licenseNo: string; vehicleId: number | null; onDuty: boolean; fix: Fix | null };
+const drivers: Record<number, DriverProfile> = {
+  4: { driverCode: MOCK_DRIVER_CODE, licenseNo: 'B1234567', vehicleId: 101, onDuty: false, fix: null },
+};
+
+const tripAt = (tripId: number, routeId: number, vehicleId: number, startMin: number, lengthMin: number, status: TripStatus): Trip => ({
+  tripId, routeId, vehicleId, startTime: minsFromNow(startMin), endTime: minsFromNow(startMin + lengthMin), status,
+});
+// each bus's trips around now. Ids keep `Math.floor(tripId / 10) === routeId`, which createTicket relies on.
+const busTrips: Trip[] = [
+  tripAt(10, 1, 101, -110, 75, 'COMPLETED'),
+  tripAt(11, 1, 101, -20, 75, 'ONGOING'),
+  tripAt(14, 1, 101, 70, 75, 'SCHEDULED'),
+  tripAt(15, 1, 101, 160, 75, 'SCHEDULED'),
+  tripAt(13, 1, 102, -5, 75, 'DELAYED'),
+  tripAt(16, 1, 102, 100, 75, 'SCHEDULED'),
+  tripAt(21, 2, 201, -30, 180, 'ONGOING'),
+  tripAt(24, 2, 201, 150, 180, 'SCHEDULED'),
+];
+
+const findVehicle = (vehicleId: number) => {
+  for (const [routeId, list] of Object.entries(vehiclesByRoute)) {
+    const v = list.find((x) => x.vehicleId === vehicleId);
+    if (v) return { routeId: Number(routeId), v };
+  }
+  return null;
+};
+
+/** The trip the bus is running now, or else its next trip in the coming day (RideTrack-API `currentTrip`). */
+function currentTrip(vehicleId: number): Trip | null {
+  const mine = busTrips.filter((t) => t.vehicleId === vehicleId);
+  const byStart = (a: Trip, b: Trip) => a.startTime.localeCompare(b.startTime);
+  const running = mine.filter((t) => t.status === 'ONGOING' || t.status === 'DELAYED').sort(byStart).pop();
+  if (running) return { ...running };
+  const now = Date.now();
+  const next = mine
+    .filter((t) => t.status === 'SCHEDULED' && Date.parse(t.startTime) > now - 3600000 && Date.parse(t.startTime) < now + 86400000)
+    .sort(byStart)[0];
+  return next ? { ...next } : null;
+}
+
+/** The sticker URL: RideTrack-API serves `/b/<code>` from its public address, outside `/api/v1`. */
+const busQr = (code: string): BusQr => ({ code, url: `${env.apiUrl.replace(/\/api\/v1\/?$/, '')}/b/${code}` });
+
+// codes are read off a sticker, so no 0/O or 1/I/L (RideTrack-API `utils/codes.js`)
+const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const newBusCode = () => Array.from({ length: 8 }, () => CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)]).join('');
+
+/** A driver's phone position wins over the simulated one while it is fresh. */
+function driverFix(vehicleId: number): Fix | null {
+  const d = Object.values(drivers).find((x) => x.vehicleId === vehicleId);
+  return d?.fix && Date.now() - Date.parse(d.fix.recordedAt) < 60_000 ? d.fix : null;
+}
+
+function driverOf(userId: number): DriverProfile {
+  const d = drivers[userId];
+  if (!d || !users.find((u) => u.userId === userId)?.isActive) throw apiError('Please log in again.', 'UNAUTHORIZED');
+  return d;
+}
+
+function busOf(d: DriverProfile): number {
+  if (!d.vehicleId) throw apiError('No bus is assigned to your account yet. Ask your administrator.', 'NO_BUS_ASSIGNED');
+  return d.vehicleId;
+}
+
+/** A trip of the driver's own bus; other buses' trips are invisible to them. */
+function ownTrip(d: DriverProfile, tripId: number): Trip {
+  const vehicleId = busOf(d);
+  const trip = busTrips.find((t) => t.tripId === tripId && t.vehicleId === vehicleId);
+  if (!trip) throw apiError('Trip not found on your bus.', 'NOT_FOUND');
+  return trip;
+}
+
+/** Simulated positions: each vehicle ping-pongs along its route. A driver's fresh phone fix replaces the simulation. */
+function livePositions(routeId: number): VehiclePosition[] {
+  const path = stopsFor(routeId);
+  if (path.length < 2) return [];
+  const now = Date.now();
+  return (vehiclesByRoute[routeId] ?? []).map((v) => {
+    // ping-pong along the stops: 0 -> 1 -> 0 over `periodSec`
+    const t = ((now / 1000 + v.offsetSec) % v.periodSec) / v.periodSec;
+    const progress = t < 0.5 ? t * 2 : (1 - t) * 2;
+    const scaled = progress * (path.length - 1);
+    const seg = Math.min(Math.floor(scaled), path.length - 2);
+    const f = scaled - seg;
+    const a = path[seg];
+    const b = path[seg + 1];
+    const fix = driverFix(v.vehicleId);
+    return {
+      vehicleId: v.vehicleId,
+      regNo: v.regNo,
+      lat: fix?.lat ?? a.latitude + (b.latitude - a.latitude) * f,
+      lng: fix?.lng ?? a.longitude + (b.longitude - a.longitude) * f,
+      eta: new Date(now + (1 - progress) * v.periodSec * 500).toISOString(),
+      recordedAt: fix?.recordedAt ?? new Date(now).toISOString(),
+      passengerCount: v.passengerCount,
+      capacity: v.capacity,
+    };
+  });
+}
+
 export const mockApi = {
   async login(identifier: string, password: string): Promise<AuthResult> {
     const user = users.find((u) => u.email === identifier || u.phone === identifier);
-    // same message for unknown account, wrong password and disabled account (docs/03-dfd.md, security note)
-    if (!user || password !== (passwords[user.userId] ?? MOCK_PASSWORD) || !user.isActive) throw new Error('Invalid email/phone or password.');
+    // same message for unknown account, wrong password, disabled account and driver account (drivers use driverLogin)
+    if (!user || password !== (passwords[user.userId] ?? MOCK_PASSWORD) || !user.isActive || user.role === 'DRIVER') {
+      throw apiError('Invalid email/phone or password.', 'INVALID_CREDENTIALS');
+    }
     return delay({ user, accessToken: `mock-access-${user.userId}`, refreshToken: `mock-refresh-${user.userId}` });
   },
 
@@ -166,41 +282,17 @@ export const mockApi = {
   getArrivals(routeId: number, stopId: number): Promise<Arrival[]> {
     // vary times by stop so switching stops visibly changes the list
     const o = stopId % 5;
+    // a trip a driver started or ended keeps that status here
+    const status = (tripId: number, fallback: TripStatus) => busTrips.find((t) => t.tripId === tripId)?.status ?? fallback;
     return delay([
-      { tripId: routeId * 10 + 1, routeId, vehicleId: 101, eta: minsFromNow(2 + o), scheduled: false, status: 'ONGOING' },
+      { tripId: routeId * 10 + 1, routeId, vehicleId: 101, eta: minsFromNow(2 + o), scheduled: false, status: status(routeId * 10 + 1, 'ONGOING') },
       { tripId: routeId * 10 + 2, routeId, vehicleId: null, eta: minsFromNow(15 + o), scheduled: true, status: 'SCHEDULED' },
-      { tripId: routeId * 10 + 3, routeId, vehicleId: 102, eta: minsFromNow(28 + o), scheduled: false, status: 'DELAYED' },
+      { tripId: routeId * 10 + 3, routeId, vehicleId: 102, eta: minsFromNow(28 + o), scheduled: false, status: status(routeId * 10 + 3, 'DELAYED') },
     ]);
   },
 
   /** Vehicles drift along the route over time, so polling this shows them moving. */
-  getVehicles(routeId: number): Promise<VehiclePosition[]> {
-    const path = stopsFor(routeId);
-    if (path.length < 2) return delay([]);
-    const now = Date.now();
-    return delay(
-      (vehiclesByRoute[routeId] ?? []).map((v) => {
-        // ping-pong along the stops: 0 -> 1 -> 0 over `periodSec`
-        const t = ((now / 1000 + v.offsetSec) % v.periodSec) / v.periodSec;
-        const progress = t < 0.5 ? t * 2 : (1 - t) * 2;
-        const scaled = progress * (path.length - 1);
-        const seg = Math.min(Math.floor(scaled), path.length - 2);
-        const f = scaled - seg;
-        const a = path[seg];
-        const b = path[seg + 1];
-        return {
-          vehicleId: v.vehicleId,
-          regNo: v.regNo,
-          lat: a.latitude + (b.latitude - a.latitude) * f,
-          lng: a.longitude + (b.longitude - a.longitude) * f,
-          eta: new Date(now + (1 - progress) * v.periodSec * 500).toISOString(),
-          recordedAt: new Date(now).toISOString(),
-          passengerCount: v.passengerCount,
-          capacity: v.capacity,
-        };
-      }),
-    );
-  },
+  getVehicles: (routeId: number): Promise<VehiclePosition[]> => delay(livePositions(routeId)),
 
   async createTicket(input: { tripId: number; boardStopId: number; alightStopId: number }): Promise<PaymentSession> {
     const routeId = Math.floor(input.tripId / 10);
@@ -372,6 +464,151 @@ export const mockApi = {
     const all = tickets.filter((t) => !status || t.status === status);
     const items = all.slice((page - 1) * TICKET_PAGE_SIZE, page * TICKET_PAGE_SIZE);
     return delay({ items, nextPage: page * TICKET_PAGE_SIZE < all.length ? page + 1 : null });
+  },
+
+  // ---- bus QR (public) ----
+
+  /** What a passenger sees after scanning the QR inside a bus. Codes are case-insensitive, like the API. */
+  async getBus(code: string): Promise<BusView> {
+    const wanted = code.trim().toUpperCase();
+    const vehicleId = Number(Object.keys(busCodes).find((id) => busCodes[Number(id)] === wanted));
+    const found = vehicleId ? findVehicle(vehicleId) : null;
+    if (!found) throw apiError('This bus QR code is not recognised. It may have been replaced; ask the driver.', 'BUS_NOT_FOUND');
+    const route = routes.find((r) => r.routeId === found.routeId)!;
+    const driver = Object.values(drivers).find((d) => d.vehicleId === vehicleId);
+    return delay({
+      bus: { vehicleId, regNo: found.v.regNo, type: route.mode, capacity: found.v.capacity, code: wanted },
+      route: { ...route, stops: stopsFor(route.routeId) },
+      trip: currentTrip(vehicleId),
+      live: livePositions(found.routeId).find((p) => p.vehicleId === vehicleId) ?? null,
+      // buses without a demo driver are simulated as running
+      driverOnDuty: driver ? driver.onDuty : true,
+    });
+  },
+
+  // ---- driver panel ----
+
+  async driverLogin(driverCode: string, password: string): Promise<AuthResult> {
+    const code = driverCode.trim().toUpperCase();
+    const userId = Number(Object.keys(drivers).find((id) => drivers[Number(id)].driverCode === code));
+    const user = users.find((u) => u.userId === userId && u.role === 'DRIVER');
+    // one message for unknown code, wrong password and disabled account
+    if (!user || !user.isActive || password !== (passwords[user.userId] ?? MOCK_PASSWORD)) {
+      throw apiError('Invalid driver code or password.', 'INVALID_CREDENTIALS');
+    }
+    return delay({ user: { ...user }, accessToken: `mock-access-${user.userId}`, refreshToken: `mock-refresh-${user.userId}` });
+  },
+
+  async driverMe(userId: number): Promise<DriverOverview> {
+    const d = driverOf(userId);
+    const user = users.find((u) => u.userId === userId)!;
+    const base = { ...user, driverCode: d.driverCode, licenseNo: d.licenseNo, onDuty: d.onDuty };
+    const found = d.vehicleId ? findVehicle(d.vehicleId) : null;
+    if (!found) return delay({ ...base, bus: null, route: null, trip: null, live: null });
+    const route = routes.find((r) => r.routeId === found.routeId)!;
+    busCodes[found.v.vehicleId] ??= newBusCode();
+    return delay({
+      ...base,
+      bus: { vehicleId: found.v.vehicleId, regNo: found.v.regNo, type: route.mode, capacity: found.v.capacity, isActive: true, qr: busQr(busCodes[found.v.vehicleId]) },
+      route: { ...route, stops: stopsFor(route.routeId) },
+      trip: currentTrip(found.v.vehicleId),
+      live: livePositions(found.routeId).find((p) => p.vehicleId === found.v.vehicleId) ?? null,
+    });
+  },
+
+  async driverSetDuty(userId: number, onDuty: boolean): Promise<{ onDuty: boolean }> {
+    const d = driverOf(userId);
+    if (onDuty) busOf(d);
+    d.onDuty = onDuty;
+    return delay({ onDuty }, 150);
+  },
+
+  /** The phone's position becomes the bus position, but only while the driver is on duty. */
+  async driverReportLocation(userId: number, fix: { lat: number; lng: number; recordedAt?: string }): Promise<void> {
+    const d = driverOf(userId);
+    busOf(d);
+    if (!d.onDuty) throw apiError('Go on duty to share your bus location.', 'OFF_DUTY');
+    if (Math.abs(fix.lat) > 90 || Math.abs(fix.lng) > 180) throw apiError('That is not a valid position.', 'VALIDATION_ERROR');
+    d.fix = { lat: fix.lat, lng: fix.lng, recordedAt: fix.recordedAt ?? new Date().toISOString() };
+    return delay(undefined, 100);
+  },
+
+  async driverSetOccupancy(userId: number, passengerCount: number): Promise<Occupancy> {
+    const vehicleId = busOf(driverOf(userId));
+    const capacity = findVehicle(vehicleId)?.v.capacity ?? 0;
+    if (passengerCount > capacity) throw apiError(`The bus holds at most ${capacity} passengers.`, 'VALIDATION_ERROR');
+    return mockApi.setOccupancy(vehicleId, passengerCount);
+  },
+
+  /** The bus's trips from 12 hours ago to 24 hours ahead, in timetable order. */
+  driverTrips(userId: number): Promise<Trip[]> {
+    const vehicleId = busOf(driverOf(userId));
+    const now = Date.now();
+    return delay(
+      busTrips
+        .filter((t) => t.vehicleId === vehicleId && Date.parse(t.startTime) > now - 12 * 3600000 && Date.parse(t.startTime) < now + 86400000)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime))
+        .map((t) => ({ ...t })),
+    );
+  },
+
+  /** Departing: the trip runs and the driver goes on duty, so the phone starts sharing the bus position. */
+  async driverStartTrip(userId: number, tripId: number): Promise<Trip> {
+    const d = driverOf(userId);
+    const trip = ownTrip(d, tripId);
+    if (trip.status === 'SCHEDULED' || trip.status === 'DELAYED') trip.status = 'ONGOING';
+    else if (trip.status !== 'ONGOING') throw apiError(`This trip is ${trip.status.toLowerCase()} and cannot be started.`, 'TRIP_NOT_STARTABLE');
+    d.onDuty = true;
+    return delay({ ...trip });
+  },
+
+  async driverEndTrip(userId: number, tripId: number): Promise<Trip> {
+    const trip = ownTrip(driverOf(userId), tripId);
+    if (trip.status !== 'ONGOING' && trip.status !== 'DELAYED') throw apiError('Only a running trip can be ended.', 'TRIP_NOT_RUNNING');
+    trip.status = 'COMPLETED';
+    trip.endTime = new Date().toISOString();
+    return delay({ ...trip });
+  },
+
+  /** Paid and boarded tickets on one of the driver's trips. Counts and stops only, never who the passengers are. */
+  async driverTripPassengers(userId: number, tripId: number): Promise<TripPassengers> {
+    const trip = ownTrip(driverOf(userId), tripId);
+    const booked = tickets.filter((t) => t.tripId === trip.tripId && (t.status === 'ACTIVE' || t.status === 'USED'));
+    return delay({
+      tripId: trip.tripId,
+      paid: booked.length,
+      boarded: booked.filter((t) => t.status === 'USED').length,
+      revenue: Math.round(booked.reduce((sum, t) => sum + t.fare, 0) * 100) / 100,
+      tickets: booked.map((t) => ({
+        ticketId: t.ticketId,
+        status: t.status as 'ACTIVE' | 'USED',
+        fare: t.fare,
+        boardStopName: t.boardStopName ?? `Stop ${t.boardStopId}`,
+        alightStopName: t.alightStopName ?? `Stop ${t.alightStopId}`,
+      })),
+    });
+  },
+
+  /** A delay, detour or cancellation from the bus. Without a trip id it goes to the trip running now. */
+  async driverRaiseAlert(userId: number, { tripId, ...alert }: DriverAlert): Promise<DelayAlert> {
+    const d = driverOf(userId);
+    const trip = tripId ? ownTrip(d, tripId) : currentTrip(busOf(d));
+    if (!trip) throw apiError('Your bus has no trip running or coming up.', 'NO_CURRENT_TRIP');
+    if (trip.status === 'CANCELLED' || trip.status === 'COMPLETED') throw apiError('This trip has already finished.', 'TRIP_NOT_RUNNING');
+    return mockApi.publishAlert({ tripId: trip.tripId, ...alert });
+  },
+
+  async driverBusQr(userId: number): Promise<BusQr> {
+    const vehicleId = busOf(driverOf(userId));
+    busCodes[vehicleId] ??= newBusCode();
+    return delay(busQr(busCodes[vehicleId]));
+  },
+
+  /** A new code for the driver's bus; the old sticker stops working at once. */
+  async driverRotateQr(userId: number): Promise<BusQr> {
+    const vehicleId = busOf(driverOf(userId));
+    busCodes[vehicleId] = newBusCode();
+    return delay(busQr(busCodes[vehicleId]));
   },
 
   // ---- admin panel ----

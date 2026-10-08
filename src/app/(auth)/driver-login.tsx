@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Text } from 'react-native';
 
-import { authApi } from '@/api/endpoints';
 import { errorMessage } from '@/api/client';
+import { authApi } from '@/api/endpoints';
 import { AuthScreen, startSession } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { typography } from '@/theme';
-import { loginSchema, normalizePhone, isEmail, type LoginForm } from '@/utils/validation';
+import { driverLoginSchema, type DriverLoginForm } from '@/utils/validation';
 
-export default function LoginScreen() {
+/** Driver sign-in on the bus phone: the driver code an admin issued, not an email (RideTrack-API `/driver/auth/login`). */
+export default function DriverLoginScreen() {
   const c = useColors();
   const t = useT();
   const [formError, setFormError] = useState<string | null>(null);
@@ -21,35 +22,35 @@ export default function LoginScreen() {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { identifier: '', password: '' } });
+  } = useForm<DriverLoginForm>({ resolver: zodResolver(driverLoginSchema), defaultValues: { driverCode: '', password: '' } });
 
-  const onSubmit = handleSubmit(async ({ identifier, password }) => {
+  const onSubmit = handleSubmit(async ({ driverCode, password }) => {
     setFormError(null);
     try {
-      const id = isEmail(identifier) ? identifier.trim().toLowerCase() : normalizePhone(identifier);
-      // on success the root layout's route guard moves the user to their role's screens
-      await startSession(await authApi.login(id, password));
+      // on success the root layout's route guard opens the driver panel
+      await startSession(await authApi.driverLogin(driverCode, password));
     } catch (e) {
       setFormError(errorMessage(e));
     }
   });
 
   return (
-    <AuthScreen title="Welcome back" subtitle="Log in to track your ride and manage your tickets.">
+    <AuthScreen title="Driver sign-in" subtitle="Sign in on the bus phone to run your bus. Use the driver code from your administrator.">
       <Controller
         control={control}
-        name="identifier"
+        name="driverCode"
         render={({ field }) => (
           <TextField
-            label="Email or mobile number"
+            label="Driver code"
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}
-            autoCapitalize="none"
+            autoCapitalize="characters"
+            autoCorrect={false}
             autoComplete="username"
-            keyboardType="email-address"
             textContentType="username"
-            error={errors.identifier?.message}
+            placeholder="e.g. DRV-4K7Q2M"
+            error={errors.driverCode?.message}
           />
         )}
       />
@@ -72,17 +73,11 @@ export default function LoginScreen() {
         )}
       />
       {formError ? <ErrorMessage message={formError} /> : null}
-      <Button title="Log in" onPress={onSubmit} loading={isSubmitting} />
+      <Button title="Sign in" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
-        {t('New to RideTrack?')}{' '}
-        <Link href="/register" style={{ color: c.primary, fontWeight: '700' }}>
-          {t('Create an account')}
-        </Link>
-      </Text>
-      <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
-        {t('Driving a bus?')}{' '}
-        <Link href="/driver-login" style={{ color: c.primary, fontWeight: '700' }}>
-          {t('Sign in with your driver code')}
+        {t('Not a driver?')}{' '}
+        <Link href="/login" style={{ color: c.primary, fontWeight: '700' }}>
+          {t('Passenger and staff login')}
         </Link>
       </Text>
     </AuthScreen>

@@ -1,6 +1,13 @@
 # RideTrack Frontend
 
-Mobile app for RideTrack, a public transport (bus and train) tracking and ticketing system. One React Native app serves three kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Staff** (conductor/inspector) and **Authority**.
+Mobile app for RideTrack, a public transport (bus and train) tracking and ticketing system. One React Native app serves four kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Driver**, **Staff** (conductor/inspector) and **Authority**.
+
+The everyday flow on a bus (RideTrack-API's bus QR logic):
+
+1. Every bus carries a **QR sticker** holding `<API address>/b/<code>`. A passenger on the bus scans it, with the phone camera or the app's **Scan** tab.
+2. The sticker's page opens the app on that bus (`rtexpo://bus/<code>`), or sends the passenger to the store to install it. On Android the bus code survives the install (Play install referrer), so the app opens that bus on first launch.
+3. The bus screen shows where the bus is, its route and trip, and sells a ticket for that trip. It works before login.
+4. The **driver's phone is the bus's GPS**: the driver signs in with a driver code, goes on duty, and the app sends the phone's position while the panel is open.
 
 > This file is kept up to date as the app is built. See [Keeping this README current](#keeping-this-readme-current).
 
@@ -16,6 +23,7 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 | HTTP / real-time | Axios, socket.io-client |
 | Maps | react-native-maps (native only; web shows a notice) |
 | Tickets / scanning | react-native-qrcode-svg, expo-brightness, expo-web-browser, expo-camera, expo-haptics |
+| Bus QR install hand-off | expo-application (Play install referrer, Android) |
 | Alerts | expo-notifications (push registration), socket `alert:new` |
 | Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache, offline route cache, language and translations) |
 | Forms | React Hook Form |
@@ -36,6 +44,8 @@ By default the app runs against a **built-in mock API** (`EXPO_PUBLIC_USE_MOCK_A
 
 The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO). Most endpoints the app calls have been checked against it: login, routes, arrivals, nearby stops, buying and paying for a ticket (mock gateway), staff scan, alerts, the ops dashboard, reports and the admin panel (see [Known limitations](#known-limitations) for the rest).
 
+The bus QR scan and the driver panel need the RideTrack-API version with the `buses` and `drivers` modules (`GET /buses/:code`, `/driver/*`, the `/b/:code` page). They follow that API's contract and tests but have only been run against the built-in mock so far. In the API's `.env`, `APP_SCHEME` must stay `rtexpo` (this app's `scheme` in `app.json`) and `ANDROID_PACKAGE` should be `com.ridetrack.app`.
+
 1. In `RideTrack-API`: start MySQL, then run `npm run migrate`, `npm run seed` and `npm run dev` (see its README). Check `http://<host>:3000/health` returns `{"status":"ok"}`.
 2. In this app's `.env.local`, set `EXPO_PUBLIC_USE_MOCK_API=false` and point both URLs at the computer running the API:
    - web or iOS simulator: `http://localhost:3000/api/v1` and `http://localhost:3000`
@@ -44,7 +54,8 @@ The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO).
 
 Notes:
 - The LAN IP changes when you switch networks. If the app shows "Cannot reach RideTrack", update the IP here **and** `PUBLIC_URL` in the backend's `.env` (it is used for payment page links).
-- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `RideTrack-API`.
+- Live vehicles only appear while something sends GPS positions: a driver on duty in the driver panel, or `npm run simulate` in `RideTrack-API`.
+- To try a bus QR without printing one, open `/bus/DEMOBUS101` in the app (web: `http://localhost:8081/bus/DEMOBUS101`), type `DEMOBUS101` on the Scan tab, or open the API's `http://<host>:3000/b/DEMOBUS101` page on a phone with the app installed.
 - Passengers only receive an alert when they hold a pending or active ticket for that trip.
 - The EAS `development` and `preview` profiles force mock mode; only `production` uses the real API.
 
@@ -57,11 +68,15 @@ All use the password `Password1!`.
 | Passenger | `passenger@ridetrack.test` | Passenger tabs (home, tickets, alerts, profile) |
 | Staff | `staff@ridetrack.test` | Staff tabs (scan, passengers, shift) |
 | Authority | `officer@ridetrack.test` | Authority tabs (dashboard, fleet, reports, alerts) |
+| Driver | driver code `DRV-DEMO01` (not an email) | Driver tabs (bus, trips, report, QR code); runs bus NB-1234 |
+
+Demo bus QR codes: `DEMOBUS101` (NB-1234, the demo driver's bus), `DEMOBUS102` (NB-5678) and `DEMOTRN201` (train TR-0042). Codes are not case-sensitive.
 
 Notes:
 - In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the same accounts and password are created by `npm run seed` in `RideTrack-API`.
 - The login field accepts an email or a mobile number, but the demo accounts have no phone number, so log in with the email.
-- Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
+- Registering in the app always creates a **Passenger**. Staff, Authority and Driver accounts cannot be self-registered.
+- Drivers sign in on **Login → "Sign in with your driver code"**. The email login refuses driver accounts with the usual "Invalid email/phone or password.", as the API does.
 - In mock mode, registered accounts live in memory only and disappear when the app reloads. On the real backend they are saved in MySQL.
 - A wrong email or wrong password gives the same error, "Invalid email/phone or password."
 - Passwords need at least 8 characters with a letter and a number when registering.
@@ -93,6 +108,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
 | – | Authority: admin back office (overview, accounts, vehicles, routes, trips, tickets) | Built; every screen checked in the browser against the real backend (create and disable an account, edit a vehicle); not tested on a device |
 | 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
+| – | Bus QR: passenger scan, public bus screen, buying for the scanned bus; Driver role: sign-in, duty and phone GPS, trips, passengers, alerts, bus QR | Built; every screen checked in the browser in mock mode (GPS stubbed in the browser); not yet run against RideTrack-API or on a device (camera scan, deep link, install referrer) |
 
 ## Features built so far
 
@@ -104,6 +120,18 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 
 - Alerts tab: delay, cancellation and route-change alerts with unread highlighting, a tab badge with the unread count, "Mark as read" and "Mark all as read". A banner slides in over any screen when the server sends `alert:new`. The device is registered for push notifications on login (skipped in mock mode, on web, and when notifications are off). In mock mode a "Demo: simulate a new alert" button stands in for the server.
 - Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out. Saving a new language switches the app to it (see Languages below).
+
+- Scan tab (bus QR): scan the QR sticker inside a bus with the camera, or type the bus code (the driver can show it). The scan accepts the sticker URL (`…/b/<code>`), the app link (`rtexpo://bus/<code>`) or the bare code; a ticket QR or any other code gets a clear "not a RideTrack bus QR code". Home also has an "On a bus?" card that opens it.
+- Bus screen (`/bus/<code>`, also the target of `rtexpo://bus/<code>`): the bus and its route, whether it is live (stop it is near, next-stop arrival, occupancy), the trip running now or next, the stops with "Bus is here", and the map on a phone. It refreshes every 10 s, plus socket updates when signed in. It opens without an account: a signed-out visitor gets "Log in" / "Create an account" and lands back on the bus after signing in. A replaced or unknown code shows "Bus code not recognised".
+- Buy a ticket for the scanned bus: the trip is fixed to that bus's trip, and boarding defaults to the stop the bus is near (the passenger can change it).
+- Android: a bus scanned before the app was installed opens on first launch (Play install referrer `bus=<code>`, read once).
+
+**Driver** (sign in with a driver code; RideTrack-API `/driver/*`)
+- Bus tab: the driver and their bus and route; **Go on duty / Go off duty**. On duty, the phone's GPS position is sent every 5 s (`POST /driver/location`) on any tab, with a status line ("Location sent 5 s ago", or what to do when location access is off). The current or next trip with **Start trip** (also puts the driver on duty) and **End trip** (asks first). Passengers on board with the same ±1/±5 counter as staff. Log out goes off duty and revokes the session first.
+- Trips tab: the bus's trips from 12 h ago to 24 h ahead, start and end each, and per trip the tickets paid, boarded and revenue, with each ticket's stops (never who the passenger is).
+- Report tab: send a delay (with minutes), detour or cancellation to the passengers of the current trip.
+- QR code tab: the bus's QR (what the sticker holds) and its code in large type, the link to share for printing, and **Replace QR code** (asks first; the old sticker stops working at once).
+- A driver with no bus assigned sees "No bus assigned yet" and cannot go on duty.
 
 **Staff**
 - Scan tab: camera permission flow, QR scanning, then a large VALID / INVALID result with the reason (icon, word and colour) and haptic feedback. "Scan next ticket" resets for the next passenger. If a QR will not scan, type the ticket number instead.
@@ -140,7 +168,7 @@ The app is written in English and translated at run time with the Google Cloud T
 - English shows until the translation arrives, when there is no API key, or when the request fails (retried after a minute). When Google rejects a request (bad key, API not enabled, billing off), its error message is shown under the language picker. If Google drops a `{placeholder}`, that string stays in English rather than showing a broken sentence.
 - Shared components (`Button`, `TextField`, `EmptyState`, `ErrorMessage`, `Loading`, `StatusBadge`, `Chips`, ...) translate their text props themselves, so screens pass English. Language names in the picker are never translated.
 - Which language: the signed-in account's `language` wins; before login the device keeps the last language picked. Profile → Save sends it to the account.
-- Translated: auth screens and all passenger screens, plus alert messages from the server. Staff and Authority screens only get the shared components translated (they have no language setting).
+- Translated: auth screens (including driver sign-in), all passenger screens and the bus screen, plus alert messages from the server. Staff, Driver and Authority screens only get the shared components translated (they have no language setting).
 - Setup: in Google Cloud Console enable the **Cloud Translation API** (billing must be on for the project), create an API key, and set it as `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` (in `.env.local`, EAS and Vercel). `EXPO_PUBLIC_*` values are baked in when the bundle is built, so restart with `npx expo start -c` (or redeploy) after setting it. The key is built into the app, so restrict it to the Cloud Translation API and to the app's Android package / web domain. Google bills per character after the free tier.
 
 ## Folder structure
@@ -148,16 +176,18 @@ The app is written in English and translated at run time with the Google Cloud T
 ```
 src/
 ├── app/                  Expo Router screens (a file = a route)
-│   ├── (auth)/           login, register
-│   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
+│   ├── (auth)/           login, register, driver-login
+│   ├── (passenger)/      home, scan, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
+│   ├── (driver)/         bus (index), trips, report, qr tabs
+│   ├── bus/[code]        a scanned bus; outside the role groups, so it opens before login too
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
 │       └── admin/        Admin tab, a stack: overview (index), users, new-account, vehicles, routes, trips, tickets
 ├── api/                  axios client, typed endpoint wrappers, mock API
-├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/, admin/
+├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, bus/, driver/, alerts/, ops/, admin/
 ├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
-├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, ...
-├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
+├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-bus, use-driver, use-admin, ...
+├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language, pending-bus, location-share
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
 assets/
@@ -181,12 +211,14 @@ Automated tests run with Jest, `jest-expo` and React Native Testing Library (`np
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
 - `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request, and keeping Google's error message on failure (fetch mocked).
+- `src/utils/__tests__/bus-code.test.ts`: reading a bus code from a sticker URL, app link, typed code or Play install referrer (and rejecting ticket QRs), and driver sign-in validation.
+- `src/api/__tests__/bus-flow.test.ts`: the mock bus QR and driver panel, mirroring RideTrack-API's tests: bus lookup, driver-code sign-in, location only on duty, occupancy limit, own trips only, start/end, passengers without personal details, alerts, replacing the QR code.
 
-Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
+Not automated yet: map screens, the camera scanner, payment in the browser, push notifications, driver GPS sharing. Those need a device.
 
 ## Release
 
-- Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards).
+- Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards). RideTrack-API's `ANDROID_PACKAGE` must match it, and its `APP_SCHEME` must match `scheme` (`rtexpo`), or the bus QR page cannot open the app.
 - Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
 - To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
 - Web (Vercel): `vercel.json` tells Vercel to run `npm install`, then `npx expo export -p web`, and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. The Vercel project's Root Directory is currently `src`, so `src/vercel.json` does the same from there (installs and builds from the repo root, outputs to `src/dist`); delete it once Root Directory is cleared. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
@@ -216,6 +248,11 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
 - The new icons and splash have not been seen on a device yet: the splash only shows in a real build (not Expo Go), and the iOS Liquid Glass icon (`assets/expo.icon`) has not been opened in Icon Composer or built for iOS.
 - Unused Expo template images (`expo-badge*`, `expo-logo`, `react-logo*`, `logo-glow`, `tutorial-web`, `tabIcons/`) are still in `assets/images/`.
+- Bus QR and driver panel: built against RideTrack-API's contract and checked only in mock mode. Not yet checked against the real API, and the camera scan, the `rtexpo://bus/<code>` deep link from the sticker page and the Play install referrer have not been tried on a device.
+- The driver's phone only sends its position while RideTrack is open in the foreground (`watchPositionAsync`); there is no background location task yet, and the screen is not kept awake, so a locked phone stops the bus moving on passengers' maps.
+- The sticker holds the API's `/b/<code>` web address, which opens a browser page first. Android App Links / iOS Universal Links (opening the app straight from the camera) are not set up; they need the API's domain and `assetlinks.json` / `apple-app-site-association`.
+- In mock mode each app session has its own memory, so a driver going on duty in one browser tab does not show up for a passenger in another. Mock bus positions are simulated unless the demo driver's phone sent one in the last minute.
+- The in-app admin panel (`(authority)/admin`) calls `/admin/overview`, `/admin/routes`, `/admin/trips` and `/admin/tickets` as an authority officer. The RideTrack-API version with bus QR codes moved `/admin/*` to a separate ADMIN role (with its own sign-in) and has no such endpoints, so the admin tab does not work against it; registering buses and issuing driver codes happen in the API's own admin panel there.
 
 ## Comparison with LMT GO (Lanka Metro Transit)
 
