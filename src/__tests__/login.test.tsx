@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { useAuth } from '@/store/auth';
+import { useLanguage } from '@/store/language';
 
 import LoginScreen from '@/app/(auth)/login';
 
@@ -12,7 +13,10 @@ jest.mock('expo-router', () => {
 jest.mock('@/utils/secure-storage', () => ({ getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() }));
 
 describe('LoginScreen', () => {
-  beforeEach(() => useAuth.setState({ user: null, accessToken: null, refreshToken: null }));
+  beforeEach(() => {
+    useAuth.setState({ user: null, accessToken: null, refreshToken: null });
+    useLanguage.setState({ language: 'en', pickedBeforeLogin: false });
+  });
 
   it('shows a message for each empty field and does not log in', async () => {
     await render(<LoginScreen />);
@@ -38,5 +42,15 @@ describe('LoginScreen', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Log in' }));
     await waitFor(() => expect(useAuth.getState().user?.role).toBe('PASSENGER'), { timeout: 3000 });
     expect(useAuth.getState().accessToken).toBeTruthy();
+  });
+
+  it('keeps a language picked on the login screen and saves it to the account', async () => {
+    await render(<LoginScreen />);
+    await fireEvent.press(screen.getByText('සිංහල'));
+    await fireEvent.changeText(screen.getByLabelText('Email or mobile number'), 'passenger@ridetrack.test');
+    await fireEvent.changeText(screen.getByLabelText('Password'), 'Password1!');
+    await fireEvent.press(screen.getByRole('button', { name: 'Log in' }));
+    await waitFor(() => expect(useAuth.getState().user?.language).toBe('si'), { timeout: 3000 });
+    expect(useLanguage.getState()).toMatchObject({ language: 'si', pickedBeforeLogin: false });
   });
 });

@@ -6,18 +6,16 @@ import { Text } from 'react-native';
 
 import { authApi } from '@/api/endpoints';
 import { errorMessage } from '@/api/client';
-import { AuthScreen } from '@/components/auth/AuthScreen';
+import { AuthScreen, startSession } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { useAuth } from '@/store/auth';
 import { typography } from '@/theme';
 import { loginSchema, normalizePhone, isEmail, type LoginForm } from '@/utils/validation';
 
 export default function LoginScreen() {
   const c = useColors();
   const t = useT();
-  const setSession = useAuth((s) => s.setSession);
   const [formError, setFormError] = useState<string | null>(null);
   const {
     control,
@@ -30,7 +28,7 @@ export default function LoginScreen() {
     try {
       const id = isEmail(identifier) ? identifier.trim().toLowerCase() : normalizePhone(identifier);
       // on success the root layout's route guard moves the user to their role's screens
-      await setSession(await authApi.login(id, password));
+      await startSession(await authApi.login(id, password));
     } catch (e) {
       setFormError(errorMessage(e));
     }
