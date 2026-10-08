@@ -22,7 +22,11 @@ async function translateBatch(texts: string[], target: string): Promise<string[]
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ q: texts, source: SOURCE_LANGUAGE, target, format: 'text' }),
   });
-  if (!res.ok) throw new Error(`Google Translate responded ${res.status}`);
+  if (!res.ok) {
+    // Google explains the failure in the body, e.g. "API key not valid" or "Cloud Translation API has not been used in project …"
+    const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+    throw new Error(body?.error?.message ?? `Google Translate responded ${res.status}`);
+  }
   const json = (await res.json()) as { data: { translations: { translatedText: string }[] } };
   return json.data.translations.map((t) => t.translatedText);
 }
@@ -39,9 +43,11 @@ async function flush() {
       try {
         const out = await translateBatch(chunk, language);
         useLanguage.getState().addTranslations(language, Object.fromEntries(chunk.map((text, j) => [text, out[j] ?? text])));
+        useLanguage.getState().setTranslationError(null);
         chunk.forEach((text) => requested.delete(`${language}\n${text}`));
       } catch (e) {
         if (__DEV__) console.warn('[i18n]', e);
+        useLanguage.getState().setTranslationError(e instanceof Error ? e.message : String(e));
         // English stays on screen; allow another attempt later
         setTimeout(() => chunk.forEach((text) => requested.delete(`${language}\n${text}`)), RETRY_AFTER_MS);
       }
