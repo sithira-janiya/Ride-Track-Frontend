@@ -1,8 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { useLanguage } from '@/store/language';
-
-import { useT } from '..';
+import { useLanguage, useT } from '..';
 
 beforeEach(async () => {
   await act(() => useLanguage.setState({ language: 'en', translations: {} }));

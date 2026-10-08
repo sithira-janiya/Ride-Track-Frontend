@@ -1,29 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi, vehiclesApi } from '@/api/endpoints';
 import { Button, Card, EmptyState, ErrorMessage, Loading, OccupancyBar } from '@/components/ui';
+import { useShiftVehicle } from '@/features/shift/hooks/use-shift-vehicle';
 import { useColors } from '@/hooks/use-colors';
-import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
 
-/** Update the on-board passenger count for the shift's vehicle (FR7, `POST /vehicles/:id/occupancy`). */
+/** Update the on-board passenger count for the shift's vehicle (FR7). */
 export default function PassengerCountScreen() {
   const c = useColors();
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const shift = useShift((s) => s.shift);
-
-  const vehicles = useQuery({
-    queryKey: ['vehicles', shift?.routeId],
-    queryFn: () => routesApi.vehicles(shift!.routeId),
-    enabled: !!shift,
-  });
-  const vehicle = vehicles.data?.find((v) => v.vehicleId === shift?.vehicleId);
+  const { shift, vehicles, vehicle, saveCount: save } = useShiftVehicle();
   const capacity = vehicle?.capacity ?? 0;
 
   // local draft so staff can tap +/- quickly and send once
@@ -34,10 +24,6 @@ export default function PassengerCountScreen() {
     setDraft(vehicle?.passengerCount ?? null);
   }
 
-  const save = useMutation({
-    mutationFn: (count: number) => vehiclesApi.setOccupancy(shift!.vehicleId, count),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['vehicles', shift?.routeId] }),
-  });
   useEffect(() => save.reset(), [draft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const change = (delta: number) => setDraft((d) => Math.max(0, Math.min(capacity || Infinity, (d ?? 0) + delta)));

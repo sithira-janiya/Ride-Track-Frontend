@@ -3,10 +3,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { NavRow } from '@/components/admin/NavRow';
-import { StatTile } from '@/components/ops/StatTile';
-import { ErrorMessage, Loading } from '@/components/ui';
-import { useAdminOverview } from '@/hooks/use-admin';
+import { ErrorMessage, Loading, StatTile } from '@/components/ui';
+import { NavRow } from '@/features/admin/components/NavRow';
+import { useAdminOverview } from '@/features/admin/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import { countOf, formatFare } from '@/utils/format';

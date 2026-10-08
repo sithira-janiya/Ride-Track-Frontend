@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '@/api/client';
-import { AdminPage } from '@/components/admin/AdminPage';
 import { Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
-import { useAdminRoutes, useAdminTrips } from '@/hooks/use-admin';
+import { AdminPage } from '@/features/admin/components/AdminPage';
+import { useAdminRoutes, useAdminTrips } from '@/features/admin/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { TripStatus } from '@/types';

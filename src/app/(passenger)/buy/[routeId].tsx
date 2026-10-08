@@ -1,65 +1,46 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi, ticketsApi } from '@/api/endpoints';
-import { ArrivalRow } from '@/components/routes/ArrivalRow';
-import { StopRow } from '@/components/routes/StopRow';
-import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { BackButton, Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { isRunning, sortByEta } from '@/features/routes/arrivals';
+import { ArrivalRow } from '@/features/routes/components/ArrivalRow';
+import { StopRow } from '@/features/routes/components/StopRow';
+import { useArrivals, useRouteDetail } from '@/features/routes/hooks/use-routes';
+import { useBuyTicket } from '@/features/tickets/hooks/use-buy-ticket';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { useTicketCache } from '@/store/tickets';
 import { spacing, typography } from '@/theme';
 import { formatClock, formatFare } from '@/utils/format';
-import { startPayment } from '@/utils/payment';
 
 export default function BuyTicketScreen() {
   const c = useColors();
   const t = useT();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const routeId = Number(useLocalSearchParams<{ routeId: string }>().routeId);
 
   const [boardId, setBoardId] = useState<number | null>(null);
   const [alightId, setAlightId] = useState<number | null>(null);
   const [tripId, setTripId] = useState<number | null>(null);
 
-  const route = useQuery({ queryKey: ['route', routeId], queryFn: () => routesApi.detail(routeId), enabled: Number.isFinite(routeId) });
+  const route = useRouteDetail(routeId);
   const stops = route.data?.stops ?? [];
   const board = stops.find((s) => s.stopId === boardId);
   const alightOptions = board ? stops.filter((s) => s.stopSequence! > board.stopSequence!) : [];
   const alight = alightOptions.find((s) => s.stopId === alightId);
   const fare = board && alight ? alight.fareFromOrigin! - board.fareFromOrigin! : null;
 
-  const arrivals = useQuery({
-    queryKey: ['arrivals', routeId, boardId],
-    queryFn: () => routesApi.arrivals(routeId, boardId!),
-    enabled: boardId != null,
-  });
-  const trips = (arrivals.data ?? []).filter((a) => a.status !== 'CANCELLED' && a.status !== 'COMPLETED');
+  const arrivals = useArrivals(routeId, boardId);
+  const trips = (arrivals.data ?? []).filter(isRunning);
 
-  const pay = useMutation({
-    mutationFn: async () => {
-      const { addPending, clearPending, upsert } = useTicketCache.getState();
-      const session = await ticketsApi.create({ tripId: tripId!, boardStopId: boardId!, alightStopId: alightId! });
-      // remember it before the payment page opens, so closing the app mid-payment cannot lose it (NFR7)
-      addPending(session.ticketId);
-      await startPayment(session).catch(() => {});
-      const ticket = await ticketsApi.get(session.ticketId).catch(() => null);
-      if (ticket) {
-        upsert([ticket]);
-        if (ticket.status !== 'PENDING') clearPending(session.ticketId);
-      }
-      return session.ticketId;
-    },
-    onSuccess: (ticketId) => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      router.replace({ pathname: '/ticket/[id]', params: { id: String(ticketId) } });
-    },
-  });
+  const pay = useBuyTicket();
+  const buy = () =>
+    pay.mutate(
+      { tripId: tripId!, boardStopId: boardId!, alightStopId: alightId! },
+      { onSuccess: (ticketId) => router.replace({ pathname: '/ticket/[id]', params: { id: String(ticketId) } }) },
+    );
 
   const ready = boardId != null && alightId != null && tripId != null && fare != null && fare >= 0;
 
@@ -67,7 +48,7 @@ export default function BuyTicketScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+          <BackButton />
           <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
             {t('Buy a ticket')}
             {route.data ? ` · ${route.data.routeNo}` : ''}
@@ -119,19 +100,17 @@ export default function BuyTicketScreen() {
                     <EmptyState title="No trips available" message="There are no more trips from this stop today." />
                   ) : (
                     <View style={styles.list}>
-                      {[...trips]
-                        .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
-                        .map((a) => (
-                          <View key={a.tripId} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
-                            <ArrivalRow arrival={a} />
-                            <Button
-                              title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta) })}
-                              variant={a.tripId === tripId ? 'primary' : 'secondary'}
-                              onPress={() => setTripId(a.tripId)}
-                              style={styles.pick}
-                            />
-                          </View>
-                        ))}
+                      {sortByEta(trips).map((a) => (
+                        <View key={a.tripId} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
+                          <ArrivalRow arrival={a} />
+                          <Button
+                            title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta) })}
+                            variant={a.tripId === tripId ? 'primary' : 'secondary'}
+                            onPress={() => setTripId(a.tripId)}
+                            style={styles.pick}
+                          />
+                        </View>
+                      ))}
                     </View>
                   )}
                 </>
@@ -147,7 +126,7 @@ export default function BuyTicketScreen() {
                   </Text>
                   <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!)}</Text>
                   {pay.isError ? <ErrorMessage message={errorMessage(pay.error)} /> : null}
-                  <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} loading={pay.isPending} onPress={() => pay.mutate()} />
+                  <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} loading={pay.isPending} onPress={buy} />
                   <Text style={[styles.caption, { color: c.textSecondary }]}>
                     {t('You will be taken to the secure payment page. Your ticket appears once payment is confirmed.')}
                   </Text>

@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { scansApi } from '@/api/endpoints';
-import { ScanResultPanel } from '@/components/scan/ScanResultPanel';
 import { Button, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { ScanResultPanel } from '@/features/scan/components/ScanResultPanel';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { ScanOutcome } from '@/types';

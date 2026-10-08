@@ -4,14 +4,16 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Text } from 'react-native';
 
-import { authApi } from '@/api/endpoints';
 import { errorMessage } from '@/api/client';
-import { AuthScreen, startSession } from '@/components/auth/AuthScreen';
+import { authApi } from '@/api/endpoints';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
+import { AuthScreen } from '@/features/auth/components/AuthScreen';
+import { startSession } from '@/features/auth/session';
+import { loginSchema, type LoginForm } from '@/features/auth/validation';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { typography } from '@/theme';
-import { loginSchema, normalizePhone, isEmail, type LoginForm } from '@/utils/validation';
+import { isEmail, normalizePhone } from '@/utils/validation';
 
 export default function LoginScreen() {
   const c = useColors();

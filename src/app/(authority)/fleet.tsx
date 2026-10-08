@@ -1,22 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi } from '@/api/endpoints';
-import { FleetMap } from '@/components/map/FleetMap';
-import { VehicleCard } from '@/components/ops/VehicleCard';
 import { Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { FleetMap } from '@/features/map/components/FleetMap';
+import { VehicleCard } from '@/features/ops/components/VehicleCard';
+import { useOpsDashboard } from '@/features/ops/hooks/use-ops';
+import { useAllRoutes } from '@/features/routes/hooks/use-routes';
 import { useColors } from '@/hooks/use-colors';
-import { useOpsDashboard } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
 
 /** All vehicles on one map, filterable by route (FR9). Shares the dashboard's live data. */
 export default function FleetScreen() {
   const c = useColors();
   const ops = useOpsDashboard();
-  const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const routes = useAllRoutes();
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 

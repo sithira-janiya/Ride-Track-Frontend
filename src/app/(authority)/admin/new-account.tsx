@@ -4,12 +4,13 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { StyleSheet, Text } from 'react-native';
 
 import { errorMessage } from '@/api/client';
-import { AdminPage } from '@/components/admin/AdminPage';
 import { Button, Card, Chips, ErrorMessage, TextField } from '@/components/ui';
-import { useAdminVehicles, useCreateStaffAccount } from '@/hooks/use-admin';
+import { AdminPage } from '@/features/admin/components/AdminPage';
+import { useAdminVehicles, useCreateStaffAccount } from '@/features/admin/hooks/use-admin';
+import { staffAccountSchema, type StaffAccountForm } from '@/features/admin/validation';
 import { useColors } from '@/hooks/use-colors';
 import { typography } from '@/theme';
-import { splitIdentifier, staffAccountSchema, type StaffAccountForm } from '@/utils/validation';
+import { splitIdentifier } from '@/utils/validation';
 
 const ROLES = [
   { value: 'STAFF' as const, label: 'Staff (conductor or inspector)' },

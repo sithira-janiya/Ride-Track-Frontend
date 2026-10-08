@@ -1,14 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { opsApi, routesApi } from '@/api/endpoints';
 import { Button, Card, Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { BarChart } from '@/features/ops/components/BarChart';
+import { ReportTable } from '@/features/ops/components/ReportTable';
+import { useReport, type ReportCriteria } from '@/features/ops/hooks/use-ops';
+import { useAllRoutes } from '@/features/routes/hooks/use-routes';
 import { useColors } from '@/hooks/use-colors';
-import { radius, spacing, typography } from '@/theme';
-import type { Report, ReportType } from '@/types';
+import { spacing, typography } from '@/theme';
+import type { ReportType } from '@/types';
 
 const TYPES: { value: ReportType; label: string }[] = [
   { value: 'ROUTE_PERFORMANCE', label: 'Route performance' },
@@ -20,77 +22,14 @@ const RANGES = [
   { value: 30, label: 'Last 30 days' },
 ];
 
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
-
-type Criteria = { type: ReportType; routeId: number | undefined; days: number };
-
-/** A horizontal bar per row, scaled to the largest value, with the number printed beside it. */
-function BarChart({ report }: { report: Report }) {
-  const c = useColors();
-  const values = report.rows.map((r) => r.values[report.chartColumn] ?? 0);
-  const max = Math.max(1, ...values);
-  return (
-    <View accessibilityRole="image" accessibilityLabel={`Bar chart of ${report.columns[report.chartColumn]}`} style={styles.chart}>
-      {report.rows.map((r, i) => (
-        <View key={r.label} style={styles.barRow}>
-          <Text numberOfLines={1} style={[styles.barLabel, { color: c.text }]}>
-            {r.label}
-          </Text>
-          <View style={[styles.barTrack, { backgroundColor: c.border }]}>
-            <View style={[styles.barFill, { width: `${(values[i] / max) * 100}%`, backgroundColor: c.primary }]} />
-          </View>
-          <Text style={[styles.barValue, { color: c.text }]}>
-            {values[i]}
-            {report.unit === '%' ? '%' : ''}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-function ReportTable({ report }: { report: Report }) {
-  const c = useColors();
-  return (
-    <View style={[styles.table, { borderColor: c.border }]}>
-      <View style={[styles.tr, { backgroundColor: c.surface }]}>
-        <Text style={[styles.th, styles.first, { color: c.text }]}>{report.type === 'DELAYS' ? 'Day' : 'Route'}</Text>
-        {report.columns.map((col) => (
-          <Text key={col} style={[styles.th, { color: c.text }]}>
-            {col}
-          </Text>
-        ))}
-      </View>
-      {report.rows.map((r) => (
-        <View key={r.label} style={[styles.tr, { borderTopColor: c.border, borderTopWidth: 1 }]}>
-          <Text style={[styles.td, styles.first, { color: c.text }]}>{r.label}</Text>
-          {r.values.map((v, i) => (
-            <Text key={report.columns[i]} style={[styles.td, { color: c.text }]}>
-              {v.toLocaleString()}
-            </Text>
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-}
-
 export default function ReportsScreen() {
   const c = useColors();
-  const [draft, setDraft] = useState<Criteria>({ type: 'ROUTE_PERFORMANCE', routeId: undefined, days: 7 });
+  const [draft, setDraft] = useState<ReportCriteria>({ type: 'ROUTE_PERFORMANCE', routeId: undefined, days: 7 });
   // only the criteria the officer generated with; editing the filters does not change the shown report
-  const [submitted, setSubmitted] = useState<Criteria | null>(null);
+  const [submitted, setSubmitted] = useState<ReportCriteria | null>(null);
 
-  const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
-  const report = useQuery({
-    queryKey: ['report', submitted],
-    queryFn: () => {
-      const to = new Date();
-      const from = new Date(to.getTime() - (submitted!.days - 1) * 86400000);
-      return opsApi.report(submitted!.type, submitted!.routeId, isoDay(from), isoDay(to));
-    },
-    enabled: submitted != null,
-  });
+  const routes = useAllRoutes();
+  const report = useReport(submitted);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
@@ -149,15 +88,4 @@ const styles = StyleSheet.create({
   title: { ...typography.title },
   label: { ...typography.body, fontWeight: '700' },
   caption: { ...typography.caption },
-  chart: { gap: spacing.sm },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  barLabel: { ...typography.caption, width: 110 },
-  barTrack: { flex: 1, height: 14, borderRadius: radius.pill, overflow: 'hidden' },
-  barFill: { height: '100%', borderRadius: radius.pill },
-  barValue: { ...typography.caption, width: 48, textAlign: 'right', fontWeight: '700' },
-  table: { borderWidth: 1, borderRadius: radius.md, overflow: 'hidden' },
-  tr: { flexDirection: 'row' },
-  th: { ...typography.caption, flex: 1, fontWeight: '700', padding: spacing.sm },
-  td: { ...typography.caption, flex: 1, padding: spacing.sm },
-  first: { flex: 2 },
 });

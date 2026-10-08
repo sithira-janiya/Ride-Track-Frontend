@@ -1,4 +1,4 @@
-import { useLanguage } from '@/store/language';
+import { useLanguage } from '../language-store';
 
 import { requestTranslation } from '../google-translate';
 

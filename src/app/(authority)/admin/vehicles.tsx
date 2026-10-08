@@ -4,15 +4,15 @@ import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '@/api/client';
-import { AdminPage } from '@/components/admin/AdminPage';
 import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField } from '@/components/ui';
-import { useAdminRoutes, useAdminVehicles, useCreateVehicle, useUpdateVehicle } from '@/hooks/use-admin';
+import { AdminPage } from '@/features/admin/components/AdminPage';
+import { useAdminRoutes, useAdminVehicles, useCreateVehicle, useUpdateVehicle } from '@/features/admin/hooks/use-admin';
+import { vehicleSchema, type VehicleForm } from '@/features/admin/validation';
 import { useColors } from '@/hooks/use-colors';
+import { confirmAction } from '@/lib/confirm';
 import { spacing, typography } from '@/theme';
 import type { AdminRoute, AdminVehicle, TransportMode } from '@/types';
-import { confirmAction } from '@/utils/confirm';
 import { modeLabel } from '@/utils/format';
-import { vehicleSchema, type VehicleForm } from '@/utils/validation';
 
 const MODES: { value: TransportMode; label: string }[] = [
   { value: 'BUS', label: 'Bus' },

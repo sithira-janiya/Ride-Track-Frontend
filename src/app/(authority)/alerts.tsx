@@ -1,13 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { alertsApi, routesApi } from '@/api/endpoints';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField, type Tone } from '@/components/ui';
+import { alertsApi } from '@/api/endpoints';
+import { queryKeys } from '@/api/query-keys';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField } from '@/components/ui';
+import { ALERT_TYPE } from '@/features/alerts/alert-types';
+import { useAlerts } from '@/features/alerts/hooks/use-alerts';
+import { useAllRoutes, useRouteTrips } from '@/features/routes/hooks/use-routes';
 import { useColors } from '@/hooks/use-colors';
-import { useRouteTrips } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
 import type { AlertType } from '@/types';
 import { formatClock } from '@/utils/format';
@@ -17,11 +20,6 @@ const TYPES: { value: AlertType; label: string }[] = [
   { value: 'CANCELLATION', label: 'Cancellation' },
   { value: 'ROUTE_CHANGE', label: 'Route change' },
 ];
-const BADGE: Record<AlertType, { label: string; tone: Tone }> = {
-  DELAY: { label: 'Delay', tone: 'warning' },
-  CANCELLATION: { label: 'Cancelled', tone: 'danger' },
-  ROUTE_CHANGE: { label: 'Route change', tone: 'info' },
-};
 
 /** Publish a delay, cancellation or route-change alert and review what has been published (FR8, FR9). */
 export default function AuthorityAlertsScreen() {
@@ -34,9 +32,9 @@ export default function AuthorityAlertsScreen() {
   const [minutes, setMinutes] = useState('');
   const [formError, setFormError] = useState<string | undefined>();
 
-  const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const routes = useAllRoutes();
   const trips = useRouteTrips(routeId);
-  const published = useQuery({ queryKey: ['alerts'], queryFn: () => alertsApi.list() });
+  const published = useAlerts();
 
   const publish = useMutation({
     mutationFn: () =>
@@ -44,8 +42,8 @@ export default function AuthorityAlertsScreen() {
     onSuccess: () => {
       setMessage('');
       setMinutes('');
-      queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      queryClient.invalidateQueries({ queryKey: ['ops', 'dashboard'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.alerts });
+      queryClient.invalidateQueries({ queryKey: queryKeys.opsDashboard });
     },
   });
 
@@ -130,7 +128,7 @@ export default function AuthorityAlertsScreen() {
             published.data.map((a) => (
               <Card key={a.alertId}>
                 <View style={styles.row}>
-                  <StatusBadge label={BADGE[a.type].label} tone={BADGE[a.type].tone} />
+                  <StatusBadge label={ALERT_TYPE[a.type].label} tone={ALERT_TYPE[a.type].tone} />
                   <Text style={[styles.caption, { color: c.textSecondary }]}>Trip {a.tripId} · {new Date(a.createdAt).toLocaleString()}</Text>
                 </View>
                 <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>

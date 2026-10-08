@@ -1,5 +1,5 @@
 import { env } from '@/config/env';
-import { SOURCE_LANGUAGE, useLanguage } from '@/store/language';
+import { SOURCE_LANGUAGE, useLanguage } from './language-store';
 
 // Google Cloud Translation API (Basic, v2): https://cloud.google.com/translate/docs/reference/rest/v2/translate
 const ENDPOINT = 'https://translation.googleapis.com/language/translate/v2';

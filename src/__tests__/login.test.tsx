@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
+import { useLanguage } from '@/i18n';
 import { useAuth } from '@/store/auth';
-import { useLanguage } from '@/store/language';
 
 import LoginScreen from '@/app/(auth)/login';
 
@@ -10,7 +10,7 @@ jest.mock('expo-router', () => {
   const { Text } = jest.requireActual('react-native');
   return { Link: ({ children }: { children: React.ReactNode }) => <Text>{children}</Text> };
 });
-jest.mock('@/utils/secure-storage', () => ({ getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() }));
+jest.mock('@/lib/secure-storage', () => ({ getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() }));
 
 describe('LoginScreen', () => {
   beforeEach(() => {

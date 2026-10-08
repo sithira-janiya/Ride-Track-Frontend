@@ -1,30 +1,24 @@
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 
-import { AlertBanner } from '@/components/alerts/AlertBanner';
-import { useAlertSocket, usePushRegistration, useUnreadCount } from '@/hooks/use-alerts';
-import { useColors } from '@/hooks/use-colors';
+import { AlertBanner } from '@/features/alerts/components/AlertBanner';
+import { useAlertSocket, useUnreadCount } from '@/features/alerts/hooks/use-alerts';
+import { usePushRegistration } from '@/features/alerts/hooks/use-push-registration';
+import { useTabScreenOptions } from '@/hooks/use-tab-screen-options';
 import { useT } from '@/i18n';
 
 // Passenger tabs per docs/08-frontend-react-native.md: Home · Map · Tickets · Alerts · Profile.
 // Map is not a tab: it opens from a route.
 export default function PassengerTabs() {
-  const c = useColors();
   const t = useT();
+  const screenOptions = useTabScreenOptions();
   const unread = useUnreadCount();
   useAlertSocket();
   usePushRegistration();
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: c.primary,
-          tabBarInactiveTintColor: c.textSecondary,
-          tabBarStyle: { backgroundColor: c.background, borderTopColor: c.border },
-          tabBarLabelStyle: { fontSize: 14 },
-        }}>
+      <Tabs screenOptions={screenOptions}>
         <Tabs.Screen name="index" options={{ title: t('Home') }} />
         <Tabs.Screen name="tickets" options={{ title: t('Tickets') }} />
         <Tabs.Screen

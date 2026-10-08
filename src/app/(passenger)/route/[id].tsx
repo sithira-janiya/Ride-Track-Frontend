@@ -1,17 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi } from '@/api/endpoints';
-import { ArrivalRow } from '@/components/routes/ArrivalRow';
-import { StopRow } from '@/components/routes/StopRow';
-import { Button, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { BackButton, Button, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { sortByEta } from '@/features/routes/arrivals';
+import { ArrivalRow } from '@/features/routes/components/ArrivalRow';
+import { StopRow } from '@/features/routes/components/StopRow';
+import { useArrivals, useRouteDetail } from '@/features/routes/hooks/use-routes';
+import { useFavourites } from '@/features/routes/stores/favourites';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { useFavourites } from '@/store/favourites';
 import { spacing, typography } from '@/theme';
 import { modeLabel } from '@/utils/format';
 
@@ -23,17 +23,12 @@ export default function RouteDetailScreen() {
   const routeId = Number(params.id);
   const [pickedStopId, setPickedStopId] = useState<number | null>(params.stopId ? Number(params.stopId) : null);
 
-  const route = useQuery({ queryKey: ['route', routeId], queryFn: () => routesApi.detail(routeId), enabled: Number.isFinite(routeId) });
+  const route = useRouteDetail(routeId);
 
   // fall back to the first stop until the passenger picks one
   const selectedStopId = pickedStopId ?? route.data?.stops[0]?.stopId ?? null;
 
-  const arrivals = useQuery({
-    queryKey: ['arrivals', routeId, selectedStopId],
-    queryFn: () => routesApi.arrivals(routeId, selectedStopId!),
-    enabled: selectedStopId != null,
-    refetchInterval: 30_000, // keep ETAs fresh while the screen is open
-  });
+  const arrivals = useArrivals(routeId, selectedStopId, 30_000); // keep ETAs fresh while the screen is open
 
   const isFavourite = useFavourites((s) => s.routeIds.includes(routeId));
   const toggleFavourite = useFavourites((s) => s.toggle);
@@ -43,7 +38,7 @@ export default function RouteDetailScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+          <BackButton />
 
           {route.isPending ? (
             <Loading label="Loading route…" />
@@ -89,11 +84,9 @@ export default function RouteDetailScreen() {
                 <EmptyState title="No upcoming arrivals" message="There are no more trips at this stop today." />
               ) : (
                 <View style={styles.list}>
-                  {[...arrivals.data]
-                    .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
-                    .map((a) => (
-                      <ArrivalRow key={a.tripId} arrival={a} />
-                    ))}
+                  {sortByEta(arrivals.data).map((a) => (
+                    <ArrivalRow key={a.tripId} arrival={a} />
+                  ))}
                 </View>
               )}
             </>

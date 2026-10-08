@@ -7,10 +7,8 @@ import { errorMessage } from '@/api/client';
 import { userApi } from '@/api/endpoints';
 import { Button, Card, ErrorMessage, LanguagePicker, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
-import { useT } from '@/i18n';
-import { disconnectSocket } from '@/socket';
+import { useLanguage, useT } from '@/i18n';
 import { useAuth } from '@/store/auth';
-import { useLanguage } from '@/store/language';
 import { spacing, typography } from '@/theme';
 
 export default function PassengerProfile() {
@@ -43,11 +41,6 @@ export default function PassengerProfile() {
     }
     setNameError(undefined);
     save.mutate();
-  };
-
-  const signOut = async () => {
-    disconnectSocket();
-    await logout();
   };
 
   return (
@@ -91,7 +84,7 @@ export default function PassengerProfile() {
             </Text>
           ) : null}
           <Button title="Save changes" loading={save.isPending} disabled={!dirty} onPress={submit} />
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <Button title="Log out" variant="secondary" onPress={logout} />
         </View>
       </ScrollView>
     </SafeAreaView>

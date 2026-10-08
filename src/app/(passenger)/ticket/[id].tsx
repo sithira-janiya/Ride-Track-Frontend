@@ -1,82 +1,39 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as Brightness from 'expo-brightness';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { ticketsApi } from '@/api/endpoints';
-import { TICKET_STATUS, ticketJourney, ticketTitle } from '@/components/tickets/TicketCard';
-import { Button, Card, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { BackButton, Button, Card, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { useBrightnessBoost } from '@/features/tickets/hooks/use-brightness-boost';
+import { useCancelTicket, useTicket } from '@/features/tickets/hooks/use-tickets';
+import { TICKET_STATUS, ticketJourney, ticketTitle } from '@/features/tickets/ticket-display';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { useTicket } from '@/hooks/use-tickets';
-import { useTicketCache } from '@/store/tickets';
+import { confirmAction } from '@/lib/confirm';
 import { spacing, typography } from '@/theme';
 import { formatFare } from '@/utils/format';
-
-/** Max screen brightness while the QR is on screen so a scanner can read it, restored on leave. */
-function useBrightnessBoost(active: boolean) {
-  useEffect(() => {
-    if (!active || Platform.OS === 'web') return;
-    let previous: number | null = null;
-    (async () => {
-      try {
-        previous = await Brightness.getBrightnessAsync();
-        await Brightness.setBrightnessAsync(1);
-      } catch {
-        // brightness is a nicety; the QR still works without it
-      }
-    })();
-    return () => {
-      if (previous != null) Brightness.setBrightnessAsync(previous).catch(() => {});
-    };
-  }, [active]);
-}
 
 export default function TicketScreen() {
   const c = useColors();
   const tr = useT();
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const id = Number(useLocalSearchParams<{ id: string }>().id);
   const ticket = useTicket(id);
-  const upsert = useTicketCache((s) => s.upsert);
-  const [cancelError, setCancelError] = useState<string | null>(null);
+  const cancel = useCancelTicket(id);
 
   const t = ticket.data;
   useBrightnessBoost(t?.status === 'ACTIVE' && !!t.qrToken);
 
-  const cancel = useMutation({
-    mutationFn: () => ticketsApi.cancel(id),
-    onSuccess: (updated) => {
-      upsert([updated]);
-      queryClient.setQueryData(['ticket', id], updated);
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      setCancelError(null);
-    },
-    onError: (e) => setCancelError(errorMessage(e)),
-  });
-
-  const confirmCancel = () => {
-    const run = () => cancel.mutate();
-    if (Platform.OS === 'web') {
-      if (window.confirm(tr('Cancel this ticket? Refund rules apply.'))) run();
-      return;
-    }
-    Alert.alert(tr('Cancel this ticket?'), tr('Refund rules apply. This cannot be undone.'), [
-      { text: tr('Keep ticket'), style: 'cancel' },
-      { text: tr('Cancel ticket'), style: 'destructive', onPress: run },
-    ]);
+  const confirmCancel = async () => {
+    const ok = await confirmAction(tr('Cancel this ticket?'), tr('Refund rules apply. This cannot be undone.'), tr('Cancel ticket'), tr('Keep ticket'));
+    if (ok) cancel.mutate();
   };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/tickets'))} />
+          <BackButton fallback="/tickets" />
 
           {!t && ticket.isPending ? (
             <Loading label="Loading ticket…" />
@@ -125,7 +82,7 @@ export default function TicketScreen() {
 
               {t.status === 'ACTIVE' ? (
                 <>
-                  {cancelError ? <ErrorMessage message={cancelError} /> : null}
+                  {cancel.isError ? <ErrorMessage message={errorMessage(cancel.error)} /> : null}
                   <Button title="Cancel ticket" variant="danger" loading={cancel.isPending} onPress={confirmCancel} />
                 </>
               ) : null}

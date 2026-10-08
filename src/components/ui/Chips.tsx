@@ -7,7 +7,7 @@ import { minTouchTarget, radius, spacing, typography } from '@/theme';
 type Option<T> = { value: T; label: string };
 type Props<T> = {
   label: string;
-  options: Option<T>[];
+  options: readonly Option<T>[];
   value: T;
   onChange: (v: T) => void;
   /** false for labels that must stay as written, e.g. language names */

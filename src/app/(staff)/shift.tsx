@@ -1,15 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi } from '@/api/endpoints';
 import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { useAllRoutes, useRouteTrips } from '@/features/routes/hooks/use-routes';
+import { useShift } from '@/features/shift/stores/shift';
 import { useColors } from '@/hooks/use-colors';
-import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
-import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
 import { formatClock, modeLabel } from '@/utils/format';
 
@@ -21,24 +19,12 @@ export default function ShiftScreen() {
   const { shift, start, end } = useShift();
   const [routeId, setRouteId] = useState<number | null>(null);
 
-  const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const routes = useAllRoutes();
   const route = routes.data?.find((r) => r.routeId === routeId);
 
-  // trips are listed from the route's first stop, which is where a shift starts
-  const detail = useQuery({ queryKey: ['route', routeId], queryFn: () => routesApi.detail(routeId!), enabled: routeId != null });
-  const firstStopId = detail.data?.stops[0]?.stopId;
-  const trips = useQuery({
-    queryKey: ['arrivals', routeId, firstStopId],
-    queryFn: () => routesApi.arrivals(routeId!, firstStopId!),
-    enabled: firstStopId != null,
-  });
+  const trips = useRouteTrips(routeId);
   // a trip with no vehicle yet cannot report passengers
-  const assignable = (trips.data ?? []).filter((t) => t.vehicleId != null && t.status !== 'CANCELLED' && t.status !== 'COMPLETED');
-
-  const signOut = async () => {
-    disconnectSocket();
-    await logout();
-  };
+  const assignable = trips.trips.filter((t) => t.vehicleId != null);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
@@ -90,10 +76,10 @@ export default function ShiftScreen() {
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
                 Trips on {route.routeNo}
               </Text>
-              {trips.isPending || detail.isPending ? (
+              {trips.isPending ? (
                 <Loading label="Loading trips…" />
-              ) : trips.isError ? (
-                <ErrorMessage message={errorMessage(trips.error)} onRetry={() => trips.refetch()} />
+              ) : trips.error ? (
+                <ErrorMessage message={errorMessage(trips.error)} onRetry={trips.refetch} />
               ) : assignable.length === 0 ? (
                 <EmptyState title="No trips with a vehicle" message="No trip on this route has a vehicle assigned right now." />
               ) : (
@@ -111,7 +97,7 @@ export default function ShiftScreen() {
             </>
           ) : null}
 
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <Button title="Log out" variant="secondary" onPress={logout} />
         </View>
       </ScrollView>
     </SafeAreaView>

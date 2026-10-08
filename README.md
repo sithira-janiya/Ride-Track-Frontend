@@ -75,7 +75,7 @@ npx expo-doctor     # check dependencies and config
 npm test            # run the automated tests (Jest)
 ```
 
-Run typecheck and lint before committing. Add packages with `npx expo install <package>`, not `npm install`, so versions match the SDK.
+Run typecheck and lint before committing. Lint also checks the folder rules (see [Folder structure](#folder-structure)). Add packages with `npx expo install <package>`, not `npm install`, so versions match the SDK.
 
 ## Project status
 
@@ -125,9 +125,9 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
   - Admin data is never saved on the device. Opening an admin page directly (web refresh or link) still puts the overview underneath it, so the back arrow works.
 - Log out is at the bottom of the Dashboard.
 
-**Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
+**Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/lib/query-client.ts`, with the list in `OFFLINE_QUERY_ROOTS` in `src/api/query-keys.ts`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
 
-**Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
+**Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too. Whenever the session ends (Log out, or a token refresh that fails), the live connection to the server is closed too.
 
 ### Languages (Google Translate)
 
@@ -145,31 +145,63 @@ The app is written in English and translated at run time with the Google Cloud T
 
 ```
 src/
-├── app/                  Expo Router screens (a file = a route)
+├── app/                  Expo Router screens only (a file = a route). Screens put features together.
 │   ├── (auth)/           login, register
 │   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
 │       └── admin/        Admin tab, a stack: overview (index), users, new-account, vehicles, routes, trips, tickets
-├── api/                  axios client, typed endpoint wrappers, mock API
-├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/, admin/
-├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
-├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, ...
-├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
-├── socket/               socket.io client
-├── config/ theme/ types/ utils/
+├── features/             one folder per feature, holding its components, hooks, stores and helpers
+│   ├── admin/            back office: AdminPage, NavRow, use-admin, form validation
+│   ├── alerts/           AlertBanner, use-alerts, use-push-registration, banner store, alert labels
+│   ├── auth/             AuthScreen, startSession, login and register validation
+│   ├── map/              LiveMap and FleetMap (with .web fallbacks), use-live-vehicles
+│   ├── ops/              authority operations: VehicleCard, BarChart, ReportTable, use-ops (dashboard, reports)
+│   ├── routes/           RouteCard, StopRow, ArrivalRow, ModeFilter, use-routes, use-nearby-stops, favourites store
+│   ├── scan/             ScanResultPanel
+│   ├── shift/            shift store, use-shift-vehicle
+│   └── tickets/          TicketCard, use-tickets, use-buy-ticket, use-brightness-boost, payment, status labels
+├── components/ui/        shared design system: Button, Card, Chips, TextField, StatTile, BackButton, ...
+├── api/                  axios client, typed endpoint wrappers, mock API, query keys
+├── hooks/                hooks that belong to no feature: use-colors, use-debounce, use-now, use-tab-screen-options
+├── i18n/                 useT() / <T>, language store, Google Translate client (batching, retry)
+├── lib/                  set-up libraries and device wrappers: socket, query client, secure storage, confirm dialog
+├── store/                app-wide Zustand stores: the auth session, and the ticket cache it clears on logout
+├── config/               env.ts (the EXPO_PUBLIC_* settings)
+└── theme/ types/ utils/  design tokens, API types, pure helpers (formatting, shared validation)
 ```
 
-Rules: screens in `app/` stay thin and call hooks and components; all network calls live in `src/api/endpoints.ts` (never call axios from a screen); keep non-route code out of `src/app/`.
+### Where new code goes
+
+| You are adding | Put it in |
+|---|---|
+| A screen | `src/app/...`, and nothing else: every file there becomes a route |
+| A component, hook or store used by one feature | `src/features/<feature>/components/`, `hooks/` or `stores/` |
+| Other code for one feature (validation, labels, helpers) | a file at the root of `src/features/<feature>/` |
+| Something two or more features need | the shared folder for its kind: `components/ui/`, `hooks/`, `utils/` or `lib/` |
+| A REST call | `src/api/endpoints.ts` (and its fake in `src/api/mock.ts`), with its query key in `src/api/query-keys.ts` |
+| A test | a `__tests__/` folder next to the file it tests; tests for screens go in `src/__tests__/` |
+
+A new feature gets its own folder in `src/features/`, with only the subfolders it needs.
+
+### Rules
+
+- Screens stay thin: they read route params, call feature hooks and lay out components. Fetching, saving and business rules live in hooks.
+- All network calls go through `src/api/endpoints.ts`; never call axios from a screen or a feature.
+- Never type a query key by hand: use `queryKeys` from `src/api/query-keys.ts`. `OFFLINE_QUERY_ROOTS` in the same file decides which queries are kept for offline use.
+- Imports only go one way: screens use features and shared code, features use shared code, and shared code uses neither. Features never import each other; if two need the same thing, move it to shared code. `npx expo lint` enforces this (`import/no-restricted-paths` in `eslint.config.js`) and picks up new feature folders by itself.
+- File names: components in `PascalCase.tsx`, everything else in `kebab-case.ts`, hooks start with `use-`. A web version sits next to the native file as `Name.web.tsx`.
 
 ## Testing
 
-Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
+Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders. Screen tests go in `src/__tests__/`, because any file inside `src/app/` becomes a route:
 
-- `src/utils/__tests__/validation.test.ts`: login and register rules, and the admin forms (new staff account, new vehicle).
+- `src/features/auth/__tests__/validation.test.ts`: login and register rules.
+- `src/features/admin/__tests__/validation.test.ts`: the admin forms (new staff account, new vehicle).
+- `src/utils/__tests__/validation.test.ts`: splitting the email-or-phone field into what the API expects.
 - `src/api/__tests__/admin.test.ts`: the mock admin API: creating accounts (own password, duplicate email), disabling blocks login, role filter, vehicle route rules, out-of-service vehicles drop out of trips, ticket paging.
-- `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
-- `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
+- `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success, keeping a language picked before login).
+- `src/features/scan/components/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
 - `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request (fetch mocked).

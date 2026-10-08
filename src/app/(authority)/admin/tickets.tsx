@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '@/api/client';
-import { AdminPage } from '@/components/admin/AdminPage';
 import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
-import { useAdminTickets } from '@/hooks/use-admin';
+import { AdminPage } from '@/features/admin/components/AdminPage';
+import { useAdminTickets } from '@/features/admin/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { PaymentStatus, TicketStatus } from '@/types';

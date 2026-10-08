@@ -1,19 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi } from '@/api/endpoints';
-import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
-import { RouteCard } from '@/components/routes/RouteCard';
 import { Button, Card, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { ModeFilter, type ModeValue } from '@/features/routes/components/ModeFilter';
+import { RouteCard } from '@/features/routes/components/RouteCard';
+import { useNearbyStops } from '@/features/routes/hooks/use-nearby-stops';
+import { useAllRoutes, useRouteSearch } from '@/features/routes/hooks/use-routes';
+import { useFavourites } from '@/features/routes/stores/favourites';
 import { useColors } from '@/hooks/use-colors';
-import { useT } from '@/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
-import { useNearbyStops } from '@/hooks/use-nearby-stops';
-import { useFavourites } from '@/store/favourites';
+import { useT } from '@/i18n';
 import { minTouchTarget, spacing, typography } from '@/theme';
 import { formatDistance } from '@/utils/format';
 
@@ -29,15 +28,10 @@ export default function PassengerHome() {
   const openRoute = (id: number, stopId?: number) =>
     router.push({ pathname: '/route/[id]', params: stopId ? { id: String(id), stopId: String(stopId) } : { id: String(id) } });
 
-  // Route search (FR3): keyed on the debounced text so typing does not fire a request per keystroke.
-  const results = useQuery({
-    queryKey: ['routes', debouncedQuery, mode],
-    queryFn: () => routesApi.search(debouncedQuery, mode === 'ALL' ? undefined : mode),
-    enabled: searching,
-  });
+  const results = useRouteSearch(debouncedQuery, mode, searching);
 
   const favouriteIds = useFavourites((s) => s.routeIds);
-  const allRoutes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const allRoutes = useAllRoutes();
   const favourites = (allRoutes.data ?? []).filter((r) => favouriteIds.includes(r.routeId));
 
   const nearby = useNearbyStops();

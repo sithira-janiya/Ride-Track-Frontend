@@ -1,8 +1,10 @@
+export { BackButton } from './BackButton';
 export { Button } from './Button';
 export { Card } from './Card';
 export { Chips } from './Chips';
 export { TextField } from './TextField';
 export { StatusBadge, type Tone } from './StatusBadge';
+export { StatTile } from './StatTile';
 export { OccupancyBar, occupancyLevel } from './OccupancyBar';
 export { ETAChip, minutesUntil } from './ETAChip';
 export { EmptyState } from './EmptyState';

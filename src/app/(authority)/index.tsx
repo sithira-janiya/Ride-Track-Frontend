@@ -2,12 +2,11 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { StatTile as Tile } from '@/components/ops/StatTile';
-import { VehicleCard } from '@/components/ops/VehicleCard';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Card, EmptyState, ErrorMessage, Loading, StatTile as Tile, StatusBadge } from '@/components/ui';
+import { ALERT_TYPE } from '@/features/alerts/alert-types';
+import { VehicleCard } from '@/features/ops/components/VehicleCard';
+import { useOpsDashboard } from '@/features/ops/hooks/use-ops';
 import { useColors } from '@/hooks/use-colors';
-import { useOpsDashboard } from '@/hooks/use-ops';
-import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { spacing, typography } from '@/theme';
 
@@ -16,11 +15,6 @@ export default function AuthorityDashboard() {
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const ops = useOpsDashboard();
-
-  const signOut = async () => {
-    disconnectSocket();
-    await logout();
-  };
 
   const d = ops.data;
   const pct = d && d.occupancy.totalCapacity > 0 ? Math.round((d.occupancy.totalPassengers / d.occupancy.totalCapacity) * 100) : null;
@@ -55,7 +49,7 @@ export default function AuthorityDashboard() {
               ) : (
                 d!.activeDelays.map((a) => (
                   <Card key={a.alertId}>
-                    <StatusBadge label={a.type === 'CANCELLATION' ? 'Cancelled' : 'Delay'} tone={a.type === 'CANCELLATION' ? 'danger' : 'warning'} />
+                    <StatusBadge label={ALERT_TYPE[a.type].label} tone={ALERT_TYPE[a.type].tone} />
                     <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>
                     {a.delayMinutes ? <Text style={[styles.caption, { color: c.textSecondary }]}>About {a.delayMinutes} minutes late</Text> : null}
                   </Card>
@@ -73,7 +67,7 @@ export default function AuthorityDashboard() {
             </>
           )}
 
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <Button title="Log out" variant="secondary" onPress={logout} />
         </View>
       </ScrollView>
     </SafeAreaView>

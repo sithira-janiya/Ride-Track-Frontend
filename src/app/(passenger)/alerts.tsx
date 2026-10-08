@@ -1,23 +1,14 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { mockApi } from '@/api/mock';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
+import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
 import { env } from '@/config/env';
-import { useAlerts, useMarkRead } from '@/hooks/use-alerts';
+import { ALERT_TYPE } from '@/features/alerts/alert-types';
+import { useAlerts, useMarkRead, useSimulateAlert } from '@/features/alerts/hooks/use-alerts';
 import { useColors } from '@/hooks/use-colors';
 import { useT, type Translate } from '@/i18n';
-import { useAlertBanner } from '@/store/alert-banner';
 import { spacing, typography } from '@/theme';
-import type { AlertType } from '@/types';
-
-const TYPE: Record<AlertType, { label: string; tone: Tone }> = {
-  DELAY: { label: 'Delay', tone: 'warning' },
-  CANCELLATION: { label: 'Cancelled', tone: 'danger' },
-  ROUTE_CHANGE: { label: 'Route change', tone: 'info' },
-};
 
 function when(iso: string, t: Translate) {
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -32,8 +23,7 @@ export default function AlertsScreen() {
   const t = useT();
   const alerts = useAlerts();
   const markRead = useMarkRead();
-  const queryClient = useQueryClient();
-  const showBanner = useAlertBanner((s) => s.show);
+  const simulateAlert = useSimulateAlert();
   const unread = alerts.data?.filter((a) => !a.isRead) ?? [];
 
   return (
@@ -60,7 +50,7 @@ export default function AlertsScreen() {
                 />
               ) : null}
               {alerts.data.map((a) => {
-                const type = TYPE[a.type];
+                const type = ALERT_TYPE[a.type];
                 return (
                   <Card key={a.alertId} style={!a.isRead ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
                     <View style={styles.row}>
@@ -84,15 +74,7 @@ export default function AlertsScreen() {
           )}
 
           {env.useMockApi ? (
-            <Button
-              title="Demo: simulate a new alert"
-              variant="secondary"
-              onPress={() => {
-                const a = mockApi.createDemoAlert();
-                showBanner(a.message);
-                queryClient.invalidateQueries({ queryKey: ['alerts'] });
-              }}
-            />
+            <Button title="Demo: simulate a new alert" variant="secondary" onPress={simulateAlert} />
           ) : null}
         </View>
       </ScrollView>

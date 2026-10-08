@@ -3,15 +3,15 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { errorMessage } from '@/api/client';
-import { AdminPage } from '@/components/admin/AdminPage';
 import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField } from '@/components/ui';
-import { useAdminUsers, useUpdateAccount } from '@/hooks/use-admin';
+import { AdminPage } from '@/features/admin/components/AdminPage';
+import { useAdminUsers, useUpdateAccount } from '@/features/admin/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { useDebounce } from '@/hooks/use-debounce';
+import { confirmAction } from '@/lib/confirm';
 import { useAuth } from '@/store/auth';
 import { spacing, typography } from '@/theme';
 import type { AdminUser, Role } from '@/types';
-import { confirmAction } from '@/utils/confirm';
 
 const ROLES: { value: Role | undefined; label: string }[] = [
   { value: undefined, label: 'All' },

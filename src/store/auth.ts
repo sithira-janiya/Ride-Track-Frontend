@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
+import { getItem, removeItem, setItem } from '@/lib/secure-storage';
 import { useTicketCache } from '@/store/tickets';
 import type { AuthResult, AuthTokens, User } from '@/types';
-import { getItem, removeItem, setItem } from '@/utils/secure-storage';
 
 const KEY = 'ridetrack.session';
 

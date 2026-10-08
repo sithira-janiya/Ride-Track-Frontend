@@ -1,16 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { routesApi } from '@/api/endpoints';
-import { LiveMap } from '@/components/map/LiveMap';
-import { Button, Card, ErrorMessage, ETAChip, Loading, OccupancyBar, StatusBadge } from '@/components/ui';
+import { BackButton, Button, Card, ErrorMessage, ETAChip, Loading, OccupancyBar, StatusBadge } from '@/components/ui';
+import { LiveMap } from '@/features/map/components/LiveMap';
+import { STALE_AFTER_MS, useLiveVehicles } from '@/features/map/hooks/use-live-vehicles';
+import { useRouteDetail } from '@/features/routes/hooks/use-routes';
 import { useColors } from '@/hooks/use-colors';
+import { useNow } from '@/hooks/use-now';
 import { useT, type Translate } from '@/i18n';
-import { STALE_AFTER_MS, useLiveVehicles, useNow } from '@/hooks/use-live-vehicles';
 import { spacing, typography } from '@/theme';
 
 function ago(ms: number, t: Translate) {
@@ -21,11 +21,10 @@ function ago(ms: number, t: Translate) {
 export default function LiveMapScreen() {
   const c = useColors();
   const t = useT();
-  const router = useRouter();
   const routeId = Number(useLocalSearchParams<{ id: string }>().id);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const route = useQuery({ queryKey: ['route', routeId], queryFn: () => routesApi.detail(routeId), enabled: Number.isFinite(routeId) });
+  const route = useRouteDetail(routeId);
   const { vehicles, query, connected, lastUpdated } = useLiveVehicles(routeId);
   const now = useNow();
 
@@ -35,7 +34,7 @@ export default function LiveMapScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <View style={styles.top}>
-        <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <BackButton />
         <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
           {t('Live map')}
           {route.data ? ` · ${route.data.routeNo}` : ''}

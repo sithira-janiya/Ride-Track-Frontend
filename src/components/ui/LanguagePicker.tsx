@@ -1,8 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
-import { translationEnabled, useT } from '@/i18n';
-import { LANGUAGES, SOURCE_LANGUAGE } from '@/store/language';
+import { LANGUAGES, SOURCE_LANGUAGE, translationEnabled, useT } from '@/i18n';
 import { spacing, typography } from '@/theme';
 
 import { Chips } from './Chips';
@@ -16,7 +15,7 @@ export function LanguagePicker({ value, onChange }: Props) {
   return (
     <View style={styles.wrap}>
       <Text style={[styles.label, { color: c.text }]}>{t('Language')}</Text>
-      <Chips label="Language" options={[...LANGUAGES]} value={value} onChange={onChange} translateOptions={false} />
+      <Chips label="Language" options={LANGUAGES} value={value} onChange={onChange} translateOptions={false} />
       {value !== SOURCE_LANGUAGE ? (
         <Text style={[styles.caption, { color: c.textSecondary }]}>
           {translationEnabled
