@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
 import { translationEnabled, useT } from '@/i18n';
-import { LANGUAGES, SOURCE_LANGUAGE } from '@/store/language';
+import { LANGUAGES, SOURCE_LANGUAGE, useLanguage } from '@/store/language';
 import { spacing, typography } from '@/theme';
 
 import { Chips } from './Chips';
@@ -13,6 +13,7 @@ type Props = { value: string; onChange: (language: string) => void };
 export function LanguagePicker({ value, onChange }: Props) {
   const c = useColors();
   const t = useT();
+  const error = useLanguage((s) => s.translationError);
   return (
     <View style={styles.wrap}>
       <Text style={[styles.label, { color: c.text }]}>{t('Language')}</Text>
@@ -22,6 +23,12 @@ export function LanguagePicker({ value, onChange }: Props) {
           {translationEnabled
             ? t('Translated by Google')
             : 'Translation is not set up in this build, so the app stays in English.'}
+        </Text>
+      ) : null}
+      {value !== SOURCE_LANGUAGE && error ? (
+        // shown untranslated: translating is what failed
+        <Text accessibilityRole="alert" style={[styles.caption, { color: c.danger }]}>
+          {`Google Translate failed, so the app stays in English: ${error}`}
         </Text>
       ) : null}
     </View>

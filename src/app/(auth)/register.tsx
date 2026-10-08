@@ -6,18 +6,16 @@ import { Text } from 'react-native';
 
 import { authApi } from '@/api/endpoints';
 import { errorMessage } from '@/api/client';
-import { AuthScreen } from '@/components/auth/AuthScreen';
+import { AuthScreen, startSession } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { useAuth } from '@/store/auth';
 import { typography } from '@/theme';
 import { registerSchema, splitIdentifier, type RegisterForm } from '@/utils/validation';
 
 export default function RegisterScreen() {
   const c = useColors();
   const t = useT();
-  const setSession = useAuth((s) => s.setSession);
   const [formError, setFormError] = useState<string | null>(null);
   const {
     control,
@@ -31,7 +29,7 @@ export default function RegisterScreen() {
   const onSubmit = handleSubmit(async ({ name, identifier, password }) => {
     setFormError(null);
     try {
-      await setSession(await authApi.register({ name: name.trim(), password, ...splitIdentifier(identifier) }));
+      await startSession(await authApi.register({ name: name.trim(), password, ...splitIdentifier(identifier) }), { newAccount: true });
     } catch (e) {
       setFormError(errorMessage(e));
     }

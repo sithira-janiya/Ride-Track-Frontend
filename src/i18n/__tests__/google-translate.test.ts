@@ -23,4 +23,23 @@ describe('requestTranslation', () => {
     expect(JSON.parse(init.body)).toEqual({ q: ['Home', 'Tickets'], source: 'en', target: 'si', format: 'text' });
     expect(useLanguage.getState().translations.si).toEqual({ Home: 'ගෙදර', Tickets: 'ටිකට්' });
   });
+
+  it("keeps Google's error message so the language picker can show why translation failed", async () => {
+    jest.useFakeTimers({ doNotFake: ['setImmediate'] });
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: { message: 'API key not valid. Please pass a valid API key.' } }),
+    }) as unknown as typeof fetch;
+
+    requestTranslation('ta', 'Alerts');
+    jest.advanceTimersByTime(30);
+    for (let i = 0; i < 5; i++) await new Promise<void>((r) => setImmediate(r));
+
+    expect(useLanguage.getState().translationError).toBe('API key not valid. Please pass a valid API key.');
+    expect(useLanguage.getState().translations.ta).toBeUndefined();
+    jest.clearAllTimers(); // the one-minute retry wait
+    jest.useRealTimers();
+  });
 });

@@ -32,7 +32,23 @@ To show the app in Sinhala or Tamil, set `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` 
 
 By default the app runs against a **built-in mock API** (`EXPO_PUBLIC_USE_MOCK_API=true`), so no backend is needed. Set it to `false` and point `EXPO_PUBLIC_API_URL` / `EXPO_PUBLIC_SOCKET_URL` at the real backend to use live data.
 
-### Demo accounts (mock mode only)
+### Running against the real backend (RideTrack-API)
+
+The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO). Most endpoints the app calls have been checked against it: login, routes, arrivals, nearby stops, buying and paying for a ticket (mock gateway), staff scan, alerts, the ops dashboard, reports and the admin panel (see [Known limitations](#known-limitations) for the rest).
+
+1. In `RideTrack-API`: start MySQL, then run `npm run migrate`, `npm run seed` and `npm run dev` (see its README). Check `http://<host>:3000/health` returns `{"status":"ok"}`.
+2. In this app's `.env.local`, set `EXPO_PUBLIC_USE_MOCK_API=false` and point both URLs at the computer running the API:
+   - web or iOS simulator: `http://localhost:3000/api/v1` and `http://localhost:3000`
+   - a phone on the same Wi-Fi: the computer's LAN IP (`ipconfig` on Windows), e.g. `http://10.116.186.92:3000/api/v1`
+3. Restart with `npx expo start -c`, because `EXPO_PUBLIC_*` values are built in at bundle time.
+
+Notes:
+- The LAN IP changes when you switch networks. If the app shows "Cannot reach RideTrack", update the IP here **and** `PUBLIC_URL` in the backend's `.env` (it is used for payment page links).
+- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `RideTrack-API`.
+- Passengers only receive an alert when they hold a pending or active ticket for that trip.
+- The EAS `development` and `preview` profiles force mock mode; only `production` uses the real API.
+
+### Demo accounts
 
 All use the password `Password1!`.
 
@@ -43,10 +59,10 @@ All use the password `Password1!`.
 | Authority | `officer@ridetrack.test` | Authority tabs (dashboard, fleet, reports, alerts) |
 
 Notes:
-- These accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). They do not exist on a real backend.
+- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the same accounts and password are created by `npm run seed` in `RideTrack-API`.
 - The login field accepts an email or a mobile number, but the demo accounts have no phone number, so log in with the email.
 - Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
-- Registered accounts live in memory only and disappear when the app reloads.
+- In mock mode, registered accounts live in memory only and disappear when the app reloads. On the real backend they are saved in MySQL.
 - A wrong email or wrong password gives the same error, "Invalid email/phone or password."
 - Passwords need at least 8 characters with a letter and a number when registering.
 
@@ -75,6 +91,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 5 | Staff: QR scanner, scan result, manual entry, passenger count, shift | Built; manual entry, shift and count checked in the browser; camera scan and haptics not tested on a device |
 | 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
 | 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
+| – | Authority: admin back office (overview, accounts, vehicles, routes, trips, tickets) | Built; every screen checked in the browser against the real backend (create and disable an account, edit a vehicle); not tested on a device |
 | 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
 
 ## Features built so far
@@ -98,6 +115,14 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Fleet tab: all vehicles on one map, filterable by route; selecting a card highlights its marker.
 - Reports tab: choose report type (route performance, delays, occupancy), route and period (last 7 or 30 days), then see a bar chart and a table.
 - Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
+- Admin tab (back office, backed by RideTrack-API `/admin/*`):
+  - Overview: today's trips, delays and cancellations, tickets sold and revenue, plus account, vehicle, route and stop counts.
+  - Accounts: search by name, email or phone, filter by role, page through results. Add a staff (conductor or inspector, optionally on a vehicle) or authority officer account. Disable an account (asks first; the person is signed out at once) or enable it again. You cannot disable your own account.
+  - Vehicles: add a bus or train to a route of the same kind, change its capacity or route, take it out of service or return it.
+  - Routes: every route, active or not, with its stop and vehicle counts (read only).
+  - Trips: yesterday's, today's or tomorrow's timetable (UTC days), filterable by route, with status and tickets sold.
+  - Tickets: every ticket sold, newest first, filterable by status, with passenger, fare and payment status.
+  - Admin data is never saved on the device. Opening an admin page directly (web refresh or link) still puts the overview underneath it, so the back arrow works.
 - Log out is at the bottom of the Dashboard.
 
 **Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
@@ -112,11 +137,11 @@ The app is written in English and translated at run time with the Google Cloud T
 
 - `useT()` returns `t(text, params?)`. Values that change go in `{placeholders}` (`t('Pay {amount}', { amount })`), so each sentence is translated once, not once per value.
 - Strings a screen asks for are batched into one request (up to 100 per call). Results are kept on the device (`ridetrack.language` in AsyncStorage), so each string is only translated once per language and works offline afterwards.
-- English shows until the translation arrives, when there is no API key, or when the request fails (retried after a minute). If Google drops a `{placeholder}`, that string stays in English rather than showing a broken sentence.
+- English shows until the translation arrives, when there is no API key, or when the request fails (retried after a minute). When Google rejects a request (bad key, API not enabled, billing off), its error message is shown under the language picker. If Google drops a `{placeholder}`, that string stays in English rather than showing a broken sentence.
 - Shared components (`Button`, `TextField`, `EmptyState`, `ErrorMessage`, `Loading`, `StatusBadge`, `Chips`, ...) translate their text props themselves, so screens pass English. Language names in the picker are never translated.
 - Which language: the signed-in account's `language` wins; before login the device keeps the last language picked. Profile → Save sends it to the account.
 - Translated: auth screens and all passenger screens, plus alert messages from the server. Staff and Authority screens only get the shared components translated (they have no language setting).
-- Setup: in Google Cloud Console enable the **Cloud Translation API**, create an API key, and set it as `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` (in `.env.local`, EAS and Vercel). The key is built into the app, so restrict it to the Cloud Translation API and to the app's Android package / web domain. Google bills per character after the free tier.
+- Setup: in Google Cloud Console enable the **Cloud Translation API** (billing must be on for the project), create an API key, and set it as `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` (in `.env.local`, EAS and Vercel). `EXPO_PUBLIC_*` values are baked in when the bundle is built, so restart with `npx expo start -c` (or redeploy) after setting it. The key is built into the app, so restrict it to the Cloud Translation API and to the app's Android package / web domain. Google bills per character after the free tier.
 
 ## Folder structure
 
@@ -127,10 +152,11 @@ src/
 │   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
+│       └── admin/        Admin tab, a stack: overview (index), users, new-account, vehicles, routes, trips, tickets
 ├── api/                  axios client, typed endpoint wrappers, mock API
-├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/
+├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/, admin/
 ├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
-├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, ...
+├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, ...
 ├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
@@ -148,12 +174,13 @@ Rules: screens in `app/` stay thin and call hooks and components; all network ca
 
 Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
 
-- `src/utils/__tests__/validation.test.ts`: login and register rules.
+- `src/utils/__tests__/validation.test.ts`: login and register rules, and the admin forms (new staff account, new vehicle).
+- `src/api/__tests__/admin.test.ts`: the mock admin API: creating accounts (own password, duplicate email), disabling blocks login, role filter, vehicle route rules, out-of-service vehicles drop out of trips, ticket paging.
 - `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
 - `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
-- `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request (fetch mocked).
+- `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request, and keeping Google's error message on failure (fetch mocked).
 
 Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
 
@@ -174,14 +201,16 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Map markers jump between positions instead of animating.
 - The map is native only; the web build shows a notice instead.
 - Android release builds need a Google Maps API key in `app.json`.
-- The real backend does not exist yet; the shapes of `POST /tickets` and the `GET /tickets` paging are assumed (see `src/api/endpoints.ts`).
-- The real backend's response to `POST /scans` and `POST /vehicles/:id/occupancy` is assumed (`{result, reason}` and `{vehicleId, passengerCount, capacity}`).
+- Checked against the real backend (RideTrack-API): login, routes, arrivals, nearby stops, buying and paying for a ticket, ticket list, `POST /scans`, publishing an alert, `GET /ops/dashboard`, reports and every `/admin/*` endpoint. Not yet checked against it: `POST /vehicles/:id/occupancy` and `PUT /users/me/push-token`.
+- On the real backend, `GET /alerts` only returns alerts sent to the signed-in user, and officers are never recipients, so the authority's "Published alerts" list stays empty there. It needs a backend endpoint for all alerts.
+- The admin overview needs the RideTrack-API fix that renames the `delayed` column alias in `src/modules/admin/service.js` (`DELAYED` is a reserved word in MySQL); without it `GET /admin/overview` returns a 500.
+- The admin panel cannot yet create or edit routes, stops or trips, or change a staff member's vehicle after the account is made (the backend supports the last one: `PATCH /admin/users/:id` with `vehicleId`). There is no way to delete an account, only to disable it.
 - In mock mode a ticket can only be scanned if it was bought in the same app session (the mock data lives in memory).
 - Translation is machine translation from Google Translate, not reviewed by a Sinhala or Tamil speaker. The first time a screen opens in a new language it shows English for a moment until the translation arrives, and stays English offline until it has been translated once. Real Google translation has not yet been checked with a live API key.
 - The Google Translate API key ships inside the app. Restrict it in Google Cloud Console; a backend proxy would hide it completely.
 - Dates and times still use the device's locale format, not the chosen language.
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
-- Report and dashboard data in mock mode is fake (deterministic numbers); the real `GET /reports` and `GET /ops/dashboard` response shapes are assumed (see `Report` and `OpsDashboard` in `src/types/index.ts`). `GET /alerts` is documented for passengers only; the authority's "published alerts" list assumes the same endpoint works for them.
+- Report, dashboard and admin data in mock mode is fake (deterministic numbers and generated trips), and admin changes in mock mode are lost when the app reloads.
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
 - Offline route data can be up to 24 hours old; arrivals shown offline are the last ones fetched.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
