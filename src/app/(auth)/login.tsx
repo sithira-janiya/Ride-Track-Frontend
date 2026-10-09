@@ -35,7 +35,7 @@ export default function LoginScreen() {
   });
 
   return (
-    <AuthScreen title="Welcome back" subtitle="Log in to track your ride and manage your tickets.">
+    <AuthScreen title="Welcome back" emoji="👋" subtitle="Log in to track your ride and manage your tickets.">
       <Controller
         control={control}
         name="identifier"
@@ -72,7 +72,7 @@ export default function LoginScreen() {
         )}
       />
       {formError ? <ErrorMessage message={formError} /> : null}
-      <Button title="Log in" onPress={onSubmit} loading={isSubmitting} />
+      <Button title="Log in" emoji="🔓" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
         {t('New to RideTrack?')}{' '}
         <Link href="/register" style={{ color: c.primary, fontWeight: '700' }}>

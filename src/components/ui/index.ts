@@ -9,3 +9,5 @@ export { EmptyState } from './EmptyState';
 export { ErrorMessage } from './ErrorMessage';
 export { LanguagePicker } from './LanguagePicker';
 export { Loading } from './Loading';
+export { ScreenHeader } from './ScreenHeader';
+export { Emoji, FadeInView, PressableScale, TabEmoji, tapFeedback } from './motion';

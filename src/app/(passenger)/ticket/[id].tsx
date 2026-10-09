@@ -3,13 +3,14 @@ import * as Brightness from 'expo-brightness';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import QRCode from 'react-native-qrcode-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { ticketsApi } from '@/api/endpoints';
 import { TICKET_STATUS, ticketJourney, ticketTitle } from '@/components/tickets/TicketCard';
-import { Button, Card, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Card, Emoji, ErrorMessage, FadeInView, Loading, ScreenHeader, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useTicket } from '@/hooks/use-tickets';
@@ -76,17 +77,15 @@ export default function TicketScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/tickets'))} />
+          <Button title="← Back" variant="secondary" style={{ alignSelf: 'flex-start' }} onPress={() => (router.canGoBack() ? router.back() : router.replace('/tickets'))} />
 
           {!t && ticket.isPending ? (
-            <Loading label="Loading ticket…" />
+            <Loading label="Loading ticket…" emoji="🎟️" />
           ) : !t ? (
             <ErrorMessage message={errorMessage(ticket.error)} onRetry={() => ticket.refetch()} />
           ) : (
             <>
-              <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-                {ticketTitle(t, tr)}
-              </Text>
+              <ScreenHeader title={ticketTitle(t, tr)} emoji="🎟️" />
               <StatusBadge label={TICKET_STATUS[t.status].label} tone={TICKET_STATUS[t.status].tone} />
               {ticket.isError ? (
                 <Text style={[styles.caption, { color: c.textSecondary }]}>
@@ -95,39 +94,42 @@ export default function TicketScreen() {
               ) : null}
 
               {t.status === 'ACTIVE' && t.qrToken ? (
-                <View style={styles.qrWrap}>
+                <Animated.View entering={ZoomIn.springify().damping(14).delay(120)} style={styles.qrWrap}>
                   {/* scanners need dark-on-white regardless of theme */}
                   <View accessible accessibilityLabel={tr('Ticket QR code. Show this to the conductor.')} style={styles.qrBox}>
                     <QRCode value={t.qrToken} size={240} />
                   </View>
                   <Text style={[styles.caption, { color: c.textSecondary }]}>
-                    {tr('Ticket number {id}. Show this code to the conductor.', { id: t.ticketId })}
+                    👀 {tr('Ticket number {id}. Show this code to the conductor.', { id: t.ticketId })}
                   </Text>
-                </View>
+                </Animated.View>
               ) : t.status === 'PENDING' ? (
                 <Card style={{ borderColor: c.warning, backgroundColor: c.warningBg }}>
+                  <Emoji symbol="⏳" size={28} motion="pulse" />
                   <Text style={[styles.body, { color: c.text }]}>
                     {tr('We are waiting for your payment to be confirmed. Your QR code will appear here as soon as it is.')}
                   </Text>
-                  <Button title="Check again" variant="secondary" loading={ticket.isFetching} onPress={() => ticket.refetch()} />
+                  <Button title="Check again" emoji="🔄" variant="secondary" loading={ticket.isFetching} onPress={() => ticket.refetch()} />
                 </Card>
               ) : (
-                <Text style={[styles.body, { color: c.textSecondary }]}>{tr('This ticket can no longer be scanned.')}</Text>
+                <Text style={[styles.body, { color: c.textSecondary }]}>🗃️ {tr('This ticket can no longer be scanned.')}</Text>
               )}
 
-              <Card>
-                <Text style={[styles.body, { color: c.text }]}>{ticketJourney(t, tr)}</Text>
-                <Text style={[styles.body, { color: c.text }]}>{tr('Fare: {amount}', { amount: formatFare(t.fare) })}</Text>
-                <Text style={[styles.caption, { color: c.textSecondary }]}>
-                  {tr('Bought {date}', { date: new Date(t.issuedAt).toLocaleString() })}
-                </Text>
-              </Card>
+              <FadeInView delay={150}>
+                <Card>
+                  <Text style={[styles.body, { color: c.text }]}>🧭 {ticketJourney(t, tr)}</Text>
+                  <Text style={[styles.body, { color: c.text }]}>💰 {tr('Fare: {amount}', { amount: formatFare(t.fare) })}</Text>
+                  <Text style={[styles.caption, { color: c.textSecondary }]}>
+                    🗓️ {tr('Bought {date}', { date: new Date(t.issuedAt).toLocaleString() })}
+                  </Text>
+                </Card>
+              </FadeInView>
 
               {t.status === 'ACTIVE' ? (
-                <>
+                <Animated.View entering={FadeInDown.delay(250)} style={styles.cancel}>
                   {cancelError ? <ErrorMessage message={cancelError} /> : null}
-                  <Button title="Cancel ticket" variant="danger" loading={cancel.isPending} onPress={confirmCancel} />
-                </>
+                  <Button title="Cancel ticket" emoji="🗑️" variant="danger" loading={cancel.isPending} onPress={confirmCancel} />
+                </Animated.View>
               ) : null}
             </>
           )}
@@ -141,9 +143,18 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   caption: { ...typography.caption },
   qrWrap: { alignItems: 'center', gap: spacing.sm },
-  qrBox: { backgroundColor: '#FFFFFF', padding: spacing.md, borderRadius: spacing.md },
+  qrBox: {
+    backgroundColor: '#FFFFFF',
+    padding: spacing.md,
+    borderRadius: spacing.md,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  cancel: { gap: spacing.md },
 });

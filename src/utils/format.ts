@@ -13,4 +13,7 @@ export function formatClock(iso: string): string {
 /** "1 vehicle", "3 vehicles". Pass the plural when it is not just the singular plus "s". */
 export const countOf = (n: number, singular: string, plural = `${singular}s`) => `${n} ${n === 1 ? singular : plural}`;
 
-export const modeLabel =(mode: 'BUS' | 'TRAIN') => (mode === 'BUS' ? 'Bus' : 'Train');
+export const modeLabel = (mode: 'BUS' | 'TRAIN') => (mode === 'BUS' ? 'Bus' : 'Train');
+
+/** Decorative emoji for a transport mode; always shown beside the text label, never instead of it. */
+export const modeEmoji = (mode: 'BUS' | 'TRAIN') => (mode === 'BUS' ? '🚌' : '🚆');

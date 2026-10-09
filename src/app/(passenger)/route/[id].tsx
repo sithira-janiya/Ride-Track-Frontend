@@ -8,12 +8,12 @@ import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { ArrivalRow } from '@/components/routes/ArrivalRow';
 import { StopRow } from '@/components/routes/StopRow';
-import { Button, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useFavourites } from '@/store/favourites';
 import { spacing, typography } from '@/theme';
-import { modeLabel } from '@/utils/format';
+import { modeEmoji, modeLabel } from '@/utils/format';
 
 export default function RouteDetailScreen() {
   const c = useColors();
@@ -43,56 +43,62 @@ export default function RouteDetailScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+          <Button title="← Back" variant="secondary" style={{ alignSelf: 'flex-start' }} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
 
           {route.isPending ? (
-            <Loading label="Loading route…" />
+            <Loading label="Loading route…" emoji="🗺️" />
           ) : route.isError ? (
             <ErrorMessage message={errorMessage(route.error)} onRetry={() => route.refetch()} />
           ) : (
             <>
-              <View style={styles.header}>
+              <FadeInView style={styles.header}>
                 <View style={styles.titleRow}>
-                  <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-                    {route.data.routeNo}
-                  </Text>
+                  <View style={styles.titleLeft}>
+                    <Emoji symbol={modeEmoji(route.data.mode)} size={32} motion="float" />
+                    <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
+                      {route.data.routeNo}
+                    </Text>
+                  </View>
                   <StatusBadge label={modeLabel(route.data.mode)} tone="info" />
                 </View>
                 <Text style={[styles.sub, { color: c.textSecondary }]}>{route.data.name}</Text>
-                <Button title="Buy a ticket" onPress={() => router.push({ pathname: '/buy/[routeId]', params: { routeId: String(routeId) } })} />
-                <Button title="Track live on map" variant="secondary" onPress={() => router.push({ pathname: '/map/[id]', params: { id: String(routeId) } })} />
+                <Button title="Buy a ticket" emoji="💳" onPress={() => router.push({ pathname: '/buy/[routeId]', params: { routeId: String(routeId) } })} />
+                <Button title="Track live on map" emoji="🗺️" variant="secondary" onPress={() => router.push({ pathname: '/map/[id]', params: { id: String(routeId) } })} />
                 <Button
-                  title={isFavourite ? '★ Saved to favourites' : '☆ Save to favourites'}
+                  title={isFavourite ? 'Saved to favourites' : 'Save to favourites'}
+                  emoji={isFavourite ? '⭐' : '☆'}
                   variant={isFavourite ? 'primary' : 'secondary'}
                   onPress={() => toggleFavourite(routeId)}
                 />
-              </View>
+              </FadeInView>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                {t('Stops and fares')}
+                🚏 {t('Stops and fares')}
               </Text>
               <Text style={[styles.sub, { color: c.textSecondary }]}>{t('Tap a stop to see upcoming arrivals there.')}</Text>
               <View style={styles.list}>
-                {route.data.stops.map((s) => (
-                  <StopRow key={s.stopId} stop={s} selected={s.stopId === selectedStopId} onPress={() => setPickedStopId(s.stopId)} />
+                {route.data.stops.map((s, i) => (
+                  <StopRow key={s.stopId} index={i} stop={s} selected={s.stopId === selectedStopId} onPress={() => setPickedStopId(s.stopId)} />
                 ))}
               </View>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                {t('Upcoming at {stop}', { stop: selectedStop?.name ?? '…' })}
+                ⏱️ {t('Upcoming at {stop}', { stop: selectedStop?.name ?? '…' })}
               </Text>
               {arrivals.isPending ? (
-                <Loading label="Loading arrivals…" />
+                <Loading label="Loading arrivals…" emoji="⏱️" />
               ) : arrivals.isError ? (
                 <ErrorMessage message={errorMessage(arrivals.error)} onRetry={() => arrivals.refetch()} />
               ) : arrivals.data.length === 0 ? (
-                <EmptyState title="No upcoming arrivals" message="There are no more trips at this stop today." />
+                <EmptyState emoji="🌙" title="No upcoming arrivals" message="There are no more trips at this stop today." />
               ) : (
                 <View style={styles.list}>
                   {[...arrivals.data]
                     .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
-                    .map((a) => (
-                      <ArrivalRow key={a.tripId} arrival={a} />
+                    .map((a, i) => (
+                      <FadeInView key={`${selectedStopId}-${a.tripId}`} index={i}>
+                        <ArrivalRow arrival={a} />
+                      </FadeInView>
                     ))}
                 </View>
               )}
@@ -110,6 +116,7 @@ const styles = StyleSheet.create({
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
   header: { gap: spacing.sm },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   heading: { ...typography.heading },
   sub: { ...typography.body },
   section: { ...typography.title, marginTop: spacing.sm },

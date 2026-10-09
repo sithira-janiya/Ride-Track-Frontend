@@ -1,8 +1,10 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
+
+import { PressableScale } from './motion';
 
 type Props = {
   title: string;
@@ -10,10 +12,12 @@ type Props = {
   variant?: 'primary' | 'secondary' | 'danger';
   loading?: boolean;
   disabled?: boolean;
+  /** decorative emoji before the label; kept out of the translated text */
+  emoji?: string;
   style?: StyleProp<ViewStyle>;
 };
 
-export function Button({ title, onPress, variant = 'primary', loading, disabled, style }: Props) {
+export function Button({ title, onPress, variant = 'primary', loading, disabled, emoji, style }: Props) {
   const c = useColors();
   const t = useT();
   const bg = variant === 'primary' ? c.primary : variant === 'danger' ? c.danger : 'transparent';
@@ -22,7 +26,7 @@ export function Button({ title, onPress, variant = 'primary', loading, disabled,
   const inactive = disabled || loading;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityState={{ disabled: !!inactive, busy: !!loading }}
       accessibilityLabel={label}
@@ -30,11 +34,28 @@ export function Button({ title, onPress, variant = 'primary', loading, disabled,
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        { backgroundColor: bg, borderColor: variant === 'secondary' ? c.primary : bg, opacity: inactive ? 0.5 : pressed ? 0.85 : 1 },
+        variant !== 'secondary' && !inactive ? styles.raised : null,
+        {
+          backgroundColor: variant === 'secondary' && pressed ? c.infoBg : bg,
+          borderColor: variant === 'secondary' ? c.primary : bg,
+          opacity: inactive ? 0.5 : 1,
+          shadowColor: bg,
+        },
         style,
       ]}>
-      {loading ? <ActivityIndicator color={fg} /> : <Text style={[styles.text, { color: fg }]}>{label}</Text>}
-    </Pressable>
+      {loading ? (
+        <ActivityIndicator color={fg} />
+      ) : (
+        <View style={styles.content}>
+          {emoji ? (
+            <Text accessible={false} importantForAccessibility="no" allowFontScaling={false} style={styles.emoji}>
+              {emoji}
+            </Text>
+          ) : null}
+          <Text style={[styles.text, { color: fg }]}>{label}</Text>
+        </View>
+      )}
+    </PressableScale>
   );
 }
 
@@ -47,5 +68,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: { ...typography.bodyLarge, fontWeight: '600' },
+  raised: { shadowOpacity: 0.28, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  emoji: { fontSize: 18, lineHeight: 24 },
+  text: { ...typography.bodyLarge, fontWeight: '600', textAlign: 'center', flexShrink: 1 },
 });

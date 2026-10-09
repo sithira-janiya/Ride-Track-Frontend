@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { errorMessage } from '@/api/client';
 import { StatTile as Tile } from '@/components/ops/StatTile';
 import { VehicleCard } from '@/components/ops/VehicleCard';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Card, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, ScreenHeader, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
 import { disconnectSocket } from '@/socket';
@@ -29,51 +29,57 @@ export default function AuthorityDashboard() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Operations
-          </Text>
-          <Text style={[styles.body, { color: c.textSecondary }]}>{user?.name}</Text>
+          <ScreenHeader title="Operations" emoji="📊" subtitle={user?.name ? `👋 ${user.name}` : undefined} />
 
           {ops.isPending ? (
-            <Loading label="Loading live data…" />
+            <Loading label="Loading live data…" emoji="📡" />
           ) : ops.isError ? (
             <ErrorMessage message={errorMessage(ops.error)} onRetry={() => ops.refetch()} />
           ) : (
             <>
               <View style={styles.tiles}>
-                <Tile label="Vehicles live" value={String(d!.vehicles.length)} />
-                <Tile label="Active delays" value={String(d!.activeDelays.length)} />
-                <Tile label="Passengers on board" value={String(d!.occupancy.totalPassengers)} hint={pct != null ? `${pct}% of seats` : undefined} />
-                <Tile label="Nearly full" value={String(d!.occupancy.fullVehicles)} hint="90% or more" />
+                <Tile index={0} emoji="🚌" label="Vehicles live" value={String(d!.vehicles.length)} />
+                <Tile index={1} emoji="⏰" label="Active delays" value={String(d!.activeDelays.length)} />
+                <Tile index={2} emoji="👥" label="Passengers on board" value={String(d!.occupancy.totalPassengers)} hint={pct != null ? `${pct}% of seats` : undefined} />
+                <Tile index={3} emoji="🈵" label="Nearly full" value={String(d!.occupancy.fullVehicles)} hint="90% or more" />
               </View>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                Active delays and cancellations
+                🚨 Active delays and cancellations
               </Text>
               {d!.activeDelays.length === 0 ? (
-                <EmptyState title="All running normally" message="No delays or cancellations in the last 12 hours." />
+                <EmptyState emoji="😎" title="All running normally" message="No delays or cancellations in the last 12 hours." />
               ) : (
-                d!.activeDelays.map((a) => (
-                  <Card key={a.alertId}>
-                    <StatusBadge label={a.type === 'CANCELLATION' ? 'Cancelled' : 'Delay'} tone={a.type === 'CANCELLATION' ? 'danger' : 'warning'} />
-                    <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>
-                    {a.delayMinutes ? <Text style={[styles.caption, { color: c.textSecondary }]}>About {a.delayMinutes} minutes late</Text> : null}
-                  </Card>
+                d!.activeDelays.map((a, i) => (
+                  <FadeInView key={a.alertId} index={i}>
+                    <Card>
+                      <View style={styles.row}>
+                        <Emoji symbol={a.type === 'CANCELLATION' ? '❌' : '⏰'} size={20} />
+                        <StatusBadge label={a.type === 'CANCELLATION' ? 'Cancelled' : 'Delay'} tone={a.type === 'CANCELLATION' ? 'danger' : 'warning'} />
+                      </View>
+                      <Text style={[styles.body, { color: c.text }]}>{a.message}</Text>
+                      {a.delayMinutes ? <Text style={[styles.caption, { color: c.textSecondary }]}>About {a.delayMinutes} minutes late</Text> : null}
+                    </Card>
+                  </FadeInView>
                 ))
               )}
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                Vehicles
+                🚍 Vehicles
               </Text>
               {d!.vehicles.length === 0 ? (
-                <EmptyState title="No vehicles reporting" message="No vehicle is sending its position right now." />
+                <EmptyState emoji="📭" title="No vehicles reporting" message="No vehicle is sending its position right now." />
               ) : (
-                d!.vehicles.map((v) => <VehicleCard key={v.vehicleId} vehicle={v} />)
+                d!.vehicles.map((v, i) => (
+                  <FadeInView key={v.vehicleId} index={i}>
+                    <VehicleCard vehicle={v} />
+                  </FadeInView>
+                ))
               )}
             </>
           )}
 
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <Button title="Log out" emoji="👋" variant="secondary" onPress={signOut} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -84,9 +90,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   section: { ...typography.title, marginTop: spacing.sm },
   body: { ...typography.body },
   caption: { ...typography.caption },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

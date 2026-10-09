@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Button, Card, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, PressableScale, ScreenHeader, tapFeedback } from '@/components/ui';
 import { TicketCard } from '@/components/tickets/TicketCard';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
@@ -14,10 +14,10 @@ import { minTouchTarget, radius, spacing, typography } from '@/theme';
 import type { Ticket } from '@/types';
 
 const FILTERS = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'USED', label: 'Used' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: undefined, label: 'All' },
+  { value: 'ACTIVE', label: 'Active', emoji: '✅' },
+  { value: 'USED', label: 'Used', emoji: '🕘' },
+  { value: 'CANCELLED', label: 'Cancelled', emoji: '🚫' },
+  { value: undefined, label: 'All', emoji: '🗂️' },
 ] as const;
 
 export default function TicketsScreen() {
@@ -42,12 +42,11 @@ export default function TicketsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('My tickets')}
-          </Text>
+          <ScreenHeader title={t('My tickets')} emoji="🎫" emojiMotion="pop" />
 
           {pendingIds.length > 0 ? (
             <Card style={{ borderColor: c.warning, backgroundColor: c.warningBg }}>
+              <Emoji symbol="⏳" size={26} motion="pulse" />
               <Text style={[styles.body, { color: c.text }]}>
                 {t(
                   pendingIds.length === 1
@@ -56,7 +55,7 @@ export default function TicketsScreen() {
                   { count: pendingIds.length },
                 )}
               </Text>
-              <Button title="Check payment status" variant="secondary" onPress={recheck} />
+              <Button title="Check payment status" emoji="🔄" variant="secondary" onPress={recheck} />
             </Card>
           ) : null}
 
@@ -64,21 +63,27 @@ export default function TicketsScreen() {
             {FILTERS.map((f) => {
               const selected = f.value === status;
               return (
-                <Pressable
+                <PressableScale
                   key={f.label}
+                  haptic={false}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
                   accessibilityLabel={t(f.label)}
-                  onPress={() => setStatus(f.value)}
+                  onPress={() => {
+                    if (!selected) tapFeedback('select');
+                    setStatus(f.value);
+                  }}
                   style={[styles.chip, { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border }]}>
-                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>{t(f.label)}</Text>
-                </Pressable>
+                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>
+                    {f.emoji} {t(f.label)}
+                  </Text>
+                </PressableScale>
               );
             })}
           </View>
 
           {list.isPending ? (
-            <Loading label="Loading tickets…" />
+            <Loading label="Loading tickets…" emoji="🎫" />
           ) : (
             <>
               {list.isError ? (
@@ -88,12 +93,15 @@ export default function TicketsScreen() {
                 <EmptyState illustration="tickets" title="No tickets here" message="Buy a ticket from any route and it will show up here." />
               ) : (
                 <View style={styles.list}>
-                  {tickets.map((t) => (
-                    <TicketCard key={t.ticketId} ticket={t} onPress={() => open(t.ticketId)} />
+                  {tickets.map((t, i) => (
+                    <FadeInView key={`${status}-${t.ticketId}`} index={i}>
+                      <TicketCard ticket={t} onPress={() => open(t.ticketId)} />
+                    </FadeInView>
                   ))}
                   {!list.isError && list.hasNextPage ? (
                     <Button
                       title="Load more"
+                      emoji="⬇️"
                       variant="secondary"
                       loading={list.isFetchingNextPage}
                       onPress={() => list.fetchNextPage()}
@@ -113,7 +121,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { minHeight: minTouchTarget, justifyContent: 'center', borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: spacing.md },

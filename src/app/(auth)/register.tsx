@@ -36,7 +36,7 @@ export default function RegisterScreen() {
   });
 
   return (
-    <AuthScreen title="Create your account" subtitle="Register with your email or mobile number.">
+    <AuthScreen title="Create your account" emoji="✨" subtitle="Register with your email or mobile number.">
       <Controller
         control={control}
         name="name"
@@ -103,7 +103,7 @@ export default function RegisterScreen() {
         )}
       />
       {formError ? <ErrorMessage message={formError} /> : null}
-      <Button title="Create account" onPress={onSubmit} loading={isSubmitting} />
+      <Button title="Create account" emoji="🚀" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
         {t('Already have an account?')}{' '}
         <Link href="/login" style={{ color: c.primary, fontWeight: '700' }}>

@@ -1,19 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { opsApi, routesApi } from '@/api/endpoints';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, FadeInView, Loading, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { radius, spacing, typography } from '@/theme';
 import type { Report, ReportType } from '@/types';
 
-const TYPES: { value: ReportType; label: string }[] = [
-  { value: 'ROUTE_PERFORMANCE', label: 'Route performance' },
-  { value: 'DELAYS', label: 'Delays' },
-  { value: 'OCCUPANCY', label: 'Occupancy' },
+const TYPES: { value: ReportType; label: string; emoji: string }[] = [
+  { value: 'ROUTE_PERFORMANCE', label: 'Route performance', emoji: '🏆' },
+  { value: 'DELAYS', label: 'Delays', emoji: '⏰' },
+  { value: 'OCCUPANCY', label: 'Occupancy', emoji: '👥' },
 ];
 const RANGES = [
   { value: 7, label: 'Last 7 days' },
@@ -37,7 +38,7 @@ function BarChart({ report }: { report: Report }) {
             {r.label}
           </Text>
           <View style={[styles.barTrack, { backgroundColor: c.border }]}>
-            <View style={[styles.barFill, { width: `${(values[i] / max) * 100}%`, backgroundColor: c.primary }]} />
+            <Bar pct={(values[i] / max) * 100} index={i} color={c.primary} />
           </View>
           <Text style={[styles.barValue, { color: c.text }]}>
             {values[i]}
@@ -47,6 +48,16 @@ function BarChart({ report }: { report: Report }) {
       ))}
     </View>
   );
+}
+
+/** One bar that grows from zero, each a little after the one above it. */
+function Bar({ pct, index, color }: { pct: number; index: number; color: string }) {
+  const w = useSharedValue(0);
+  useEffect(() => {
+    w.value = withDelay(index * 60, withTiming(pct, { duration: 650, easing: Easing.out(Easing.cubic) }));
+  }, [pct, index, w]);
+  const style = useAnimatedStyle(() => ({ width: `${w.value}%` }));
+  return <Animated.View style={[styles.barFill, { backgroundColor: color }, style]} />;
 }
 
 function ReportTable({ report }: { report: Report }) {
@@ -96,9 +107,7 @@ export default function ReportsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Reports
-          </Text>
+          <ScreenHeader title="Reports" emoji="📈" emojiMotion="pop" />
 
           <Text style={[styles.label, { color: c.text }]}>Report</Text>
           <Chips label="Report type" options={TYPES} value={draft.type} onChange={(type) => setDraft({ ...draft, type })} />
@@ -114,25 +123,27 @@ export default function ReportsScreen() {
           <Text style={[styles.label, { color: c.text }]}>Period</Text>
           <Chips label="Period" options={RANGES} value={draft.days} onChange={(days) => setDraft({ ...draft, days })} />
 
-          <Button title="Generate report" loading={report.isFetching} onPress={() => setSubmitted(draft)} />
+          <Button title="Generate report" emoji="📊" loading={report.isFetching} onPress={() => setSubmitted(draft)} />
 
           {report.isError ? <ErrorMessage message={errorMessage(report.error)} onRetry={() => report.refetch()} /> : null}
-          {report.isFetching && !report.data ? <Loading label="Generating report…" /> : null}
+          {report.isFetching && !report.data ? <Loading label="Generating report…" emoji="📊" /> : null}
           {report.data ? (
             report.data.rows.length === 0 ? (
-              <EmptyState title="No data" message="There is nothing to report for these filters." />
+              <EmptyState emoji="🗒️" title="No data" message="There is nothing to report for these filters." />
             ) : (
-              <Card>
-                <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
-                  {report.data.title}
-                </Text>
-                <Text style={[styles.caption, { color: c.textSecondary }]}>
-                  {report.data.from} to {report.data.to}
-                </Text>
-                <Text style={[styles.label, { color: c.text }]}>{report.data.columns[report.data.chartColumn]}</Text>
-                <BarChart report={report.data} />
-                <ReportTable report={report.data} />
-              </Card>
+              <FadeInView key={`${submitted?.type}-${submitted?.routeId}-${submitted?.days}`}>
+                <Card>
+                  <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
+                    📋 {report.data.title}
+                  </Text>
+                  <Text style={[styles.caption, { color: c.textSecondary }]}>
+                    {report.data.from} to {report.data.to}
+                  </Text>
+                  <Text style={[styles.label, { color: c.text }]}>{report.data.columns[report.data.chartColumn]}</Text>
+                  <BarChart report={report.data} />
+                  <ReportTable report={report.data} />
+                </Card>
+              </FadeInView>
             )
           ) : null}
         </View>
@@ -145,7 +156,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   title: { ...typography.title },
   label: { ...typography.body, fontWeight: '700' },
   caption: { ...typography.caption },

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { mockApi } from '@/api/mock';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
+import { Button, Card, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, ScreenHeader, StatusBadge, type Tone } from '@/components/ui';
 import { env } from '@/config/env';
 import { useAlerts, useMarkRead } from '@/hooks/use-alerts';
 import { useColors } from '@/hooks/use-colors';
@@ -13,10 +13,10 @@ import { useAlertBanner } from '@/store/alert-banner';
 import { spacing, typography } from '@/theme';
 import type { AlertType } from '@/types';
 
-const TYPE: Record<AlertType, { label: string; tone: Tone }> = {
-  DELAY: { label: 'Delay', tone: 'warning' },
-  CANCELLATION: { label: 'Cancelled', tone: 'danger' },
-  ROUTE_CHANGE: { label: 'Route change', tone: 'info' },
+const TYPE: Record<AlertType, { label: string; tone: Tone; emoji: string }> = {
+  DELAY: { label: 'Delay', tone: 'warning', emoji: '⏰' },
+  CANCELLATION: { label: 'Cancelled', tone: 'danger', emoji: '❌' },
+  ROUTE_CHANGE: { label: 'Route change', tone: 'info', emoji: '🔀' },
 };
 
 function when(iso: string, t: Translate) {
@@ -40,12 +40,10 @@ export default function AlertsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Alerts')}
-          </Text>
+          <ScreenHeader title={t('Alerts')} emoji="🔔" emojiMotion="wave" />
 
           {alerts.isPending ? (
-            <Loading label="Loading alerts…" />
+            <Loading label="Loading alerts…" emoji="🔔" />
           ) : alerts.isError ? (
             <ErrorMessage message={errorMessage(alerts.error)} onRetry={() => alerts.refetch()} />
           ) : alerts.data.length === 0 ? (
@@ -55,29 +53,35 @@ export default function AlertsScreen() {
               {unread.length > 1 ? (
                 <Button
                   title={t('Mark all {count} as read', { count: unread.length })}
+                  emoji="✅"
                   variant="secondary"
                   onPress={() => unread.forEach((a) => markRead.mutate(a.alertId))}
                 />
               ) : null}
-              {alerts.data.map((a) => {
+              {alerts.data.map((a, i) => {
                 const type = TYPE[a.type];
                 return (
-                  <Card key={a.alertId} style={!a.isRead ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
-                    <View style={styles.row}>
-                      <StatusBadge label={type.label} tone={type.tone} />
-                      <Text style={[styles.caption, { color: c.textSecondary }]}>
-                        {!a.isRead ? `● ${t('New')} · ` : ''}
-                        {when(a.createdAt, t)}
-                      </Text>
-                    </View>
-                    <Text style={[styles.body, { color: c.text }]}>{t(a.message)}</Text>
-                    {a.delayMinutes ? (
-                      <Text style={[styles.caption, { color: c.textSecondary }]}>
-                        {t('Delay: about {n} minutes', { n: a.delayMinutes })}
-                      </Text>
-                    ) : null}
-                    {!a.isRead ? <Button title="Mark as read" variant="secondary" onPress={() => markRead.mutate(a.alertId)} /> : null}
-                  </Card>
+                  <FadeInView key={a.alertId} index={i}>
+                    <Card style={!a.isRead ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
+                      <View style={styles.row}>
+                        <View style={styles.type}>
+                          <Emoji symbol={type.emoji} size={22} motion={!a.isRead ? 'pulse' : undefined} />
+                          <StatusBadge label={type.label} tone={type.tone} />
+                        </View>
+                        <Text style={[styles.caption, { color: c.textSecondary }]}>
+                          {!a.isRead ? `● ${t('New')} · ` : ''}
+                          {when(a.createdAt, t)}
+                        </Text>
+                      </View>
+                      <Text style={[styles.body, { color: c.text }]}>{t(a.message)}</Text>
+                      {a.delayMinutes ? (
+                        <Text style={[styles.caption, { color: c.textSecondary }]}>
+                          {t('Delay: about {n} minutes', { n: a.delayMinutes })}
+                        </Text>
+                      ) : null}
+                      {!a.isRead ? <Button title="Mark as read" emoji="👍" variant="secondary" onPress={() => markRead.mutate(a.alertId)} /> : null}
+                    </Card>
+                  </FadeInView>
                 );
               })}
             </>
@@ -86,6 +90,7 @@ export default function AlertsScreen() {
           {env.useMockApi ? (
             <Button
               title="Demo: simulate a new alert"
+              emoji="🧪"
               variant="secondary"
               onPress={() => {
                 const a = mockApi.createDemoAlert();
@@ -104,8 +109,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, flexWrap: 'wrap' },
+  type: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   body: { ...typography.body },
   caption: { ...typography.caption },
 });

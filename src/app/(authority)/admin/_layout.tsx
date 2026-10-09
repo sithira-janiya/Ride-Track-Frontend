@@ -15,6 +15,7 @@ export default function AdminStack() {
         headerTintColor: c.primary,
         headerTitleStyle: { color: c.text },
         headerShadowVisible: false,
+        animation: 'slide_from_right',
         contentStyle: { backgroundColor: c.background },
       }}>
       <Stack.Screen name="index" options={{ headerShown: false, title: 'Admin' }} />

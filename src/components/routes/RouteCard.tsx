@@ -1,11 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Card, StatusBadge } from '@/components/ui';
+import { Card, Emoji, PressableScale, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { typography } from '@/theme';
+import { spacing, typography } from '@/theme';
 import type { Route } from '@/types';
-import { modeLabel } from '@/utils/format';
+import { modeEmoji, modeLabel } from '@/utils/format';
 
 type Props = { route: Route; onPress: () => void };
 
@@ -13,14 +13,16 @@ export function RouteCard({ route, onPress }: Props) {
   const c = useColors();
   const t = useT();
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={t('{mode} route {no}, {from} to {to}', { mode: t(modeLabel(route.mode)), no: route.routeNo, from: route.origin, to: route.destination })}
-      onPress={onPress}
-      style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}>
+      onPress={onPress}>
       <Card>
         <View style={styles.row}>
-          <Text style={[styles.no, { color: c.primary }]}>{route.routeNo}</Text>
+          <View style={styles.title}>
+            <Emoji symbol={modeEmoji(route.mode)} size={24} />
+            <Text style={[styles.no, { color: c.primary }]}>{route.routeNo}</Text>
+          </View>
           <StatusBadge label={modeLabel(route.mode)} tone="info" />
         </View>
         <Text style={[styles.name, { color: c.text }]}>{route.name}</Text>
@@ -28,12 +30,13 @@ export function RouteCard({ route, onPress }: Props) {
           {route.origin} → {route.destination}
         </Text>
       </Card>
-    </Pressable>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  title: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   no: { ...typography.title },
   name: { ...typography.bodyLarge, fontWeight: '600' },
   meta: { ...typography.body },
