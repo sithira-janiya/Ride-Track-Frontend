@@ -8,7 +8,7 @@ import { errorMessage } from '@/api/client';
 import { routesApi, ticketsApi } from '@/api/endpoints';
 import { ArrivalRow } from '@/components/routes/ArrivalRow';
 import { StopRow } from '@/components/routes/StopRow';
-import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Button, Card, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useTicketCache } from '@/store/tickets';
@@ -67,25 +67,23 @@ export default function BuyTicketScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Buy a ticket')}
-            {route.data ? ` · ${route.data.routeNo}` : ''}
-          </Text>
+          <Button title="← Back" variant="secondary" style={{ alignSelf: 'flex-start' }} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+          <ScreenHeader title={`${t('Buy a ticket')}${route.data ? ` · ${route.data.routeNo}` : ''}`} emoji="💳" />
 
           {route.isPending ? (
-            <Loading label="Loading route…" />
+            <Loading label="Loading route…" emoji="🗺️" />
           ) : route.isError ? (
             <ErrorMessage message={errorMessage(route.error)} onRetry={() => route.refetch()} />
           ) : (
             <>
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                {t('1. Where do you board?')}
+                🚏 {t('1. Where do you board?')}
               </Text>
               <View style={styles.list}>
-                {stops.slice(0, -1).map((s) => (
+                {stops.slice(0, -1).map((s, i) => (
                   <StopRow
                     key={s.stopId}
+                    index={i}
                     stop={s}
                     selected={s.stopId === boardId}
                     onPress={() => {
@@ -98,31 +96,31 @@ export default function BuyTicketScreen() {
               </View>
 
               {board ? (
-                <>
+                <FadeInView key={board.stopId}>
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    {t('2. Where do you get off?')}
+                    🏁 {t('2. Where do you get off?')}
                   </Text>
                   <View style={styles.list}>
-                    {alightOptions.map((s) => (
-                      <StopRow key={s.stopId} stop={s} selected={s.stopId === alightId} onPress={() => setAlightId(s.stopId)} />
+                    {alightOptions.map((s, i) => (
+                      <StopRow key={s.stopId} index={i} stop={s} selected={s.stopId === alightId} onPress={() => setAlightId(s.stopId)} />
                     ))}
                   </View>
 
                   <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    {t('3. Which trip?')}
+                    🕒 {t('3. Which trip?')}
                   </Text>
                   {arrivals.isPending ? (
-                    <Loading label="Loading trips…" />
+                    <Loading label="Loading trips…" emoji="🕒" />
                   ) : arrivals.isError ? (
                     <ErrorMessage message={errorMessage(arrivals.error)} onRetry={() => arrivals.refetch()} />
                   ) : trips.length === 0 ? (
-                    <EmptyState title="No trips available" message="There are no more trips from this stop today." />
+                    <EmptyState emoji="🌙" title="No trips available" message="There are no more trips from this stop today." />
                   ) : (
                     <View style={styles.list}>
                       {[...trips]
                         .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
-                        .map((a) => (
-                          <View key={a.tripId} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
+                        .map((a, i) => (
+                          <FadeInView key={a.tripId} index={i} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
                             <ArrivalRow arrival={a} />
                             <Button
                               title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta) })}
@@ -130,28 +128,33 @@ export default function BuyTicketScreen() {
                               onPress={() => setTripId(a.tripId)}
                               style={styles.pick}
                             />
-                          </View>
+                          </FadeInView>
                         ))}
                     </View>
                   )}
-                </>
+                </FadeInView>
               ) : null}
 
               {ready ? (
-                <Card>
-                  <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                    {t('Fare summary')}
-                  </Text>
-                  <Text style={[styles.body, { color: c.text }]}>
-                    {board!.name} → {alight!.name}
-                  </Text>
-                  <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!)}</Text>
-                  {pay.isError ? <ErrorMessage message={errorMessage(pay.error)} /> : null}
-                  <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} loading={pay.isPending} onPress={() => pay.mutate()} />
-                  <Text style={[styles.caption, { color: c.textSecondary }]}>
-                    {t('You will be taken to the secure payment page. Your ticket appears once payment is confirmed.')}
-                  </Text>
-                </Card>
+                <FadeInView>
+                  <Card style={{ borderColor: c.primary, borderWidth: 2 }}>
+                    <View style={styles.summaryHead}>
+                      <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
+                        {t('Fare summary')}
+                      </Text>
+                      <Emoji symbol="🎟️" size={28} motion="pop" />
+                    </View>
+                    <Text style={[styles.body, { color: c.text }]}>
+                      {board!.name} → {alight!.name}
+                    </Text>
+                    <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!)}</Text>
+                    {pay.isError ? <ErrorMessage message={errorMessage(pay.error)} /> : null}
+                    <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} emoji="🔒" loading={pay.isPending} onPress={() => pay.mutate()} />
+                    <Text style={[styles.caption, { color: c.textSecondary }]}>
+                      🛡️ {t('You will be taken to the secure payment page. Your ticket appears once payment is confirmed.')}
+                    </Text>
+                  </Card>
+                </FadeInView>
               ) : null}
             </>
           )}
@@ -165,11 +168,11 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   section: { ...typography.title, marginTop: spacing.sm },
   body: { ...typography.body },
   caption: { ...typography.caption },
   total: { ...typography.heading },
+  summaryHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
   list: { gap: spacing.sm },
   picked: { borderWidth: 2, borderRadius: 16, padding: spacing.xs },
   pick: { marginTop: spacing.xs },

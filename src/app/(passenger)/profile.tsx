@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { userApi } from '@/api/endpoints';
-import { Button, Card, ErrorMessage, LanguagePicker, TextField } from '@/components/ui';
+import { Button, Card, Emoji, ErrorMessage, FadeInView, LanguagePicker, ScreenHeader, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { disconnectSocket } from '@/socket';
@@ -54,10 +55,18 @@ export default function PassengerProfile() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Profile')}
-          </Text>
-          <Text style={[styles.body, { color: c.textSecondary }]}>{user.email ?? user.phone}</Text>
+          <ScreenHeader title={t('Profile')} emoji="👤" />
+          <FadeInView index={1}>
+            <Card style={styles.idCard}>
+              <View style={[styles.avatar, { backgroundColor: c.primary }]}>
+                <Text style={[styles.avatarText, { color: c.onPrimary }]}>{initials(user.name)}</Text>
+              </View>
+              <View style={styles.switchText}>
+                <Text style={[styles.label, { color: c.text }]}>{user.name}</Text>
+                <Text style={[styles.caption, { color: c.textSecondary }]}>{user.email ?? user.phone}</Text>
+              </View>
+            </Card>
+          </FadeInView>
 
           <TextField label="Name" value={name} onChangeText={setName} error={nameError} autoCapitalize="words" />
 
@@ -65,6 +74,7 @@ export default function PassengerProfile() {
 
           <Card>
             <View style={styles.switchRow}>
+              <Emoji symbol={notifications ? '🔔' : '🔕'} size={26} motion="pop" />
               <View style={styles.switchText}>
                 <Text style={[styles.label, { color: c.text }]}>{t('Alert notifications')}</Text>
                 <Text style={[styles.caption, { color: c.textSecondary }]}>
@@ -86,26 +96,43 @@ export default function PassengerProfile() {
 
           {save.isError ? <ErrorMessage message={errorMessage(save.error)} /> : null}
           {save.isSuccess && !dirty ? (
-            <Text accessibilityLiveRegion="polite" style={[styles.body, { color: c.success }]}>
-              ✓ {t('Profile saved')}
-            </Text>
+            <Animated.View entering={ZoomIn.springify()} style={styles.saved}>
+              <Emoji symbol="🎉" size={22} />
+              <Text accessibilityLiveRegion="polite" style={[styles.body, { color: c.success }]}>
+                ✓ {t('Profile saved')}
+              </Text>
+            </Animated.View>
           ) : null}
-          <Button title="Save changes" loading={save.isPending} disabled={!dirty} onPress={submit} />
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <Button title="Save changes" emoji="💾" loading={save.isPending} disabled={!dirty} onPress={submit} />
+          <Animated.View entering={FadeInDown.delay(200)}>
+            <Button title="Log out" emoji="👋" variant="secondary" onPress={signOut} />
+          </Animated.View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]!.toUpperCase())
+    .join('');
+}
+
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   caption: { ...typography.caption },
   label: { ...typography.body, fontWeight: '700' },
+  idCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { ...typography.title },
+  saved: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   switchText: { flex: 1, gap: spacing.xs },
 });

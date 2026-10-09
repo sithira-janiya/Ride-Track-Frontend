@@ -55,7 +55,8 @@ export default function RootLayout() {
       }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         {/* Each group is only reachable for the matching state; guarded routes redirect to the first allowed route. */}
-        <Stack screenOptions={{ headerShown: false }}>
+        {/* signing in or out cross-fades between the role groups */}
+        <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
           <Stack.Protected guard={!user}>
             <Stack.Screen name="(auth)" />
           </Stack.Protected>

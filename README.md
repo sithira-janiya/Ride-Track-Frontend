@@ -92,6 +92,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
 | 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
 | – | Authority: admin back office (overview, accounts, vehicles, routes, trips, tickets) | Built; every screen checked in the browser against the real backend (create and disable an account, edit a vehicle); not tested on a device |
+| – | Motion and emoji pass: screen transitions, press feedback, staggered lists, animated states | Built; every role's screens checked in the browser (light and dark, phone width); haptics and native transitions not tested on a device |
 | 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
 
 ## Features built so far
@@ -130,6 +131,14 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
 
 **Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
+
+**Motion and emoji** (`src/components/ui/motion.tsx`, `ScreenHeader.tsx`):
+- Transitions: signing in or out cross-fades between role groups, the login/register stack and admin sub-screens slide in from the right, and tab switches (including the pushed passenger screens, which are hidden tabs) use the `shift` animation.
+- Tab bars use emoji icons that spring up when their tab is active (`TabEmoji`).
+- `PressableScale` springs buttons and cards down while held, with a light haptic tap on phones. `Button` takes an optional `emoji` prop.
+- `FadeInView` slides list items up in a short stagger; `ScreenHeader` drops in each screen's title with its emoji.
+- Animated states: floating emoji on loading and empty states, a shake on errors, a spring-in alert banner, a pop-in scan verdict, a sweeping scan line over the camera, a counter that pops on each change, occupancy and report bars that grow to their value, and a gently floating hero on the auth screens.
+- Emojis are decorative only: they sit beside the text (never instead of it), stay outside `t()` so translations are unchanged, and `Emoji` hides them from screen readers. Every hand-driven animation is skipped when the OS "reduce motion" setting is on, and Reanimated's layout animations follow it too.
 
 ### Languages (Google Translate)
 
@@ -172,7 +181,7 @@ Rules: screens in `app/` stay thin and call hooks and components; all network ca
 
 ## Testing
 
-Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
+Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). `jest.setup.js` swaps in the Reanimated and Worklets JS mocks, so animated components render at once in tests. They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
 
 - `src/utils/__tests__/validation.test.ts`: login and register rules, and the admin forms (new staff account, new vehicle).
 - `src/api/__tests__/admin.test.ts`: the mock admin API: creating accounts (own password, duplicate email), disabling blocks login, role filter, vehicle route rules, out-of-service vehicles drop out of trips, ticket paging.
@@ -194,11 +203,12 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 
 ## Accessibility
 
-Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size.
+Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Animations respect the system "reduce motion" setting, and decorative emoji are hidden from screen readers so status is still read from the text.
 
 ## Known limitations
 
 - Map markers jump between positions instead of animating.
+- The motion pass (transitions, springs, haptics) has only been checked in the web build. Emoji look different on each platform's emoji font, and older Android versions may draw some newer emoji (such as 🛠️ or 🛰️) as boxes.
 - The map is native only; the web build shows a notice instead.
 - Android release builds need a Google Maps API key in `app.json`.
 - Checked against the real backend (RideTrack-API): login, routes, arrivals, nearby stops, buying and paying for a ticket, ticket list, `POST /scans`, publishing an alert, `GET /ops/dashboard`, reports and every `/admin/*` endpoint. Not yet checked against it: `POST /vehicles/:id/occupancy` and `PUT /users/me/push-token`.

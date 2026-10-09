@@ -1,10 +1,12 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { Easing, FadeInDown, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { userApi } from '@/api/endpoints';
-import { LanguagePicker } from '@/components/ui';
+import { Emoji, LanguagePicker } from '@/components/ui';
 import { illustrations } from '@/components/ui/illustrations';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
@@ -13,11 +15,12 @@ import { useLanguage } from '@/store/language';
 import { spacing, typography } from '@/theme';
 import type { AuthResult } from '@/types';
 
-type Props = { title: string; subtitle: string; children: ReactNode };
+type Props = { title: string; subtitle: string; emoji?: string; children: ReactNode };
 
 /** Shared shell for the login and register screens. */
-export function AuthScreen({ title, subtitle, children }: Props) {
+export function AuthScreen({ title, subtitle, emoji, children }: Props) {
   const c = useColors();
+  const hero = useHeroFloat();
   const t = useT();
   const language = useLanguage((s) => s.language);
   const setLanguage = useLanguage((s) => s.pickBeforeLogin);
@@ -26,21 +29,45 @@ export function AuthScreen({ title, subtitle, children }: Props) {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
-            <Image source={illustrations.authHero} style={styles.hero} contentFit="contain" accessibilityLabel="" />
-            <Text accessibilityRole="header" style={[styles.brand, { color: c.primary }]}>
-              RideTrack
-            </Text>
-            <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
-              {t(title)}
-            </Text>
-            <Text style={[styles.subtitle, { color: c.textSecondary }]}>{t(subtitle)}</Text>
-            <View style={styles.form}>{children}</View>
-            <LanguagePicker value={language} onChange={setLanguage} />
+            <Animated.View entering={FadeInDown.duration(500)} style={hero}>
+              <Image source={illustrations.authHero} style={styles.hero} contentFit="contain" accessibilityLabel="" />
+            </Animated.View>
+            <Animated.View entering={FadeInDown.duration(450).delay(80)} style={styles.brandRow}>
+              <Emoji symbol="🚌" size={24} />
+              <Text accessibilityRole="header" style={[styles.brand, { color: c.primary }]}>
+                RideTrack
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.duration(450).delay(160)} style={styles.brandRow}>
+              <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
+                {t(title)}
+              </Text>
+              {emoji ? <Emoji symbol={emoji} size={30} motion="wave" /> : null}
+            </Animated.View>
+            <Animated.Text entering={FadeInDown.duration(450).delay(220)} style={[styles.subtitle, { color: c.textSecondary }]}>
+              {t(subtitle)}
+            </Animated.Text>
+            <Animated.View entering={FadeInDown.duration(450).delay(300)} style={styles.form}>
+              {children}
+            </Animated.View>
+            <Animated.View entering={FadeInDown.duration(450).delay(380)}>
+              <LanguagePicker value={language} onChange={setLanguage} />
+            </Animated.View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+/** The hero picture drifts up and down slowly, like a bus on an easy road. */
+function useHeroFloat() {
+  const v = useSharedValue(0);
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (!reduced) v.value = withRepeat(withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [reduced, v]);
+  return useAnimatedStyle(() => ({ transform: [{ translateY: -6 * v.value }] }));
 }
 
 /**
@@ -70,8 +97,9 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.lg },
   content: { width: '100%', maxWidth: 440, alignSelf: 'center', gap: spacing.sm },
   hero: { width: '100%', height: 140, marginBottom: spacing.sm },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brand: { ...typography.title },
-  title: { ...typography.heading },
+  title: { ...typography.heading, flexShrink: 1 },
   subtitle: { ...typography.body, marginBottom: spacing.sm },
   form: { gap: spacing.md, marginBottom: spacing.md },
 });

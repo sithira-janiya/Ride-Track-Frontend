@@ -1,10 +1,12 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
 
-type Option<T> = { value: T; label: string };
+import { PressableScale, tapFeedback } from './motion';
+
+type Option<T> = { value: T; label: string; emoji?: string };
 type Props<T> = {
   label: string;
   options: Option<T>[];
@@ -24,15 +26,22 @@ export function Chips<T extends string | number | undefined>({ label, options, v
         const selected = o.value === value;
         const text = translateOptions ? t(o.label) : o.label;
         return (
-          <Pressable
+          <PressableScale
+            haptic={false}
             key={String(o.value)}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
             accessibilityLabel={text}
-            onPress={() => onChange(o.value)}
+            onPress={() => {
+              if (!selected) tapFeedback('select');
+              onChange(o.value);
+            }}
             style={[styles.chip, { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border }]}>
-            <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>{text}</Text>
-          </Pressable>
+            <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>
+              {o.emoji ? `${o.emoji} ` : ''}
+              {text}
+            </Text>
+          </PressableScale>
         );
       })}
     </View>

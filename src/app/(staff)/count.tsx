@@ -2,11 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi, vehiclesApi } from '@/api/endpoints';
-import { Button, Card, EmptyState, ErrorMessage, Loading, OccupancyBar } from '@/components/ui';
+import { Button, Card, Emoji, EmptyState, ErrorMessage, FadeInView, Loading, OccupancyBar, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
@@ -47,30 +48,36 @@ export default function PassengerCountScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Passengers on board
-          </Text>
+          <ScreenHeader title="Passengers on board" emoji="👥" emojiMotion="pop" />
 
           {!shift ? (
-            <EmptyState title="No shift started" message="Choose your route and trip on the Shift tab first." />
+            <EmptyState emoji="🕒" title="No shift started" message="Choose your route and trip on the Shift tab first." />
           ) : vehicles.isPending ? (
-            <Loading label="Loading vehicle…" />
+            <Loading label="Loading vehicle…" emoji="🚌" />
           ) : vehicles.isError ? (
             <ErrorMessage message={errorMessage(vehicles.error)} onRetry={() => vehicles.refetch()} />
           ) : !vehicle || draft == null ? (
-            <EmptyState title="Vehicle not found" message="This vehicle is not reporting on the route. Check your shift." />
+            <EmptyState emoji="🔍" title="Vehicle not found" message="This vehicle is not reporting on the route. Check your shift." />
           ) : (
             <>
               <Text style={[styles.body, { color: c.textSecondary }]}>
-                Route {shift.routeNo} · {vehicle.regNo ?? `Vehicle ${vehicle.vehicleId}`}
+                🚏 Route {shift.routeNo} · {vehicle.regNo ?? `Vehicle ${vehicle.vehicleId}`}
               </Text>
-              <Card>
-                <Text accessibilityLiveRegion="polite" maxFontSizeMultiplier={1.2} style={[styles.count, { color: c.text }]}>
-                  {draft}
-                  <Text style={[styles.of, { color: c.textSecondary }]}> / {capacity}</Text>
-                </Text>
-                <OccupancyBar passengerCount={draft} capacity={capacity} />
-              </Card>
+              <FadeInView>
+                <Card>
+                  {/* re-keyed on each change so the number pops, like a turnstile counter */}
+                  <Animated.Text
+                    key={draft}
+                    entering={ZoomIn.duration(180)}
+                    accessibilityLiveRegion="polite"
+                    maxFontSizeMultiplier={1.2}
+                    style={[styles.count, { color: c.text }]}>
+                    {draft}
+                    <Text style={[styles.of, { color: c.textSecondary }]}> / {capacity}</Text>
+                  </Animated.Text>
+                  <OccupancyBar passengerCount={draft} capacity={capacity} />
+                </Card>
+              </FadeInView>
 
               <View style={styles.row}>
                 <Button title="− 1" variant="secondary" onPress={() => change(-1)} style={styles.step} />
@@ -83,12 +90,15 @@ export default function PassengerCountScreen() {
 
               {save.isError ? <ErrorMessage message={errorMessage(save.error)} /> : null}
               {save.isSuccess ? (
-                <Text accessibilityLiveRegion="polite" style={[styles.body, { color: c.success }]}>
-                  ✓ Count saved
-                </Text>
+                <Animated.View entering={ZoomIn.springify()} style={styles.saved}>
+                  <Emoji symbol="🎉" size={22} />
+                  <Text accessibilityLiveRegion="polite" style={[styles.body, { color: c.success }]}>
+                    ✓ Count saved
+                  </Text>
+                </Animated.View>
               ) : null}
-              <Button title="Save count" loading={save.isPending} disabled={!dirty} onPress={() => save.mutate(draft)} />
-              <Button title="Back to scanning" variant="secondary" onPress={() => router.navigate('/')} />
+              <Button title="Save count" emoji="💾" loading={save.isPending} disabled={!dirty} onPress={() => save.mutate(draft)} />
+              <Button title="Back to scanning" emoji="📷" variant="secondary" onPress={() => router.navigate('/')} />
             </>
           )}
         </View>
@@ -101,10 +111,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   count: { fontSize: 64, lineHeight: 72, fontWeight: '800', textAlign: 'center' },
   of: { ...typography.title },
   row: { flexDirection: 'row', gap: spacing.md },
   step: { flex: 1 },
+  saved: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

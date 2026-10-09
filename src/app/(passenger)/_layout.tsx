@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { AlertBanner } from '@/components/alerts/AlertBanner';
 import { useAlertSocket, usePushRegistration, useUnreadCount } from '@/hooks/use-alerts';
 import { useColors } from '@/hooks/use-colors';
+import { TabEmoji } from '@/components/ui';
 import { useT } from '@/i18n';
 
 // Passenger tabs per docs/08-frontend-react-native.md: Home · Map · Tickets · Alerts · Profile.
@@ -24,18 +25,20 @@ export default function PassengerTabs() {
           tabBarInactiveTintColor: c.textSecondary,
           tabBarStyle: { backgroundColor: c.background, borderTopColor: c.border },
           tabBarLabelStyle: { fontSize: 14 },
+          animation: 'shift',
         }}>
-        <Tabs.Screen name="index" options={{ title: t('Home') }} />
-        <Tabs.Screen name="tickets" options={{ title: t('Tickets') }} />
+        <Tabs.Screen name="index" options={{ title: t('Home'), tabBarIcon: ({ focused }) => <TabEmoji symbol="🏠" focused={focused} /> }} />
+        <Tabs.Screen name="tickets" options={{ title: t('Tickets'), tabBarIcon: ({ focused }) => <TabEmoji symbol="🎫" focused={focused} /> }} />
         <Tabs.Screen
           name="alerts"
           options={{
             title: t('Alerts'),
+            tabBarIcon: ({ focused }) => <TabEmoji symbol="🔔" focused={focused} />,
             tabBarBadge: unread > 0 ? unread : undefined,
             tabBarAccessibilityLabel: unread > 0 ? t('Alerts, {count} unread', { count: unread }) : t('Alerts'),
           }}
         />
-        <Tabs.Screen name="profile" options={{ title: t('Profile') }} />
+        <Tabs.Screen name="profile" options={{ title: t('Profile'), tabBarIcon: ({ focused }) => <TabEmoji symbol="👤" focused={focused} /> }} />
         {/* pushed from other screens; keep the tab bar but have no tab of their own */}
         <Tabs.Screen name="route/[id]" options={{ href: null }} />
         <Tabs.Screen name="map/[id]" options={{ href: null }} />

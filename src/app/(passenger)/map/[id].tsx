@@ -7,11 +7,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { LiveMap } from '@/components/map/LiveMap';
-import { Button, Card, ErrorMessage, ETAChip, Loading, OccupancyBar, StatusBadge } from '@/components/ui';
+import { Button, Card, Emoji, ErrorMessage, ETAChip, FadeInView, Loading, OccupancyBar, ScreenHeader, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT, type Translate } from '@/i18n';
 import { STALE_AFTER_MS, useLiveVehicles, useNow } from '@/hooks/use-live-vehicles';
 import { spacing, typography } from '@/theme';
+import { modeEmoji } from '@/utils/format';
 
 function ago(ms: number, t: Translate) {
   const s = Math.max(0, Math.round(ms / 1000));
@@ -35,15 +36,12 @@ export default function LiveMapScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <View style={styles.top}>
-        <Button title="← Back" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
-        <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-          {t('Live map')}
-          {route.data ? ` · ${route.data.routeNo}` : ''}
-        </Text>
+        <Button title="← Back" variant="secondary" style={{ alignSelf: 'flex-start' }} onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+        <ScreenHeader size="medium" title={`${t('Live map')}${route.data ? ` · ${route.data.routeNo}` : ''}`} emoji="🗺️" />
       </View>
 
       {route.isPending ? (
-        <Loading label="Loading route…" />
+        <Loading label="Loading route…" emoji="🗺️" />
       ) : route.isError ? (
         <ErrorMessage message={errorMessage(route.error)} onRetry={() => route.refetch()} />
       ) : (
@@ -61,7 +59,10 @@ export default function LiveMapScreen() {
           <ScrollView style={styles.panel} contentContainerStyle={styles.panelContent}>
             {/* status by icon-free text AND tone, never colour alone (NFR8) */}
             <View style={styles.statusRow}>
-              <StatusBadge label={connected ? 'Live' : 'Reconnecting…'} tone={connected ? 'success' : 'warning'} />
+              <View style={styles.live}>
+                <Emoji symbol={connected ? '🟢' : '🟠'} size={14} motion="pulse" />
+                <StatusBadge label={connected ? 'Live' : 'Reconnecting…'} tone={connected ? 'success' : 'warning'} />
+              </View>
               <Text style={[styles.caption, { color: c.textSecondary }]}>
                 {lastUpdated ? t('Updated {ago}', { ago: ago(now - lastUpdated, t) }) : t('Waiting for first update…')}
               </Text>
@@ -73,27 +74,33 @@ export default function LiveMapScreen() {
             ) : null}
 
             {query.isPending ? (
-              <Loading label="Finding vehicles…" />
+              <Loading label="Finding vehicles…" emoji="🛰️" />
             ) : query.isError ? (
               <ErrorMessage message={errorMessage(query.error)} onRetry={() => query.refetch()} />
             ) : vehicles.length === 0 ? (
               <Text style={[styles.body, { color: c.textSecondary }]}>
-                {t('No vehicles are currently reporting a position on this route.')}
+                😴 {t('No vehicles are currently reporting a position on this route.')}
               </Text>
             ) : (
-              vehicles.map((v) => (
-                <Card key={v.vehicleId} style={v.vehicleId === selected?.vehicleId ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
-                  <View style={styles.statusRow}>
-                    <Text style={[styles.vehicleName, { color: c.text }]}>{v.regNo ?? t('Vehicle {id}', { id: v.vehicleId })}</Text>
-                    <ETAChip eta={v.eta} />
-                  </View>
-                  <OccupancyBar passengerCount={v.passengerCount} capacity={v.capacity} />
-                  <Button
-                    title={v.vehicleId === selected?.vehicleId ? 'Selected on map' : 'Show on map'}
-                    variant="secondary"
-                    onPress={() => setSelectedId(v.vehicleId)}
-                  />
-                </Card>
+              vehicles.map((v, i) => (
+                <FadeInView key={v.vehicleId} index={i}>
+                  <Card style={v.vehicleId === selected?.vehicleId ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
+                    <View style={styles.statusRow}>
+                      <Text style={[styles.vehicleName, { color: c.text }]}>
+                        {route.data ? `${modeEmoji(route.data.mode)} ` : ''}
+                        {v.regNo ?? t('Vehicle {id}', { id: v.vehicleId })}
+                      </Text>
+                      <ETAChip eta={v.eta} />
+                    </View>
+                    <OccupancyBar passengerCount={v.passengerCount} capacity={v.capacity} />
+                    <Button
+                      title={v.vehicleId === selected?.vehicleId ? 'Selected on map' : 'Show on map'}
+                      emoji="📍"
+                      variant="secondary"
+                      onPress={() => setSelectedId(v.vehicleId)}
+                    />
+                  </Card>
+                </FadeInView>
               ))
             )}
           </ScrollView>
@@ -106,11 +113,11 @@ export default function LiveMapScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   top: { padding: spacing.md, gap: spacing.sm },
-  heading: { ...typography.title },
   map: { flex: 3, minHeight: 240 },
   panel: { flex: 2 },
   panelContent: { padding: spacing.md, gap: spacing.sm },
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, flexWrap: 'wrap' },
+  live: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   caption: { ...typography.caption },
   body: { ...typography.body },
   vehicleName: { ...typography.bodyLarge, fontWeight: '700' },
