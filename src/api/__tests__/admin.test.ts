@@ -21,6 +21,18 @@ describe('admin panel (mock backend)', () => {
     expect(page.users[0]).toMatchObject({ employeeNo: 'C-2002', staffType: 'INSPECTOR', organisation: 'SLTB Kottawa Depot' });
   });
 
+  it('lets every test login in (see .env.example)', async () => {
+    for (const [id, role] of [
+      ['passenger@ridetrack.test', 'PASSENGER'],
+      ['0771234567', 'PASSENGER'],
+      ['staff@ridetrack.test', 'STAFF'],
+      ['inspector@ridetrack.test', 'STAFF'],
+      ['officer@ridetrack.test', 'AUTHORITY'],
+    ]) {
+      await expect(mockApi.login(id, MOCK_PASSWORD)).resolves.toMatchObject({ user: { role } });
+    }
+  });
+
   it('rejects a duplicate email', async () => {
     await expect(
       mockApi.adminCreateUser({ role: 'AUTHORITY', name: 'Copy', email: 'officer@ridetrack.test', password: 'abcdefg1', employeeNo: 'X', organisation: 'Y' }),

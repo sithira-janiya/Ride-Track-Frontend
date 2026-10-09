@@ -81,6 +81,9 @@ const users: User[] = [
   { userId: 1, name: 'Demo Passenger', email: 'passenger@ridetrack.test', phone: null, role: 'PASSENGER', isActive: true },
   { userId: 2, name: 'Demo Conductor', email: 'staff@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
   { userId: 3, name: 'Demo Officer', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
+  { userId: 4, name: 'Demo Inspector', email: 'inspector@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
+  // logs in with a mobile number instead of an email
+  { userId: 5, name: 'Demo Phone Passenger', email: null, phone: '0771234567', role: 'PASSENGER', isActive: true },
 ];
 
 // admin-only details per account: staff and officer profile rows, and passwords set by an officer
@@ -88,6 +91,7 @@ type AccountInfo = Pick<AdminUser, 'createdAt' | 'employeeNo' | 'organisation' |
 const accountInfo: Record<number, AccountInfo> = {
   2: { createdAt: null, employeeNo: 'C-1001', organisation: 'SLTB Maharagama Depot', staffType: 'CONDUCTOR', vehicleId: 101 },
   3: { createdAt: null, employeeNo: 'A-2001', organisation: 'NTC Operations', staffType: null, vehicleId: null },
+  4: { createdAt: null, employeeNo: 'I-1001', organisation: 'SLTB Maharagama Depot', staffType: 'INSPECTOR', vehicleId: null },
 };
 const passwords: Record<number, string> = {};
 

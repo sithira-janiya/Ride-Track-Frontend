@@ -55,12 +55,15 @@ All use the password `Password1!`.
 | Role | Email | Lands on |
 |---|---|---|
 | Passenger | `passenger@ridetrack.test` | Passenger tabs (home, tickets, alerts, profile) |
-| Staff | `staff@ridetrack.test` | Staff tabs (scan, passengers, shift) |
+| Passenger (mobile number) | `0771234567` (mock mode only) | Passenger tabs |
+| Staff (conductor) | `staff@ridetrack.test` | Staff tabs (scan, passengers, shift) |
+| Staff (inspector) | `inspector@ridetrack.test` (mock mode only) | Staff tabs |
 | Authority | `officer@ridetrack.test` | Authority tabs (dashboard, fleet, reports, alerts) |
 
 Notes:
-- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the same accounts and password are created by `npm run seed` in `RideTrack-API`.
-- The login field accepts an email or a mobile number, but the demo accounts have no phone number, so log in with the email.
+- The same list is in `.env.example` for quick reference; the app does not read it from there.
+- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the passenger, staff and officer accounts and password are created by `npm run seed` in `RideTrack-API`; the mobile-number passenger and the inspector exist only in mock mode.
+- The login field accepts an email or a mobile number. Only the mobile-number passenger has a phone number; log in to the others with the email.
 - Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
 - In mock mode, registered accounts live in memory only and disappear when the app reloads. On the real backend they are saved in MySQL.
 - A wrong email or wrong password gives the same error, "Invalid email/phone or password."
