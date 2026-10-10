@@ -1,10 +1,10 @@
-import axios, { AxiosError, isAxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, create, isAxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { env } from '@/config/env';
 import { useAuth } from '@/store/auth';
 import type { ApiError, ApiSuccess, AuthTokens } from '@/types';
 
-export const api = axios.create({ baseURL: env.apiUrl, timeout: 15000 });
+export const api = create({ baseURL: env.apiUrl, timeout: 15000 });
 
 api.interceptors.request.use((config) => {
   const token = useAuth.getState().accessToken;
