@@ -64,6 +64,8 @@ export const env = {
   apkPath: path.resolve(rootDir, process.env.APK_PATH || 'downloads/ridetrack.apk'),
   /** If set, /download/android redirects here instead of serving APK_PATH (e.g. a GitHub release asset). */
   apkUrl: process.env.APK_URL || '',
+  /** The web version of the app, offered on the QR instructions page to phones that cannot install the APK. "off" hides it. */
+  webAppUrl: (process.env.WEB_APP_URL ?? 'https://ride-track-frontend-src.vercel.app').replace(/\/+$/, '').replace(/^off$/i, ''),
   /** A vehicle position older than this is treated as "not live" when working out ETAs. */
   livePositionMaxAgeMs: int('LIVE_POSITION_MAX_AGE_SECONDS', 120) * 1000,
 };

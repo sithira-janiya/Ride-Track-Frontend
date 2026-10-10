@@ -93,7 +93,7 @@ describe('health', () => {
 });
 
 describe('app download', () => {
-  const saved = { apkPath: env.apkPath, apkUrl: env.apkUrl };
+  const saved = { apkPath: env.apkPath, apkUrl: env.apkUrl, webAppUrl: env.webAppUrl };
   afterEach(() => Object.assign(env, saved));
 
   it('serves the APK as an Android download', async () => {
@@ -123,14 +123,39 @@ describe('app download', () => {
     expect(res.headers.location).toBe(env.apkUrl);
   });
 
-  it('serves a QR code and a page that point at the stable download URL', async () => {
-    const svg = await api().get('/download/android/qr.svg');
-    expect(svg.status).toBe(200);
-    expect(svg.headers['content-type']).toMatch(/image\/svg\+xml/);
-    const png = await api().get('/download/android/qr.png');
+  it('serves a QR code and a printable page that point at the stable instructions URL', async () => {
+    for (const p of ['/download/qr.svg', '/download/android/qr.svg']) {
+      const svg = await api().get(p);
+      expect(svg.status).toBe(200);
+      expect(svg.headers['content-type']).toMatch(/image\/svg\+xml/);
+    }
+    const png = await api().get('/download/qr.png');
     expect(png.headers['content-type']).toBe('image/png');
     const page = await api().get('/download');
-    expect(page.text).toContain(`${env.publicUrl}/download/android`);
+    expect(page.text).toContain(`${env.publicUrl}/download/start`);
+  });
+
+  it('shows instructions first after the QR scan, best option for the phone on top', async () => {
+    env.apkUrl = 'https://example.com/ridetrack.apk';
+    env.webAppUrl = 'https://web.example.com';
+    const android = await api().get('/download/start').set('user-agent', 'Mozilla/5.0 (Linux; Android 9; SM-J600F)');
+    expect(android.status).toBe(200);
+    expect(android.headers['content-security-policy']).toContain("default-src 'none'");
+    expect(android.text).toContain('install unknown apps');
+    expect(android.text.indexOf('id="android"')).toBeLessThan(android.text.indexOf('id="web"'));
+    const iphone = await api().get('/download/start').set('user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_5 like Mac OS X)');
+    expect(iphone.text.indexOf('id="web"')).toBeLessThan(iphone.text.indexOf('id="android"'));
+    expect(iphone.text).toContain('href="https://web.example.com"');
+    expect(iphone.text).toContain('Add to Home Screen');
+  });
+
+  it('points phones at the web version when no APK has been published', async () => {
+    env.apkPath = path.join(os.tmpdir(), 'rt-no-such-file.apk');
+    env.webAppUrl = 'https://web.example.com';
+    const res = await api().get('/download/start').set('user-agent', 'Mozilla/5.0 (Linux; Android 14)');
+    expect(res.text).toContain('not ready to download yet');
+    expect(res.text).not.toContain('href="/download/android"');
+    expect(res.text).toContain('href="https://web.example.com"');
   });
 });
 
