@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 import { query, withTransaction } from '../../config/db.js';
 import { env } from '../../config/env.js';
-import { conflict, unauthorized } from '../../utils/errors.js';
+import { AppError, conflict, unauthorized } from '../../utils/errors.js';
 import { toUser } from '../users/service.js';
 
 const BCRYPT_ROUNDS = 10;
@@ -54,6 +54,61 @@ export async function login({ identifier, password }) {
   const ok = await bcrypt.compare(password, row?.password_hash ?? DUMMY_HASH);
   // one message for unknown account, wrong password and disabled account
   if (!row || !ok || !row.is_active) throw unauthorized('Invalid email/phone or password.', 'INVALID_CREDENTIALS');
+  return authResult(row);
+}
+
+const GOOGLE_ISSUERS = ['accounts.google.com', 'https://accounts.google.com'];
+
+/**
+ * Checks a Google ID token with Google's tokeninfo endpoint (which verifies the signature and expiry)
+ * and that it was issued to one of our OAuth clients. Returns the token's claims.
+ */
+async function verifyGoogleIdToken(idToken) {
+  if (env.googleClientIds.length === 0) throw new AppError(503, 'GOOGLE_DISABLED', 'Google sign-in is not available right now.');
+  let res;
+  try {
+    res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+  } catch {
+    throw new AppError(503, 'GOOGLE_UNAVAILABLE', 'Cannot reach Google right now. Please try again.');
+  }
+  const claims = res.ok ? await res.json() : null;
+  if (
+    !claims ||
+    !env.googleClientIds.includes(claims.aud) ||
+    !GOOGLE_ISSUERS.includes(claims.iss) ||
+    Number(claims.exp) * 1000 < Date.now() ||
+    !claims.email ||
+    String(claims.email_verified) !== 'true'
+  ) {
+    throw unauthorized('Google sign-in failed. Please try again.', 'GOOGLE_TOKEN_INVALID');
+  }
+  return claims;
+}
+
+/**
+ * Signs in with Google. A verified Google email that matches an existing account logs into it;
+ * otherwise a new PASSENGER is created. Google-only accounts get an unusable random password.
+ */
+export async function googleLogin(idToken) {
+  const claims = await verifyGoogleIdToken(idToken);
+  const email = claims.email.toLowerCase();
+  const findUser = async () => (await query('SELECT * FROM users WHERE email = ?', [email]))[0];
+
+  let row = await findUser();
+  if (!row) {
+    const name = (claims.name || email.split('@')[0]).trim().slice(0, 100);
+    const hash = await bcrypt.hash(crypto.randomBytes(32).toString('base64url'), BCRYPT_ROUNDS);
+    try {
+      await query('INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, NULL, ?, ?)', [name, email, hash, 'PASSENGER']);
+    } catch (e) {
+      // a parallel sign-in created it first
+      if (e?.code !== 'ER_DUP_ENTRY') throw e;
+    }
+    row = await findUser();
+  }
+  if (!row?.is_active) throw unauthorized('This account is disabled.', 'ACCOUNT_DISABLED');
   return authResult(row);
 }
 

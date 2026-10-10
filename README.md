@@ -28,10 +28,10 @@ Live tracking · QR ticketing · Payments · Delay alerts
 <!-- STATS:START -->
 <table>
   <tr>
-    <td align="center"><h2>32</h2>REST endpoints</td>
+    <td align="center"><h2>42</h2>REST endpoints</td>
     <td align="center"><h2>17</h2>DB tables</td>
-    <td align="center"><h2>9</h2>API modules</td>
-    <td align="center"><h2>47</h2>automated tests</td>
+    <td align="center"><h2>10</h2>API modules</td>
+    <td align="center"><h2>52</h2>automated tests</td>
     <td align="center"><h2>4</h2>background jobs</td>
     <td align="center"><h2>11</h2>runtime deps</td>
   </tr>
@@ -62,6 +62,7 @@ GPS devices on vehicles authenticate separately with a shared device key.
 - ⏱️ **Automatic delay detection**: raises an alert when a trip runs 10+ minutes behind
 - 🔔 **Alerts** over WebSocket and optional Firebase push notifications
 - 📊 **Ops dashboard and reports** for authority officers
+- 🖥️ **Admin panel** at `/admin`: a built-in web back office for users, routes, vehicles, trips, tickets, alerts and reports
 - 🛡️ **Hardened by default**: Helmet, CORS, rate limiting, Zod request validation, constant-time key comparison
 - 🧪 **Integration tests** against a real MySQL test database
 
@@ -224,6 +225,17 @@ This starts MySQL and the API together. The compose file uses throwaway developm
 
 > Demo data only. Never seed these accounts into a real deployment.
 
+### Admin panel
+
+Open [http://localhost:3000/admin](http://localhost:3000/admin) and sign in with an authority account (e.g. `officer@ridetrack.test`). From there officers can:
+
+- see live vehicles, delays, today's trips and sales at a glance
+- search users, create staff and officer accounts, assign conductors to vehicles, and disable accounts (which also signs them out)
+- create and edit routes and stops, add or retire vehicles, schedule trips and change their status
+- browse tickets and payments, publish delay/cancellation alerts and run reports
+
+The panel is plain HTML/JS served by the API itself (`src/admin/`), so there is nothing extra to build or deploy.
+
 ### Simulate live vehicles
 
 ```bash
@@ -353,6 +365,24 @@ Base URL: `/api/v1`. Send `Authorization: Bearer <accessToken>` unless noted. Br
 
 </details>
 
+<details>
+<summary><b>Admin</b></summary>
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| `GET` | `/admin/overview` | 🛠️ Authority | Headline counts: users, fleet, today's trips and sales |
+| `GET` | `/admin/users` | 🛠️ Authority | Search and filter users |
+| `POST` | `/admin/users` | 🛠️ Authority | Create a staff or officer account |
+| `PATCH` | `/admin/users/:id` | 🛠️ Authority | Enable/disable an account, assign a staff vehicle |
+| `GET` | `/admin/routes` | 🛠️ Authority | All routes, including inactive ones |
+| `GET` | `/admin/vehicles` | 🛠️ Authority | All vehicles |
+| `POST` | `/admin/vehicles` | 🛠️ Authority | Add a vehicle |
+| `PATCH` | `/admin/vehicles/:id` | 🛠️ Authority | Edit or retire a vehicle |
+| `GET` | `/admin/trips` | 🛠️ Authority | Trips on a given day |
+| `GET` | `/admin/tickets` | 🛠️ Authority | Tickets with payment status |
+
+</details>
+
 ## ⚡ Real-time events
 
 Connect with a valid access token. Subscribe to a route, then listen for live updates:
@@ -390,11 +420,12 @@ socket.on('vehicle:location', (pos) => console.log(pos));
 ├── scripts/                 # migrate, seed, simulate
 ├── src/
 │   ├── app.js               # Express app and route wiring
+│   ├── admin/               # admin panel (static HTML/JS/CSS, served at /admin)
 │   ├── server.js            # HTTP + Socket.IO bootstrap
 │   ├── config/              # env and DB pool
 │   ├── middleware/          # auth, validation, error handling
 │   ├── modules/             # auth, users, routes, vehicles, tickets,
-│   │                        # payments, scans, alerts, ops
+│   │                        # payments, scans, alerts, ops, admin
 │   ├── realtime/            # Socket.IO rooms and emitters
 │   ├── jobs/                # cron jobs
 │   └── utils/               # ETA, geo, errors, async helpers

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { env } from '../../config/env.js';
 import { validate } from '../../middleware/validate.js';
 import { send, wrap } from '../../utils/async.js';
-import { login, refresh, register } from './service.js';
+import { googleLogin, login, refresh, register } from './service.js';
 
 const router = Router();
 
@@ -52,6 +52,13 @@ router.post(
     const identifier = raw.includes('@') ? raw.toLowerCase() : raw.replace(/[\s-]/g, '');
     send(res, await login({ identifier, password: req.valid.body.password }));
   }),
+);
+
+// one tap sign-in: the app sends the ID token it got from Google; new accounts become passengers
+router.post(
+  '/google',
+  validate({ body: z.object({ idToken: z.string().min(20).max(4096) }) }),
+  wrap(async (req, res) => send(res, await googleLogin(req.valid.body.idToken))),
 );
 
 router.post(
