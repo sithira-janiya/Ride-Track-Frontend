@@ -1,0 +1,16 @@
+# Applies to every part of the monorepo; app/, backend/ and firebase-app/ add their own rules.
+
+# Secrets: settings live in .env files, which are never committed (copy the .env.example next to them)
+.env
+.env.*
+!.env.example
+
+node_modules/
+
+# web build made by src/vercel.json (Vercel's current Root Directory)
+src/dist/
+
+# OS files
+.DS_Store
+desktop.ini
+Thumbs.db

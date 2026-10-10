@@ -1,6 +1,6 @@
-# RideTrack Frontend
+# RideTrack app
 
-Mobile app for RideTrack, a public transport (bus and train) tracking and ticketing system. One React Native app serves three kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Staff** (conductor/inspector) and **Authority**.
+Mobile and web app for RideTrack, a public transport (bus and train) tracking and ticketing system. It lives in `app/` of the RideTrack monorepo, next to the backend (`backend/`); see the [root README](../README.md). One React Native app serves three kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Staff** (conductor/inspector) and **Authority**.
 
 > This file is kept up to date as the app is built. See [Keeping this README current](#keeping-this-readme-current).
 
@@ -14,7 +14,7 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 | Client state | Zustand (auth, favourites, ticket cache, language) |
 | Translation | Google Cloud Translation API (v2, Basic) over `fetch` |
 | HTTP / real-time | Axios, socket.io-client |
-| Maps | react-native-maps (native only; web shows a notice) |
+| Maps | react-native-maps on Android/iOS; Leaflet 1.9 with OpenStreetMap tiles on the web |
 | Tickets / scanning | react-native-qrcode-svg, expo-brightness, expo-web-browser, expo-camera, expo-haptics |
 | Alerts | expo-notifications (push registration), socket `alert:new` |
 | Storage | expo-secure-store (tokens), AsyncStorage (favourites, ticket cache, offline route cache, language and translations) |
@@ -23,20 +23,23 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 ## Getting started
 
 ```bash
+cd app
 npm install
 cp .env.example .env.local   # then edit if needed
 npx expo start               # scan the QR code with Expo Go, or press w for web
 ```
 
+The first time the app opens (for example right after scanning the QR code), it shows **How RideTrack works** before the login screen: what passengers, staff and officers can do, how to add the web version to the home screen, and, in mock mode, the demo accounts (tap one to fill in the login). It is shown once per device and can be opened again from the login screen.
+
 To show the app in Sinhala or Tamil, set `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` in `.env.local` (see [Languages](#languages-google-translate)). Without it the app stays in English.
 
 By default the app runs against a **built-in mock API** (`EXPO_PUBLIC_USE_MOCK_API=true`), so no backend is needed. Set it to `false` and point `EXPO_PUBLIC_API_URL` / `EXPO_PUBLIC_SOCKET_URL` at the real backend to use live data.
 
-### Running against the real backend (RideTrack-API)
+### Running against the real backend (`backend/`)
 
-The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO). Most endpoints the app calls have been checked against it: login, routes, arrivals, nearby stops, buying and paying for a ticket (mock gateway), staff scan, alerts, the ops dashboard, reports and the admin panel (see [Known limitations](#known-limitations) for the rest).
+The backend is in `../backend` (Node, Express, MySQL, Socket.IO). Most endpoints the app calls have been checked against it: login, routes, arrivals, nearby stops, buying and paying for a ticket (mock gateway), staff scan, alerts, the ops dashboard, reports and the admin panel (see [Known limitations](#known-limitations) for the rest).
 
-1. In `RideTrack-API`: start MySQL, then run `npm run migrate`, `npm run seed` and `npm run dev` (see its README). Check `http://<host>:3000/health` returns `{"status":"ok"}`.
+1. In `backend/`: start MySQL, then run `npm run migrate`, `npm run seed` and `npm run dev` (see its README). Check `http://<host>:3000/health` returns `{"status":"ok"}`.
 2. In this app's `.env.local`, set `EXPO_PUBLIC_USE_MOCK_API=false` and point both URLs at the computer running the API:
    - web or iOS simulator: `http://localhost:3000/api/v1` and `http://localhost:3000`
    - a phone on the same Wi-Fi: the computer's LAN IP (`ipconfig` on Windows), e.g. `http://10.116.186.92:3000/api/v1`
@@ -44,7 +47,7 @@ The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO).
 
 Notes:
 - The LAN IP changes when you switch networks. If the app shows "Cannot reach RideTrack", update the IP here **and** `PUBLIC_URL` in the backend's `.env` (it is used for payment page links).
-- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `RideTrack-API`.
+- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `backend/`.
 - Passengers only receive an alert when they hold a pending or active ticket for that trip.
 - The EAS `development` and `preview` profiles force mock mode; only `production` uses the real API.
 
@@ -62,7 +65,7 @@ All use the password `Password1!`.
 
 Notes:
 - The same list is in `.env.example` for quick reference; the app does not read it from there.
-- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the passenger, staff and officer accounts and password are created by `npm run seed` in `RideTrack-API`; the mobile-number passenger and the inspector exist only in mock mode.
+- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the passenger, staff and officer accounts and password are created by `npm run seed` in `backend/`; the mobile-number passenger and the inspector exist only in mock mode.
 - The login field accepts an email or a mobile number. Only the mobile-number passenger has a phone number; log in to the others with the email.
 - Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
 - In mock mode, registered accounts live in memory only and disappear when the app reloads. On the real backend they are saved in MySQL.
@@ -76,6 +79,7 @@ npx tsc --noEmit    # typecheck
 npx expo lint       # lint
 npx expo-doctor     # check dependencies and config
 npm test            # run the automated tests (Jest)
+npm run build:web   # web build in dist/, made to run on older phone browsers too
 ```
 
 Run typecheck and lint before committing. Add packages with `npx expo install <package>`, not `npm install`, so versions match the SDK.
@@ -118,7 +122,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Fleet tab: all vehicles on one map, filterable by route; selecting a card highlights its marker.
 - Reports tab: choose report type (route performance, delays, occupancy), route and period (last 7 or 30 days), then see a bar chart and a table.
 - Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
-- Admin tab (back office, backed by RideTrack-API `/admin/*`):
+- Admin tab (back office, backed by the backend's `/admin/*`):
   - Overview: today's trips, delays and cancellations, tickets sold and revenue, plus account, vehicle, route and stop counts.
   - Accounts: search by name, email or phone, filter by role, page through results. Add a staff (conductor or inspector, optionally on a vehicle) or authority officer account. Disable an account (asks first; the person is signed out at once) or enable it again. You cannot disable your own account.
   - Vehicles: add a bus or train to a route of the same kind, change its capacity or route, take it out of service or return it.
@@ -130,7 +134,9 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 
 **Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
 
-**Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
+**Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too. On first launch the **How RideTrack works** instructions come first (`src/app/(auth)/welcome.tsx`, `src/store/onboarding.ts`).
+
+**Web on any phone**: the web build runs in current browsers and in older ones down to iPhone Safari on iOS 12, Chrome 69 and Samsung Internet 10. `npm run build:web` exports the site, then `scripts/web-compat.js` lowers newer JavaScript syntax in the bundles and fails the build if anything newer than ES2019 is left. `src/app/+html.tsx` adds small polyfills (`Array.prototype.at`, `findLast`, `Object.hasOwn`, `globalThis`, ...), a notch-safe phone viewport, a home-screen icon and a web manifest. On the web the live map and the fleet map use Leaflet with OpenStreetMap tiles. Tab bars use emoji icons, which every phone can show, and are tall enough for their labels.
 
 **Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
 
@@ -150,8 +156,8 @@ The app is written in English and translated at run time with the Google Cloud T
 
 ```
 src/
-├── app/                  Expo Router screens (a file = a route)
-│   ├── (auth)/           login, register
+├── app/                  Expo Router screens (a file = a route); +html.tsx is the web page shell
+│   ├── (auth)/           welcome (first-launch instructions), login, register
 │   ├── (passenger)/      home, tickets, alerts, profile (tabs) + route/[id], map/[id], buy/[routeId], ticket/[id]
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
@@ -160,7 +166,7 @@ src/
 ├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/, admin/
 ├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
 ├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, ...
-├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
+├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language, onboarding
 ├── socket/               socket.io client
 ├── config/ theme/ types/ utils/
 assets/
@@ -168,7 +174,9 @@ assets/
 │   └── illustrations/    auth-hero, empty-tickets, empty-alerts, empty-routes at @1x/@2x/@3x
 ├── source/               SVG sources of the illustrations
 └── expo.icon/            iOS icon (Icon Composer format): pin and bus layers
+public/                   copied into the web build as is: manifest.json, icon-1024.png (home-screen icon)
 scripts/render-assets.js  draws the icon set and renders every SVG above to PNG
+scripts/web-compat.js     makes the web build run on older phone browsers (part of npm run build:web)
 ```
 
 Rules: screens in `app/` stay thin and call hooks and components; all network calls live in `src/api/endpoints.ts` (never call axios from a screen); keep non-route code out of `src/app/`.
@@ -183,6 +191,7 @@ Automated tests run with Jest, `jest-expo` and React Native Testing Library (`np
 - `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
+- `src/components/auth/__tests__/WelcomeGuide.test.tsx`: the first-launch instructions, Get started and Skip, and picking a demo account. `src/__tests__/login.test.tsx` also checks that a first-time visitor is sent to them and that a picked demo account is filled in.
 - `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request, and keeping Google's error message on failure (fetch mocked).
 
 Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
@@ -192,7 +201,7 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 - Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards).
 - Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
 - To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
-- Web (Vercel): `vercel.json` tells Vercel to run `npm install`, then `npx expo export -p web`, and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. The Vercel project's Root Directory is currently `src`, so `src/vercel.json` does the same from there (installs and builds from the repo root, outputs to `src/dist`); delete it once Root Directory is cleared. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
+- Web (Vercel): `vercel.json` tells Vercel to run `npm install`, then `npm run build:web`, and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. The Vercel project's Root Directory is currently `src`; in the monorepo that folder only holds `src/vercel.json`, which builds `app/` and moves the output to `src/dist`. Once the Root Directory is changed to `app` (Vercel → Settings → Build and Deployment), `app/vercel.json` is used instead and the top-level `src/` folder can be deleted. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
 - App icon and splash are RideTrack artwork. The splash is the brand blue (`#0B5FFF`), or `#0B0E14` in dark mode. To change the art, edit `assets/source/*.svg` (illustrations) or the mark in `scripts/render-assets.js` (icons), then run `npm install --no-save @resvg/resvg-js` and `node scripts/render-assets.js` from the project root. It rewrites the PNGs in `assets/images/` and the iOS layers in `assets/expo.icon/Assets/`.
 
 ## Accessibility
@@ -202,7 +211,9 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 ## Known limitations
 
 - Map markers jump between positions instead of animating.
-- The map is native only; the web build shows a notice instead.
+- The web map needs OpenStreetMap's tile server; offline it shows the route line and vehicles on a blank background. OpenStreetMap's tile policy suits a demo; a busy public deployment should use a tile provider with an API key.
+- Browsers older than Safari 14.1 (iOS 14.5) do not support spacing between items (CSS flex `gap`), so layouts look tighter there; everything still works.
+- The web build has been checked at phone sizes (320 and 360 px wide, and 740 px landscape) in a desktop browser, not yet on real old iPhones or Android phones.
 - Android release builds need a Google Maps API key in `app.json`.
 - Checked against the real backend (RideTrack-API): login, routes, arrivals, nearby stops, buying and paying for a ticket, ticket list, `POST /scans`, publishing an alert, `GET /ops/dashboard`, reports and every `/admin/*` endpoint. Not yet checked against it: `POST /vehicles/:id/occupancy` and `PUT /users/me/push-token`.
 - On the real backend, `GET /alerts` only returns alerts sent to the signed-in user, and officers are never recipients, so the authority's "Published alerts" list stays empty there. It needs a backend endpoint for all alerts.
@@ -216,7 +227,6 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Report, dashboard and admin data in mock mode is fake (deterministic numbers and generated trips), and admin changes in mock mode are lost when the app reloads.
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
 - Offline route data can be up to 24 hours old; arrivals shown offline are the last ones fetched.
-- Lint reports one existing warning in `src/api/client.ts` (axios import style).
 - The new icons and splash have not been seen on a device yet: the splash only shows in a real build (not Expo Go), and the iOS Liquid Glass icon (`assets/expo.icon`) has not been opened in Icon Composer or built for iOS.
 - Unused Expo template images (`expo-badge*`, `expo-logo`, `react-logo*`, `logo-glow`, `tutorial-web`, `tabIcons/`) are still in `assets/images/`.
 
@@ -231,7 +241,7 @@ Reference: the public LMT GO app description ([store listing summary](https://mw
 | QR tickets, valid offline | Done |
 | Offline routes and timetables | Done (24 h cache) |
 | Service alerts | Done (delays, cancellations, route changes); no "bus approaching" alert yet |
-| Sinhala, Tamil, English | Language saved, text not translated yet |
+| Sinhala, Tamil, English | Done (machine translation with Google Translate, see Languages) |
 | Browse stops and routes without an account | Not done: the app needs login first |
 | E-wallet balance, day/week/month passes | Not done: needs new screens and backend support |
 | Journey planner (transfers, walking, fare) | Not done: needs a new screen and backend support |
