@@ -56,6 +56,8 @@ export const env = {
   paymentGatewayKey: secret('PAYMENT_GATEWAY_KEY', 'dev-gateway-key-change-me'),
   /** Shared key GPS devices send as `x-device-key` when posting locations. */
   deviceApiKey: secret('DEVICE_API_KEY', 'dev-device-key-change-me'),
+  /** OAuth client IDs (comma-separated) whose Google ID tokens `POST /auth/google` accepts. Empty = Google sign-in off. */
+  googleClientIds: (process.env.GOOGLE_CLIENT_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean),
   fcmServiceAccount: process.env.FCM_SERVICE_ACCOUNT ?? '',
   enableJobs: (process.env.ENABLE_JOBS ?? (isTest ? 'false' : 'true')) === 'true',
   /** Android APK served at /download/android (relative paths are from the project root). */

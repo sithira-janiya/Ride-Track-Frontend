@@ -199,7 +199,7 @@ describe('auth', () => {
   });
 });
 
-describe('admin', () => {
+describe('admin accounts', () => {
   let admin;
   const users = () => api().get('/api/v1/admin/users');
   const create = (body) => api().post('/api/v1/admin/users').set(auth(admin.token)).send(body);
@@ -243,16 +243,17 @@ describe('admin', () => {
     expect((await api().post('/api/v1/admin/auth/refresh').send({ refreshToken: refresh })).status).toBe(401);
   });
 
-  it('lets only admins manage accounts', async () => {
+  it('lets admins and officers manage accounts, and nobody else', async () => {
     expect((await users()).status).toBe(401);
-    expect((await users().set(auth(officer.token))).status).toBe(403);
+    expect((await users().set(auth(staff.token))).status).toBe(403);
     expect((await users().set(auth(passenger.token))).status).toBe(403);
+    expect((await users().set(auth(officer.token))).status).toBe(200);
     const res = await api().get('/api/v1/admin/users?role=AUTHORITY').set(auth(admin.token));
     expect(res.status).toBe(200);
-    expect(res.body.data.map((u) => u.email)).toContain('officer@ridetrack.test');
-    expect(res.body.data.every((u) => u.role === 'AUTHORITY')).toBe(true);
-    expect(res.body.data[0].passwordHash).toBeUndefined();
-    expect((await api().get('/api/v1/admin/users?q=%25').set(auth(admin.token))).body.data).toHaveLength(0);
+    expect(res.body.data.users.map((u) => u.email)).toContain('officer@ridetrack.test');
+    expect(res.body.data.users.every((u) => u.role === 'AUTHORITY')).toBe(true);
+    expect(res.body.data.users[0].passwordHash).toBeUndefined();
+    expect((await api().get('/api/v1/admin/users?q=%25').set(auth(admin.token))).body.data.users).toHaveLength(0);
   });
 
   it('creates staff and officer accounts that can sign in to the app', async () => {
@@ -272,7 +273,7 @@ describe('admin', () => {
 
   it('validates new accounts', async () => {
     expect((await create({ ...conductor, email: 'other@ridetrack.test' })).status).toBe(409); // employee number taken
-    expect((await create({ ...conductor, email: 'other@ridetrack.test', employeeNo: 'ST-003', vehicleId: 999 })).status).toBe(400);
+    expect((await create({ ...conductor, email: 'other@ridetrack.test', employeeNo: 'ST-003', vehicleId: 999 })).status).toBe(404); // no such vehicle
     expect((await create({ ...conductor, employeeNo: undefined })).status).toBe(400);
     expect((await create({ ...conductor, role: 'PASSENGER' })).status).toBe(400);
     expect((await create({ role: 'ADMIN', name: 'Short', email: 'short@ridetrack.test', password: 'Passw0rdOK' })).status).toBe(400); // admins need 12+ characters
@@ -294,10 +295,12 @@ describe('admin', () => {
 
     expect((await setActive(admin.user.userId, false)).body.error.code).toBe('CANNOT_DISABLE_SELF');
     expect((await setActive(999999, false)).status).toBe(404);
-    expect((await setActive(userId, false, officer.token)).status).toBe(403);
+    expect((await setActive(admin.user.userId, false, officer.token)).status).toBe(403); // officers cannot touch admin accounts
   });
 
   it('cuts a disabled admin off at once, before the access token expires', async () => {
+    const asOfficer = api().post('/api/v1/admin/users').set(auth(officer.token));
+    expect((await asOfficer.send({ role: 'ADMIN', name: 'Sneaky', email: 'sneaky@ridetrack.test', password: 'LongPassw0rdOK' })).status).toBe(403);
     const res = await create({ role: 'ADMIN', name: 'Second Admin', email: 'admin2@ridetrack.test', password: 'LongPassw0rdOK' });
     expect(res.status).toBe(201);
     const second = await adminLogin('admin2@ridetrack.test', 'LongPassw0rdOK');
@@ -651,6 +654,63 @@ describe('authority', () => {
     const t = await api().post('/api/v1/trips').set(auth(officer.token)).send({ routeId: 1, vehicleId: 101, startTime });
     expect(t.status).toBe(201);
     expect((await api().patch(`/api/v1/trips/${t.body.data.tripId}`).set(auth(officer.token)).send({ status: 'CANCELLED' })).body.data.status).toBe('CANCELLED');
+  });
+});
+
+describe('back office', () => {
+  const admin = (method, path) => api()[method](`/api/v1/admin${path}`).set(auth(officer.token));
+
+  it('serves the admin panel', async () => {
+    expect((await api().get('/admin')).headers.location).toBe('/admin/');
+    const page = await api().get('/admin/');
+    expect(page.status).toBe(200);
+    expect(page.text).toContain('RideTrack Admin');
+    expect((await api().get('/admin/app.js')).status).toBe(200);
+  });
+
+  it('is for officers and admins only', async () => {
+    expect((await api().get('/api/v1/admin/overview')).status).toBe(401);
+    expect((await api().get('/api/v1/admin/overview').set(auth(staff.token))).status).toBe(403);
+    expect((await api().get('/api/v1/admin/users').set(auth(passenger.token))).status).toBe(403);
+  });
+
+  it('returns overview numbers and lists', async () => {
+    const o = (await admin('get', '/overview')).body.data;
+    expect(o.users).toEqual(expect.objectContaining({ total: expect.any(Number), officers: expect.any(Number) }));
+    expect(o.fleet.routes).toBeGreaterThan(0);
+    const users = (await admin('get', '/users?role=STAFF')).body.data;
+    expect(users.users.every((u) => u.role === 'STAFF')).toBe(true);
+    expect(users.users[0]).toEqual(expect.objectContaining({ employeeNo: 'ST-001', staffType: 'CONDUCTOR' }));
+    expect(users.users[0]).not.toHaveProperty('passwordHash');
+    expect((await admin('get', '/routes')).body.data[0]).toEqual(expect.objectContaining({ stops: expect.any(Number), isActive: true }));
+    expect((await admin('get', `/trips?date=${new Date().toISOString().slice(0, 10)}`)).status).toBe(200);
+    expect((await admin('get', '/tickets')).body.data).toEqual(expect.objectContaining({ total: expect.any(Number), tickets: expect.any(Array) }));
+  });
+
+  it('creates staff accounts that can log in, and disables them', async () => {
+    const body = { name: 'Third Conductor', email: 'conductor3@ridetrack.test', password: PASSWORD.slice(0, -1) + '9', role: 'STAFF', employeeNo: 'ST-777', organisation: 'Demo Transport Co.', staffType: 'CONDUCTOR', vehicleId: 101 };
+    const created = await admin('post', '/users').send(body);
+    expect(created.status).toBe(201);
+    expect(created.body.data.role).toBe('STAFF');
+    expect((await admin('post', '/users').send(body)).status).toBe(409);
+    expect((await admin('post', '/users').send({ ...body, email: 'x@ridetrack.test', employeeNo: 'ST-778', staffType: undefined })).status).toBe(400);
+
+    const login1 = await api().post('/api/v1/auth/login').send({ identifier: body.email, password: body.password });
+    expect(login1.status).toBe(200);
+    const id = created.body.data.userId;
+    expect((await admin('patch', `/users/${id}`).send({ isActive: false })).body.data.isActive).toBe(false);
+    expect((await api().post('/api/v1/auth/login').send({ identifier: body.email, password: body.password })).status).toBe(401);
+    expect((await api().post('/api/v1/auth/refresh').send({ refreshToken: login1.body.data.refreshToken })).status).toBe(401);
+    expect((await admin('patch', `/users/${officer.user.userId}`).send({ isActive: false })).status).toBe(400);
+  });
+
+  it('manages vehicles', async () => {
+    const v = await admin('post', '/vehicles').send({ regNo: 'NB-9999', type: 'BUS', capacity: 40, routeId: 1 });
+    expect(v.status).toBe(201);
+    expect(v.body.data).toMatchObject({ regNo: 'NB-9999', routeId: 1, isActive: true });
+    expect((await admin('post', '/vehicles').send({ regNo: 'NB-9999', type: 'BUS', capacity: 40, routeId: 1 })).status).toBe(409);
+    const updated = await admin('patch', `/vehicles/${v.body.data.vehicleId}`).send({ capacity: 45, isActive: false });
+    expect(updated.body.data).toMatchObject({ capacity: 45, isActive: false });
   });
 });
 

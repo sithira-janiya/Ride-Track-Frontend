@@ -64,6 +64,7 @@ GPS devices on vehicles authenticate separately with a shared device key.
 - ⏱️ **Automatic delay detection**: raises an alert when a trip runs 10+ minutes behind
 - 🔔 **Alerts** over WebSocket and optional Firebase push notifications
 - 📊 **Ops dashboard and reports** for authority officers
+- 🖥️ **Admin panel** at `/admin`: a built-in web back office for users, routes, vehicles, trips, tickets, alerts and reports
 - 🛡️ **Hardened by default**: Helmet, CORS, rate limiting, Zod request validation, constant-time key comparison
 - 🧪 **Integration tests** against a real MySQL test database
 
@@ -227,6 +228,17 @@ This starts MySQL and the API together. The compose file uses throwaway developm
 
 > Demo data only. Never seed these accounts into a real deployment.
 
+### Admin panel
+
+Open [http://localhost:3000/admin](http://localhost:3000/admin) and sign in with an authority account (e.g. `officer@ridetrack.test`). From there officers can:
+
+- see live vehicles, delays, today's trips and sales at a glance
+- search users, create staff and officer accounts, assign conductors to vehicles, and disable accounts (which also signs them out)
+- create and edit routes and stops, add or retire vehicles, schedule trips and change their status
+- browse tickets and payments, publish delay/cancellation alerts and run reports
+
+The panel is plain HTML/JS served by the API itself (`src/admin/`), so there is nothing extra to build or deploy.
+
 ### Simulate live vehicles
 
 ```bash
@@ -258,6 +270,7 @@ Copy `.env.example` to `.env`. Key variables:
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL` | MySQL connection |
 | `JWT_ACCESS_SECRET`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL_DAYS` | Token signing and lifetimes |
 | `ADMIN_REFRESH_TTL_HOURS` | Admin session length (default 12) |
+| `GOOGLE_CLIENT_IDS` | Comma-separated Google OAuth client IDs accepted by `POST /auth/google` (empty turns Google sign-in off) |
 | `QR_SIGNING_SECRET` | Signs ticket QR payloads |
 | `PAYMENT_GATEWAY`, `PAYMENT_GATEWAY_KEY` | Gateway selection and webhook signing key (`mock` for development) |
 | `DEVICE_API_KEY` | Shared key GPS devices send as `x-device-key` |
@@ -314,6 +327,7 @@ Base URL: `/api/v1`. Send `Authorization: Bearer <accessToken>` unless noted. Br
 | --- | --- | --- | --- |
 | `POST` | `/auth/register` | 🌐 Public | Create an account |
 | `POST` | `/auth/login` | 🌐 Public | Obtain access and refresh tokens |
+| `POST` | `/auth/google` | 🌐 Public | Sign in with a Google ID token `{ idToken }`; a new email becomes a passenger |
 | `POST` | `/auth/refresh` | 🌐 Public | Rotate the refresh token |
 | `GET` | `/users/me` | 🔑 Any user | Current profile |
 | `PATCH` | `/users/me` | 🔑 Any user | Update profile |
@@ -325,16 +339,23 @@ Base URL: `/api/v1`. Send `Authorization: Bearer <accessToken>` unless noted. Br
 <details open>
 <summary><b>Admin</b></summary>
 
-Admins cannot use `/auth/login` or `/auth/refresh`, and app accounts cannot use the admin sign-in. Create the first admin with `npm run create-admin -- --email you@example.com`.
+Authority officers use the back office with their app sign-in (the app's Admin tab and the web panel at `/admin`). Admin accounts sign in only through `/admin/auth/*`: they cannot use `/auth/login`, `/auth/refresh` or `/auth/google`, and app accounts cannot use the admin sign-in. Every back-office request re-checks the account, so a disabled officer or admin loses access at once. Create the first admin with `npm run create-admin -- --email you@example.com`.
 
 | Method | Endpoint | Access | Description |
 | --- | --- | --- | --- |
 | `POST` | `/admin/auth/login` | 🌐 Public | Admin sign-in with `{ email, password }` |
 | `POST` | `/admin/auth/refresh` | 🌐 Public | Rotate an admin refresh token |
 | `POST` | `/admin/auth/logout` | 🌐 Public | Revoke an admin refresh token |
-| `GET` | `/admin/users` | 🔐 Admin | List accounts (`role`, `q`, `page`, `limit`) |
-| `POST` | `/admin/users` | 🔐 Admin | Create a `STAFF`, `AUTHORITY` or `ADMIN` account |
-| `PATCH` | `/admin/users/:id` | 🔐 Admin | Disable (ends its sessions) or re-enable an account |
+| `GET` | `/admin/overview` | 🛠️ Authority or 🔐 Admin | Headline counts: users, fleet, today's trips and sales |
+| `GET` | `/admin/users` | 🛠️ Authority or 🔐 Admin | Search and filter accounts (`role`, `q`, `page`, `limit`) |
+| `POST` | `/admin/users` | 🛠️ Authority or 🔐 Admin | Create a `STAFF` or `AUTHORITY` account; only admins can create an `ADMIN` |
+| `PATCH` | `/admin/users/:id` | 🛠️ Authority or 🔐 Admin | Disable (ends its sessions) or re-enable an account, assign a staff vehicle; only admins can change an admin |
+| `GET` | `/admin/routes` | 🛠️ Authority or 🔐 Admin | All routes, including inactive ones |
+| `GET` | `/admin/vehicles` | 🛠️ Authority or 🔐 Admin | All vehicles |
+| `POST` | `/admin/vehicles` | 🛠️ Authority or 🔐 Admin | Add a vehicle |
+| `PATCH` | `/admin/vehicles/:id` | 🛠️ Authority or 🔐 Admin | Edit or retire a vehicle |
+| `GET` | `/admin/trips` | 🛠️ Authority or 🔐 Admin | Trips on a given day |
+| `GET` | `/admin/tickets` | 🛠️ Authority or 🔐 Admin | Tickets with payment status |
 
 </details>
 
@@ -425,6 +446,7 @@ socket.on('vehicle:location', (pos) => console.log(pos));
 ├── scripts/                 # migrate, seed, simulate, create-admin
 ├── src/
 │   ├── app.js               # Express app and route wiring
+│   ├── admin/               # admin panel (static HTML/JS/CSS, served at /admin)
 │   ├── server.js            # HTTP + Socket.IO bootstrap
 │   ├── config/              # env and DB pool
 │   ├── middleware/          # auth, validation, error handling

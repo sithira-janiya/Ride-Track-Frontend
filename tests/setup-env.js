@@ -7,3 +7,4 @@ process.env.DB_PASSWORD = process.env.TEST_DB_PASSWORD ?? 'ridetrack_dev';
 process.env.DB_NAME = 'ridetrack_test';
 process.env.ENABLE_JOBS = 'false';
 process.env.PAYMENT_GATEWAY = 'mock';
+process.env.GOOGLE_CLIENT_IDS = 'test-client.apps.googleusercontent.com';

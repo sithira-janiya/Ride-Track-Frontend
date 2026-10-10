@@ -27,18 +27,24 @@ export const requireRole =
     roles.includes(req.user?.role) ? next() : next(forbidden('Your account type cannot do this.'));
 
 /**
- * Admin-only routes. Besides an admin access token, the account is re-read on every request,
- * so a disabled admin loses access at once instead of when the token expires.
+ * Routes for the listed roles where the account is also re-read on every request,
+ * so a disabled account loses access at once instead of when its token expires.
  */
-export const requireAdmin = [
+const requireLiveRole = (...roles) => [
   requireAuth,
-  requireRole('ADMIN'),
+  requireRole(...roles),
   wrap(async (req, _res, next) => {
     const [row] = await query('SELECT role, is_active FROM users WHERE user_id = ?', [req.user.id]);
-    if (row?.role !== 'ADMIN' || !row.is_active) throw unauthorized('Please log in again.');
+    if (row?.role !== req.user.role || !row.is_active) throw unauthorized('Please log in again.');
     next();
   }),
 ];
+
+/** Admin-only routes. */
+export const requireAdmin = requireLiveRole('ADMIN');
+
+/** The back office (/admin/*): authority officers (app Admin tab, web panel) and admins. */
+export const requireBackOffice = requireLiveRole('AUTHORITY', 'ADMIN');
 
 export function verifyAccessToken(token) {
   const payload = jwt.verify(token, env.jwtAccessSecret);
