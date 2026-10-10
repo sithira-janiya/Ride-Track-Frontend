@@ -44,3 +44,6 @@ example
 
 # Windows
 desktop.ini
+
+# Vercel CLI project link (created by `vercel link`)
+.vercel
