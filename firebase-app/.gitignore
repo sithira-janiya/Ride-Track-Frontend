@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# native builds
+android/
+ios/
+*.apk
+*.aab
+
+# secrets
+.env
+.env.*
+!.env.example
+serviceAccountKey.json
+
+# logs and OS files
+npm-debug.*
+yarn-debug.*
+*.log
+.DS_Store
+Thumbs.db
+
+# Expo generated
+expo-env.d.ts
+*.tsbuildinfo

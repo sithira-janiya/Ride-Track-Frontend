@@ -1,0 +1,38 @@
+name: Branch rules
+
+# GitHub rulesets cannot limit which branch a pull request comes from.
+# These checks fail when the source branch is wrong; the rulesets on `main` and `dev`
+# then require them to pass before merging. See docs/process/GIT-WORKFLOW.md.
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  main-only-from-dev:
+    name: main-only-from-dev
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull requests into main must come from dev
+        run: |
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "::error::Only dev can be merged into main. Open your pull request into dev first."
+            exit 1
+          fi
+          echo "OK: dev into main"
+
+  dev-only-from-work-branches:
+    name: dev-only-from-work-branches
+    if: github.base_ref == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull requests into dev must come from a feature, fix or docs branch
+        run: |
+          case "${{ github.head_ref }}" in
+            feature/*|fix/*|docs/*) echo "OK: ${{ github.head_ref }} into dev" ;;
+            *)
+              echo "::error::Use a branch named feature/<member>/<task>, fix/<member>/<task> or docs/<task>."
+              exit 1
+              ;;
+          esac
