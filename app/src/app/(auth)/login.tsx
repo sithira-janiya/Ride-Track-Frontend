@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'expo-router';
+import { Link, Redirect, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Text } from 'react-native';
@@ -10,18 +10,22 @@ import { AuthScreen, startSession } from '@/components/auth/AuthScreen';
 import { Button, ErrorMessage, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
+import { useOnboarding } from '@/store/onboarding';
 import { typography } from '@/theme';
 import { loginSchema, normalizePhone, isEmail, type LoginForm } from '@/utils/validation';
 
 export default function LoginScreen() {
   const c = useColors();
   const t = useT();
+  const seenWelcome = useOnboarding((s) => s.seenWelcome);
+  // a demo account picked on the instructions screen arrives filled in
+  const { identifier: picked } = useLocalSearchParams<{ identifier?: string }>();
   const [formError, setFormError] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { identifier: '', password: '' } });
+  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { identifier: picked ?? '', password: '' } });
 
   const onSubmit = handleSubmit(async ({ identifier, password }) => {
     setFormError(null);
@@ -33,6 +37,9 @@ export default function LoginScreen() {
       setFormError(errorMessage(e));
     }
   });
+
+  // first launch (e.g. just after scanning the app's QR code): the instructions come first
+  if (!seenWelcome) return <Redirect href="/welcome" />;
 
   return (
     <AuthScreen title="Welcome back" subtitle="Log in to track your ride and manage your tickets.">
@@ -79,6 +86,9 @@ export default function LoginScreen() {
           {t('Create an account')}
         </Link>
       </Text>
+      <Link href="/welcome" style={{ ...typography.body, color: c.primary, fontWeight: '700', textAlign: 'center', paddingVertical: 10 }}>
+        {t('How RideTrack works')}
+      </Link>
     </AuthScreen>
   );
 }

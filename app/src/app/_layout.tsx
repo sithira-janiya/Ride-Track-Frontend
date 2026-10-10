@@ -3,12 +3,14 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import Head from 'expo-router/head';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
+import { useOnboarding } from '@/store/onboarding';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,6 +18,10 @@ const DAY = 24 * 60 * 60 * 1000;
 /** Only public transport data is kept on the device, like LMT GO's offline routes and timetables. Alerts, tickets and live vehicles are not. */
 const OFFLINE_KEYS = ['routes', 'route', 'arrivals', 'nearby-stops'];
 const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: 'ridetrack.query-cache' });
+
+const subscribeWelcome = (onChange: () => void) => useOnboarding.persist.onFinishHydration(onChange);
+const welcomeHydrated = () => useOnboarding.persist.hasHydrated();
+const notHydrated = () => false; // static web rendering: device storage is not read on the server
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -37,12 +43,16 @@ export default function RootLayout() {
     return useLanguage.persist.onFinishHydration(apply);
   }, [userLanguage]);
 
-  // hold the splash screen until we know whether a session exists, so the login screen never flashes
-  useEffect(() => {
-    if (hydrated) SplashScreen.hideAsync();
-  }, [hydrated]);
+  // whether this device has seen the first-launch instructions loads asynchronously too
+  const welcomeLoaded = useSyncExternalStore(subscribeWelcome, welcomeHydrated, notHydrated);
 
-  if (!hydrated) return null;
+  // hold the splash screen until we know whether a session exists, so the login screen never flashes
+  const ready = hydrated && welcomeLoaded;
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   const role = user?.role;
   return (
@@ -53,6 +63,10 @@ export default function RootLayout() {
         maxAge: DAY,
         dehydrateOptions: { shouldDehydrateQuery: (q) => q.state.status === 'success' && OFFLINE_KEYS.includes(String(q.queryKey[0])) },
       }}>
+      {/* browser tab and home-screen bookmark name on web; no effect in the native app */}
+      <Head>
+        <title>RideTrack</title>
+      </Head>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         {/* Each group is only reachable for the matching state; guarded routes redirect to the first allowed route. */}
         <Stack screenOptions={{ headerShown: false }}>
