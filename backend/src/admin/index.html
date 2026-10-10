@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RideTrack Admin</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <section id="login" class="login" hidden>
+    <form id="login-form" class="card login-card">
+      <h1><span class="logo">RT</span> RideTrack Admin</h1>
+      <p class="muted">Sign in with an authority officer account.</p>
+      <label>Email or phone <input name="identifier" autocomplete="username" required></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="error" id="login-error" hidden></p>
+      <button type="submit" class="primary">Sign in</button>
+    </form>
+  </section>
+
+  <div id="shell" class="shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><span class="logo">RT</span> RideTrack</div>
+      <nav id="nav">
+        <a href="#overview">Overview</a>
+        <a href="#users">Users</a>
+        <a href="#routes">Routes</a>
+        <a href="#vehicles">Vehicles</a>
+        <a href="#trips">Trips</a>
+        <a href="#tickets">Tickets</a>
+        <a href="#alerts">Alerts</a>
+        <a href="#reports">Reports</a>
+      </nav>
+      <div class="me">
+        <span id="me-name"></span>
+        <button id="logout" class="link">Sign out</button>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <h2 id="page-title"></h2>
+        <div id="page-actions" class="actions"></div>
+      </header>
+      <div id="page"></div>
+    </main>
+  </div>
+
+  <dialog id="modal">
+    <form method="dialog" id="modal-form">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <p class="error" id="modal-error" hidden></p>
+      <div class="actions end">
+        <button type="button" id="modal-cancel">Cancel</button>
+        <button type="submit" class="primary" id="modal-submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>
