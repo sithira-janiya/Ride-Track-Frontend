@@ -1,6 +1,6 @@
 {
-  "installCommand": "cd .. && npm install",
-  "buildCommand": "cd .. && npx expo export -p web --output-dir src/dist",
+  "installCommand": "cd ../app && npm install",
+  "buildCommand": "cd ../app && npm run build:web && rm -rf ../src/dist && mv dist ../src/dist",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "framework": null,

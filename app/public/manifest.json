@@ -1,0 +1,12 @@
+{
+  "name": "RideTrack",
+  "short_name": "RideTrack",
+  "description": "Live buses and trains, and QR tickets on your phone.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B5FFF",
+  "theme_color": "#0B5FFF",
+  "icons": [{ "src": "/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }]
+}

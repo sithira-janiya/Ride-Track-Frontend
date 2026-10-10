@@ -1,26 +1,22 @@
-import { StyleSheet, Text } from 'react-native';
-
-import { Card } from '@/components/ui';
-import { useColors } from '@/hooks/use-colors';
-import { typography } from '@/theme';
-
 import type { FleetMapProps } from './FleetMap';
+import { WebMap } from './WebMap';
 
-/** react-native-maps has no web support, so the browser build shows the vehicle list only. */
-export function FleetMap({ vehicles }: FleetMapProps) {
-  const c = useColors();
+/** Web fleet map (react-native-maps is native only): every vehicle as a labelled marker on OpenStreetMap. */
+export function FleetMap({ vehicles, selectedId, onSelect }: FleetMapProps) {
   return (
-    <Card style={styles.card}>
-      <Text style={[styles.title, { color: c.text }]}>Map view needs the mobile app</Text>
-      <Text style={[styles.body, { color: c.textSecondary }]}>
-        {vehicles.length} vehicle{vehicles.length === 1 ? '' : 's'} on the map. The list below shows each one.
-      </Text>
-    </Card>
+    <WebMap
+      points={vehicles.map((v) => ({
+        key: String(v.vehicleId),
+        lat: v.lat,
+        lng: v.lng,
+        label: `${v.routeNo} · ${v.regNo ?? v.vehicleId}`,
+        kind: 'vehicle',
+        selected: v.vehicleId === selectedId,
+        onPress: () => onSelect(v.vehicleId),
+      }))}
+      // re-frame when the filter changes the set of vehicles, not on every position update
+      fitKey={vehicles.map((v) => v.vehicleId).join(',')}
+      accessibilityLabel="Map of all vehicles"
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  card: { margin: 16 },
-  title: { ...typography.title },
-  body: { ...typography.body },
-});
