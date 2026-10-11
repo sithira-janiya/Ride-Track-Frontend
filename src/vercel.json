@@ -6,8 +6,23 @@
   "framework": null,
   "rewrites": [
     {
+      "source": "/.well-known/assetlinks.json",
+      "destination": "/assetlinks.json"
+    },
+    {
       "source": "/:path*",
       "destination": "/"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ]
     }
   ]
 }
