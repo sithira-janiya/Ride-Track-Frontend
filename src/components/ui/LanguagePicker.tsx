@@ -16,7 +16,7 @@ export function LanguagePicker({ value, onChange }: Props) {
   const error = useLanguage((s) => s.translationError);
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.label, { color: c.text }]}>{t('Language')}</Text>
+      <Text style={[styles.label, { color: c.text }]}>{'🌐 '}{t('Language')}</Text>
       <Chips label="Language" options={[...LANGUAGES]} value={value} onChange={onChange} translateOptions={false} />
       {value !== SOURCE_LANGUAGE ? (
         <Text style={[styles.caption, { color: c.textSecondary }]}>

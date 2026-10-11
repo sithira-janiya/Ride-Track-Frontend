@@ -197,7 +197,7 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 
 ## Accessibility
 
-Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size.
+Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). The bottom of the login and register screens uses emoji too (👋 … ✨ on login, 🙌 … 🔑 on register, and 🌐 on the Language heading, which also shows on Profile); they sit outside the translated text so translations are unchanged. Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Each tab has an emoji icon beside its label (🏠 🎫 🔔 👤 for passengers, 📷 🧍 🕒 for staff, 📊 🚌 📈 🔔 🛠️ for authority; `src/components/ui/TabEmoji.tsx`). Emoji ignore the tint colour, so inactive tabs are dimmed, and the emoji are hidden from screen readers because the label already says the same thing.
 
 ## Known limitations
 
