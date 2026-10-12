@@ -11,16 +11,20 @@ import { Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
+import type { Region } from '@/types';
+import { REGION_LABEL, routeLabel } from '@/utils/format';
 
 /** All vehicles on one map, filterable by route (FR9). Shares the dashboard's live data. */
 export default function FleetScreen() {
   const c = useColors();
   const ops = useOpsDashboard();
   const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
+  const [region, setRegion] = useState<Region>('SRI_LANKA');
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const vehicles = (ops.data?.vehicles ?? []).filter((v) => !routeId || v.routeId === routeId);
+  const vehicles = (ops.data?.vehicles ?? []).filter((v) => (v.region ?? 'SRI_LANKA') === region && (!routeId || v.routeId === routeId));
+  const regionRoutes = (routes.data ?? []).filter((r) => r.region === region);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
@@ -29,13 +33,24 @@ export default function FleetScreen() {
           Live fleet
         </Text>
         <Chips
+          label="Region"
+          value={region}
+          onChange={(v) => {
+            setRegion(v);
+            setRouteId(undefined);
+            setSelectedId(null);
+          }}
+          options={(Object.keys(REGION_LABEL) as Region[]).map((r) => ({ value: r, label: REGION_LABEL[r] }))}
+        />
+        <Chips
           label="Filter by route"
           value={routeId}
           onChange={(v) => {
             setRouteId(v);
             setSelectedId(null);
           }}
-          options={[{ value: undefined, label: 'All routes' }, ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo }))]}
+          options={[{ value: undefined, label: 'All routes' }, ...regionRoutes.map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) }))]}
+          translateOptions={false}
         />
       </View>
 

@@ -13,6 +13,7 @@ import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useTicketCache } from '@/store/tickets';
 import { spacing, typography } from '@/theme';
+import { fareBetween } from '@/utils/fare';
 import { formatClock, formatFare } from '@/utils/format';
 import { startPayment } from '@/utils/payment';
 
@@ -32,7 +33,9 @@ export default function BuyTicketScreen() {
   const board = stops.find((s) => s.stopId === boardId);
   const alightOptions = board ? stops.filter((s) => s.stopSequence! > board.stopSequence!) : [];
   const alight = alightOptions.find((s) => s.stopId === alightId);
-  const fare = board && alight ? alight.fareFromOrigin! - board.fareFromOrigin! : null;
+  const fare = route.data && board && alight ? fareBetween(route.data, stops, board, alight) : null;
+  const currency = route.data?.currency;
+  const timeZone = route.data?.timeZone;
 
   const arrivals = useQuery({
     queryKey: ['arrivals', routeId, boardId],
@@ -87,6 +90,7 @@ export default function BuyTicketScreen() {
                   <StopRow
                     key={s.stopId}
                     stop={s}
+                    currency={currency}
                     selected={s.stopId === boardId}
                     onPress={() => {
                       setBoardId(s.stopId);
@@ -104,7 +108,7 @@ export default function BuyTicketScreen() {
                   </Text>
                   <View style={styles.list}>
                     {alightOptions.map((s) => (
-                      <StopRow key={s.stopId} stop={s} selected={s.stopId === alightId} onPress={() => setAlightId(s.stopId)} />
+                      <StopRow key={s.stopId} stop={s} currency={currency} selected={s.stopId === alightId} onPress={() => setAlightId(s.stopId)} />
                     ))}
                   </View>
 
@@ -123,9 +127,9 @@ export default function BuyTicketScreen() {
                         .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
                         .map((a) => (
                           <View key={a.tripId} style={a.tripId === tripId ? [styles.picked, { borderColor: c.primary }] : undefined}>
-                            <ArrivalRow arrival={a} />
+                            <ArrivalRow arrival={a} timeZone={timeZone} />
                             <Button
-                              title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta) })}
+                              title={t(a.tripId === tripId ? 'Selected: {time}' : 'Choose {time} trip', { time: formatClock(a.eta, timeZone) })}
                               variant={a.tripId === tripId ? 'primary' : 'secondary'}
                               onPress={() => setTripId(a.tripId)}
                               style={styles.pick}
@@ -145,9 +149,9 @@ export default function BuyTicketScreen() {
                   <Text style={[styles.body, { color: c.text }]}>
                     {board!.name} → {alight!.name}
                   </Text>
-                  <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!)}</Text>
+                  <Text style={[styles.total, { color: c.text }]}>{formatFare(fare!, currency)}</Text>
                   {pay.isError ? <ErrorMessage message={errorMessage(pay.error)} /> : null}
-                  <Button title={t('Pay {amount}', { amount: formatFare(fare!) })} loading={pay.isPending} onPress={() => pay.mutate()} />
+                  <Button title={t('Pay {amount}', { amount: formatFare(fare!, currency) })} loading={pay.isPending} onPress={() => pay.mutate()} />
                   <Text style={[styles.caption, { color: c.textSecondary }]}>
                     {t('You will be taken to the secure payment page. Your ticket appears once payment is confirmed.')}
                   </Text>

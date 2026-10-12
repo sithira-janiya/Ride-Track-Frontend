@@ -1,20 +1,13 @@
 import { Tabs } from 'expo-router';
 
 import { tabEmoji } from '@/components/ui/TabEmoji';
-import { useColors } from '@/hooks/use-colors';
+import { useTabBarOptions } from '@/hooks/use-tab-bar-options';
 
 // Authority screens per docs/08-frontend-react-native.md: Dashboard · Fleet · Reports · Alerts, plus the Admin back office.
 export default function AuthorityTabs() {
-  const c = useColors();
+  const tabBarOptions = useTabBarOptions();
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: c.primary,
-        tabBarInactiveTintColor: c.textSecondary,
-        tabBarStyle: { backgroundColor: c.background, borderTopColor: c.border },
-        tabBarLabelStyle: { fontSize: 14 },
-      }}>
+    <Tabs screenOptions={tabBarOptions}>
       <Tabs.Screen name="index" options={{ title: 'Dashboard', tabBarIcon: tabEmoji('📊') }} />
       <Tabs.Screen name="fleet" options={{ title: 'Fleet', tabBarIcon: tabEmoji('🚌') }} />
       <Tabs.Screen name="reports" options={{ title: 'Reports', tabBarIcon: tabEmoji('📈') }} />

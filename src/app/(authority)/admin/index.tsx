@@ -43,7 +43,13 @@ export default function AdminHome() {
                   hint={`${o!.tripsToday.delayed} delayed, ${o!.tripsToday.cancelled} cancelled`}
                 />
                 <StatTile label="Tickets sold" value={String(o!.salesToday.tickets)} />
-                <StatTile label="Revenue" value={formatFare(o!.salesToday.revenue)} />
+                {o!.salesToday.byCurrency?.length ? (
+                  o!.salesToday.byCurrency.map((s) => (
+                    <StatTile key={s.currency} label={`Revenue (${s.currency})`} value={formatFare(s.revenue, s.currency)} hint={countOf(s.tickets, 'ticket')} />
+                  ))
+                ) : (
+                  <StatTile label="Revenue" value={formatFare(o!.salesToday.revenue)} />
+                )}
               </View>
 
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>

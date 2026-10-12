@@ -11,7 +11,7 @@ import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
-import { formatClock, modeLabel } from '@/utils/format';
+import { formatClock, modeLabel, REGION_LABEL, zoneNote } from '@/utils/format';
 
 /** Choose the vehicle and trip for this shift (FR7). Passenger counts are reported against it. */
 export default function ShiftScreen() {
@@ -77,7 +77,7 @@ export default function ShiftScreen() {
               {routes.data.map((r) => (
                 <Button
                   key={r.routeId}
-                  title={`${r.routeNo} · ${r.name} (${modeLabel(r.mode)})`}
+                  title={`${r.routeNo} · ${r.name} (${modeLabel(r.mode)}, ${REGION_LABEL[r.region] ?? r.region})`}
                   variant={r.routeId === routeId ? 'primary' : 'secondary'}
                   onPress={() => setRouteId(r.routeId)}
                 />
@@ -88,8 +88,9 @@ export default function ShiftScreen() {
           {route ? (
             <>
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
-                Trips on {route.routeNo}
+                Trips on {route.routeNo} to {route.destination}
               </Text>
+              {zoneNote(route.timeZone) ? <Text style={[styles.body, { color: c.textSecondary }]}>Times shown in {zoneNote(route.timeZone)}</Text> : null}
               {trips.isPending || detail.isPending ? (
                 <Loading label="Loading trips…" />
               ) : trips.isError ? (
@@ -101,7 +102,7 @@ export default function ShiftScreen() {
                   {assignable.map((t) => (
                     <Button
                       key={t.tripId}
-                      title={`Trip ${t.tripId} · vehicle ${t.vehicleId} · ${formatClock(t.eta)}`}
+                      title={`Trip ${t.tripId} · vehicle ${t.vehicleId} · ${formatClock(t.eta, route.timeZone)}`}
                       variant={shift?.tripId === t.tripId ? 'primary' : 'secondary'}
                       onPress={() => start({ routeId: route.routeId, routeNo: route.routeNo, tripId: t.tripId, vehicleId: t.vehicleId! })}
                     />

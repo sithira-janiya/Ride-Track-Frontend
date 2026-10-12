@@ -9,6 +9,7 @@ import { Button, Card, Chips, EmptyState, ErrorMessage, Loading } from '@/compon
 import { useColors } from '@/hooks/use-colors';
 import { radius, spacing, typography } from '@/theme';
 import type { Report, ReportType } from '@/types';
+import { routeLabel } from '@/utils/format';
 
 const TYPES: { value: ReportType; label: string }[] = [
   { value: 'ROUTE_PERFORMANCE', label: 'Route performance' },
@@ -108,7 +109,8 @@ export default function ReportsScreen() {
             label="Route"
             value={draft.routeId}
             onChange={(routeId) => setDraft({ ...draft, routeId })}
-            options={[{ value: undefined, label: 'All routes' }, ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo }))]}
+            options={[{ value: undefined, label: 'All routes' }, ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) }))]}
+            translateOptions={false}
           />
 
           <Text style={[styles.label, { color: c.text }]}>Period</Text>

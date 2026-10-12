@@ -3,6 +3,11 @@
 import type {
   AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUser, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, NewStaffAccount, NewVehicle, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, TripStatus, User, VehiclePosition,
 } from '@/types';
+import { fareBetween } from '@/utils/fare';
+
+import {
+  dubaiAdminTrips, dubaiArrivals, dubaiFleet, dubaiOccupancy, dubaiRoutes, dubaiRoutesAtStop, dubaiStops, dubaiStopsFor, dubaiTripRoute, dubaiVehicles, isDubaiRoute, isDubaiTrip,
+} from './mock-dubai';
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 const minsFromNow = (m: number) => new Date(Date.now() + m * 60000).toISOString();
@@ -53,6 +58,8 @@ const tickets: Ticket[] = Array.from({ length: 12 }, (_, i): Ticket => {
     boardStopId: 1,
     alightStopId: 3,
     fare: 50,
+    currency: 'LKR',
+    timeZone: 'Asia/Colombo',
     status,
     qrToken: null,
     issuedAt: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
@@ -63,11 +70,16 @@ const tickets: Ticket[] = Array.from({ length: 12 }, (_, i): Ticket => {
   };
 });
 
+const SRI_LANKA = { region: 'SRI_LANKA', timeZone: 'Asia/Colombo', currency: 'LKR', zoneFares: null } as const;
 const routes: Route[] = [
-  { routeId: 1, routeNo: '138', name: 'Colombo - Kottawa', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kottawa' },
-  { routeId: 2, routeNo: 'MAIN', name: 'Main Line - Colombo to Kandy', mode: 'TRAIN', origin: 'Colombo Fort', destination: 'Kandy' },
-  { routeId: 3, routeNo: '177', name: 'Colombo - Kaduwela', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kaduwela' },
+  { routeId: 1, routeNo: '138', name: 'Colombo - Kottawa', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kottawa', ...SRI_LANKA },
+  { routeId: 2, routeNo: 'MAIN', name: 'Main Line - Colombo to Kandy', mode: 'TRAIN', origin: 'Colombo Fort', destination: 'Kandy', ...SRI_LANKA },
+  { routeId: 3, routeNo: '177', name: 'Colombo - Kaduwela', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kaduwela', ...SRI_LANKA },
+  ...dubaiRoutes,
 ];
+const routeStopsOf = (routeId: number) => (isDubaiRoute(routeId) ? dubaiStopsFor(routeId) : stopsFor(routeId));
+// Colombo demo trips are routeId * 10 + n; Dubai trip ids carry their route id (see mock-dubai.ts)
+const tripRouteId = (tripId: number) => (isDubaiTrip(tripId) ? dubaiTripRoute(tripId) : Math.floor(tripId / 10));
 
 function haversineMeters(aLat: number, aLng: number, bLat: number, bLng: number) {
   const rad = (d: number) => (d * Math.PI) / 180;
@@ -95,10 +107,13 @@ const accountInfo: Record<number, AccountInfo> = {
 };
 const passwords: Record<number, string> = {};
 
-const adminVehicles: AdminVehicle[] = Object.entries(vehiclesByRoute).flatMap(([routeId, list]) => {
-  const route = routes.find((r) => r.routeId === Number(routeId))!;
-  return list.map((v) => ({ vehicleId: v.vehicleId, regNo: v.regNo, type: route.mode, capacity: v.capacity, routeId: route.routeId, routeNo: route.routeNo, isActive: true }));
-});
+const adminVehicles: AdminVehicle[] = [
+  ...Object.entries(vehiclesByRoute).flatMap(([routeId, list]) => {
+    const route = routes.find((r) => r.routeId === Number(routeId))!;
+    return list.map((v) => ({ vehicleId: v.vehicleId, regNo: v.regNo, type: route.mode, capacity: v.capacity, routeId: route.routeId, routeNo: route.routeNo, isActive: true }));
+  }),
+  ...dubaiRoutes.flatMap((r) => dubaiFleet(r.routeId).map((v) => ({ ...v, routeNo: r.routeNo, isActive: true }))),
+];
 
 const utcDay = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -137,11 +152,12 @@ export const mockApi = {
     return delay({ user, accessToken: `mock-access-${user.userId}`, refreshToken: `mock-refresh-${user.userId}` });
   },
 
-  searchRoutes: (q = '', mode?: string): Promise<Route[]> =>
+  searchRoutes: (q = '', mode?: string, region?: string): Promise<Route[]> =>
     delay(
       routes.filter(
         (r) =>
           (!mode || r.mode === mode) &&
+          (!region || r.region === region) &&
           `${r.routeNo} ${r.name} ${r.origin} ${r.destination}`.toLowerCase().includes(q.toLowerCase()),
       ),
     ),
@@ -149,25 +165,29 @@ export const mockApi = {
   getRoute(routeId: number): Promise<RouteDetail> {
     const route = routes.find((r) => r.routeId === routeId);
     if (!route) throw new Error('Route not found.');
-    return delay({ ...route, stops: stopsFor(routeId) });
+    return delay({ ...route, stops: routeStopsOf(routeId) });
   },
 
   /** Mock ignores the radius and returns the closest stops so the list is never empty during development. */
   nearbyStops: (lat: number, lng: number, limit = 4): Promise<Stop[]> =>
     delay(
-      allStops
+      [...allStops, ...dubaiStops]
         .map((s) => ({
           ...s,
           distanceMeters: Math.round(haversineMeters(lat, lng, s.latitude, s.longitude)),
-          routeIds: Object.keys(routeStops)
-            .map(Number)
-            .filter((id) => routeStops[id].some(([stopId]) => stopId === s.stopId)),
+          routeIds:
+            s.stopId >= 1000
+              ? dubaiRoutesAtStop(s.stopId)
+              : Object.keys(routeStops)
+                  .map(Number)
+                  .filter((id) => routeStops[id].some(([stopId]) => stopId === s.stopId)),
         }))
         .sort((a, b) => a.distanceMeters - b.distanceMeters)
         .slice(0, limit),
     ),
 
   getArrivals(routeId: number, stopId: number): Promise<Arrival[]> {
+    if (isDubaiRoute(routeId)) return delay(dubaiArrivals(routeId, stopId)); // from the real timetable
     // vary times by stop so switching stops visibly changes the list
     const o = stopId % 5;
     return delay([
@@ -179,6 +199,7 @@ export const mockApi = {
 
   /** Vehicles drift along the route over time, so polling this shows them moving. */
   getVehicles(routeId: number): Promise<VehiclePosition[]> {
+    if (isDubaiRoute(routeId)) return delay(dubaiVehicles(routeId));
     const path = stopsFor(routeId);
     if (path.length < 2) return delay([]);
     const now = Date.now();
@@ -207,22 +228,24 @@ export const mockApi = {
   },
 
   async createTicket(input: { tripId: number; boardStopId: number; alightStopId: number }): Promise<PaymentSession> {
-    const routeId = Math.floor(input.tripId / 10);
-    const path = stopsFor(routeId);
+    const route = routes.find((r) => r.routeId === tripRouteId(input.tripId));
+    const path = route ? routeStopsOf(route.routeId) : [];
     const board = path.find((s) => s.stopId === input.boardStopId);
     const alight = path.find((s) => s.stopId === input.alightStopId);
-    if (!board || !alight || alight.stopSequence! <= board.stopSequence!) throw new Error('Choose a drop-off stop after your boarding stop.');
+    if (!route || !board || !alight || alight.stopSequence! <= board.stopSequence!) throw new Error('Choose a drop-off stop after your boarding stop.');
     const ticket: Ticket = {
       ticketId: nextTicketId++,
       tripId: input.tripId,
       boardStopId: board.stopId,
       alightStopId: alight.stopId,
-      fare: alight.fareFromOrigin! - board.fareFromOrigin!,
+      fare: fareBetween(route, path, board, alight),
+      currency: route.currency,
+      timeZone: route.timeZone,
       status: 'PENDING',
       qrToken: null,
       issuedAt: new Date().toISOString(),
       paymentStatus: 'PENDING',
-      routeNo: routes.find((r) => r.routeId === routeId)?.routeNo,
+      routeNo: route.routeNo,
       boardStopName: board.name,
       alightStopName: alight.name,
     };
@@ -257,6 +280,11 @@ export const mockApi = {
   },
 
   async setOccupancy(vehicleId: number, passengerCount: number): Promise<Occupancy> {
+    const dubai = adminVehicles.find((v) => v.vehicleId === vehicleId && isDubaiRoute(v.routeId));
+    if (dubai) {
+      dubaiOccupancy.set(vehicleId, Math.max(0, Math.min(passengerCount, dubai.capacity)));
+      return delay({ vehicleId, passengerCount: dubaiOccupancy.get(vehicleId)!, capacity: dubai.capacity });
+    }
     for (const list of Object.values(vehiclesByRoute)) {
       const v = list.find((x) => x.vehicleId === vehicleId);
       if (v) {
@@ -299,11 +327,11 @@ export const mockApi = {
   },
 
   async getDashboard(): Promise<OpsDashboard> {
-    const routeIds = Object.keys(vehiclesByRoute).map(Number);
+    const routeIds = [...Object.keys(vehiclesByRoute).map(Number), ...dubaiRoutes.map((r) => r.routeId)];
     const perRoute = await Promise.all(routeIds.map((id) => mockApi.getVehicles(id)));
     const vehicles: FleetVehicle[] = perRoute.flatMap((list, i) => {
       const route = routes.find((r) => r.routeId === routeIds[i])!;
-      return list.map((v) => ({ ...v, routeId: route.routeId, routeNo: route.routeNo, mode: route.mode }));
+      return list.map((v) => ({ ...v, routeId: route.routeId, routeNo: route.routeNo, mode: route.mode, region: route.region }));
     });
     const totalPassengers = vehicles.reduce((n, v) => n + (v.passengerCount ?? 0), 0);
     const totalCapacity = vehicles.reduce((n, v) => n + (v.capacity ?? 0), 0);
@@ -384,16 +412,24 @@ export const mockApi = {
     const count = (role: Role) => users.filter((u) => u.role === role).length;
     const trips = await mockApi.adminTrips(utcDay(new Date()));
     const sold = tickets.filter((t) => t.paymentStatus === 'PAID' && utcDay(new Date(t.issuedAt)) === utcDay(new Date()));
+    const currencies = [...new Set(sold.map((t) => t.currency ?? 'LKR'))];
     return delay({
       users: { total: users.length, passengers: count('PASSENGER'), staff: count('STAFF'), officers: count('AUTHORITY'), disabled: users.filter((u) => !u.isActive).length },
-      fleet: { routes: routes.length, vehicles: adminVehicles.filter((v) => v.isActive).length, stops: allStops.length },
+      fleet: { routes: routes.length, vehicles: adminVehicles.filter((v) => v.isActive).length, stops: allStops.length + dubaiStops.length },
       tripsToday: {
         total: trips.length,
         ongoing: trips.filter((t) => t.status === 'ONGOING').length,
         delayed: trips.filter((t) => t.status === 'DELAYED').length,
         cancelled: trips.filter((t) => t.status === 'CANCELLED').length,
       },
-      salesToday: { tickets: sold.length, revenue: sold.reduce((n, t) => n + t.fare, 0) },
+      salesToday: {
+        tickets: sold.length,
+        revenue: sold.reduce((n, t) => n + t.fare, 0),
+        byCurrency: currencies.map((currency) => {
+          const list = sold.filter((t) => (t.currency ?? 'LKR') === currency);
+          return { currency, tickets: list.length, revenue: list.reduce((n, t) => n + t.fare, 0) };
+        }),
+      },
     });
   },
 
@@ -449,7 +485,7 @@ export const mockApi = {
       routes.map((r) => ({
         ...r,
         isActive: true,
-        stops: (routeStops[r.routeId] ?? []).length,
+        stops: routeStopsOf(r.routeId).length,
         vehicles: adminVehicles.filter((v) => v.routeId === r.routeId && v.isActive).length,
       })),
     ),
@@ -482,13 +518,13 @@ export const mockApi = {
     return delay({ ...v });
   },
 
-  /** Five trips a day per active vehicle; status follows the clock, with a few delays and cancellations. */
+  /** Colombo: five trips a day per active vehicle, with a few delays and cancellations. Dubai: the real timetable. */
   adminTrips(date: string, routeId?: number): Promise<AdminTrip[]> {
     const dayStart = Date.parse(`${date}T00:00:00Z`);
     const dayKey = Number(date.slice(2).replace(/-/g, ''));
     const now = Date.now();
     const trips = adminVehicles
-      .filter((v) => v.isActive && (!routeId || v.routeId === routeId))
+      .filter((v) => v.isActive && !isDubaiRoute(v.routeId) && (!routeId || v.routeId === routeId))
       .flatMap((v) =>
         Array.from({ length: 5 }, (_, i): AdminTrip => {
           const start = dayStart + ((1 + i * 3) * 60 + (v.vehicleId % 3) * 20) * 60000;
@@ -506,13 +542,15 @@ export const mockApi = {
             regNo: v.regNo,
             startTime: new Date(start).toISOString(),
             endTime: new Date(end).toISOString(),
+            timeZone: 'Asia/Colombo',
             status,
             tickets: sold,
           };
         }),
       )
+      .concat(dubaiAdminTrips(date, routeId))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
-    return delay(trips);
+    return delay(trips.slice(0, 500)); // the server caps the list at 500 too
   },
 
   adminTickets({ status, page, limit }: { status?: TicketStatus; page: number; limit: number }): Promise<AdminTicketPage> {
@@ -525,6 +563,7 @@ export const mockApi = {
         tripId: t.tripId,
         routeNo: t.routeNo ?? '',
         fare: t.fare,
+        currency: t.currency,
         status: t.status,
         paymentStatus: t.paymentStatus ?? null,
         paymentMethod: t.paymentStatus === 'PAID' || t.paymentStatus === 'REFUNDED' ? 'CARD' : null,

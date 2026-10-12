@@ -10,7 +10,7 @@ import { useColors } from '@/hooks/use-colors';
 import { useRouteTrips } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
 import type { AlertType } from '@/types';
-import { formatClock } from '@/utils/format';
+import { formatClock, routeLabel } from '@/utils/format';
 
 const TYPES: { value: AlertType; label: string }[] = [
   { value: 'DELAY', label: 'Delay' },
@@ -78,7 +78,8 @@ export default function AuthorityAlertsScreen() {
                 setRouteId(v ?? null);
                 setTripId(null);
               }}
-              options={(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo }))}
+              options={(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) }))}
+              translateOptions={false}
             />
 
             {routeId != null ? (
@@ -93,7 +94,7 @@ export default function AuthorityAlertsScreen() {
                     label="Trip"
                     value={tripId ?? undefined}
                     onChange={(v) => setTripId(v ?? null)}
-                    options={trips.trips.map((t) => ({ value: t.tripId as number | undefined, label: `Trip ${t.tripId} · ${formatClock(t.eta)}` }))}
+                    options={trips.trips.map((t) => ({ value: t.tripId as number | undefined, label: `Trip ${t.tripId} · ${formatClock(t.eta, routes.data?.find((r) => r.routeId === routeId)?.timeZone)}` }))}
                   />
                 )}
               </>

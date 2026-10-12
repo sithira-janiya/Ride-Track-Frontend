@@ -6,7 +6,7 @@ import { Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/componen
 import { useAdminRoutes } from '@/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
-import { countOf, modeLabel } from '@/utils/format';
+import { countOf, modeLabel, REGION_LABEL } from '@/utils/format';
 
 /** Every route, including inactive ones, with how many stops and vehicles it has. */
 export default function RoutesScreen() {
@@ -31,7 +31,7 @@ export default function RoutesScreen() {
               <StatusBadge label={r.isActive ? 'Active' : 'Inactive'} tone={r.isActive ? 'success' : 'danger'} />
             </View>
             <Text style={[styles.body, { color: c.textSecondary }]}>
-              {modeLabel(r.mode)} · {r.origin} → {r.destination}
+              {modeLabel(r.mode)} · {REGION_LABEL[r.region] ?? r.region} · {r.origin} → {r.destination}
             </Text>
             <Text style={[styles.caption, { color: c.textSecondary }]}>
               {countOf(r.stops, 'stop')} · {countOf(r.vehicles, 'vehicle')} in service

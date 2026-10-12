@@ -2,6 +2,8 @@
 
 export type Role = 'PASSENGER' | 'STAFF' | 'AUTHORITY';
 export type TransportMode = 'BUS' | 'TRAIN';
+/** Where a route runs. Sets the time zone its times are shown in and the currency of its fares. */
+export type Region = 'SRI_LANKA' | 'DUBAI';
 export type TripStatus = 'SCHEDULED' | 'ONGOING' | 'DELAYED' | 'CANCELLED' | 'COMPLETED';
 export type TicketStatus = 'PENDING' | 'ACTIVE' | 'USED' | 'EXPIRED' | 'CANCELLED';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
@@ -44,6 +46,13 @@ export interface Route {
   mode: TransportMode;
   origin: string;
   destination: string;
+  region: Region;
+  /** IANA zone of the route's region, e.g. Asia/Dubai: its times are shown in this zone */
+  timeZone: string;
+  /** ISO code of its fares, LKR or AED */
+  currency: string;
+  /** zone fares (Dubai RTA): the fare for a trip touching 1, 2, 3+ zones. Null: fares go by stop. */
+  zoneFares: number[] | null;
 }
 
 export interface Stop {
@@ -53,6 +62,10 @@ export interface Stop {
   longitude: number;
   stopSequence?: number;
   fareFromOrigin?: number;
+  /** fare zone, on routes with zone fares */
+  fareZone?: string | null;
+  /** timetabled running time from the route's first stop */
+  secondsFromOrigin?: number | null;
   /** only on /stops/nearby results */
   distanceMeters?: number;
   routeIds?: number[];
@@ -89,6 +102,10 @@ export interface Ticket {
   boardStopId: number;
   alightStopId: number;
   fare: number;
+  /** of the fare; LKR when the server does not say */
+  currency?: string;
+  /** the route's time zone */
+  timeZone?: string;
   status: TicketStatus;
   qrToken: string | null;
   issuedAt: string;
@@ -149,6 +166,7 @@ export interface FleetVehicle extends VehiclePosition {
   routeId: number;
   routeNo: string;
   mode: TransportMode;
+  region?: Region;
 }
 
 export interface OpsDashboard {
@@ -186,7 +204,8 @@ export interface AdminOverview {
   users: { total: number; passengers: number; staff: number; officers: number; disabled: number };
   fleet: { routes: number; vehicles: number; stops: number };
   tripsToday: { total: number; ongoing: number; delayed: number; cancelled: number };
-  salesToday: { tickets: number; revenue: number };
+  /** revenue adds every currency together; show byCurrency instead */
+  salesToday: { tickets: number; revenue: number; byCurrency?: { currency: string; tickets: number; revenue: number }[] };
 }
 
 export interface AdminUser extends User {
@@ -248,6 +267,8 @@ export interface AdminTrip {
   regNo: string;
   startTime: string;
   endTime: string | null;
+  /** the route's time zone */
+  timeZone?: string;
   status: TripStatus;
   /** tickets sold (active or used) */
   tickets: number;
@@ -259,6 +280,7 @@ export interface AdminTicket {
   tripId: number;
   routeNo: string;
   fare: number;
+  currency?: string;
   status: TicketStatus;
   paymentStatus: PaymentStatus | null;
   paymentMethod: string | null;

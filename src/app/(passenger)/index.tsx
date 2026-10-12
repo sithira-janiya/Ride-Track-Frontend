@@ -8,14 +8,21 @@ import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
 import { RouteCard } from '@/components/routes/RouteCard';
-import { Button, Card, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useNearbyStops } from '@/hooks/use-nearby-stops';
 import { useFavourites } from '@/store/favourites';
 import { minTouchTarget, spacing, typography } from '@/theme';
-import { formatDistance } from '@/utils/format';
+import type { Region } from '@/types';
+import { formatDistance, REGION_LABEL } from '@/utils/format';
+
+const REGIONS: { value: Region | undefined; label: string }[] = [
+  { value: undefined, label: 'All places' },
+  { value: 'SRI_LANKA', label: REGION_LABEL.SRI_LANKA },
+  { value: 'DUBAI', label: REGION_LABEL.DUBAI },
+];
 
 export default function PassengerHome() {
   const c = useColors();
@@ -23,16 +30,17 @@ export default function PassengerHome() {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<ModeValue>('ALL');
+  const [region, setRegion] = useState<Region | undefined>(undefined);
   const debouncedQuery = useDebounce(query.trim(), 300);
-  const searching = debouncedQuery.length > 0 || mode !== 'ALL';
+  const searching = debouncedQuery.length > 0 || mode !== 'ALL' || region != null;
 
   const openRoute = (id: number, stopId?: number) =>
     router.push({ pathname: '/route/[id]', params: stopId ? { id: String(id), stopId: String(stopId) } : { id: String(id) } });
 
   // Route search (FR3): keyed on the debounced text so typing does not fire a request per keystroke.
   const results = useQuery({
-    queryKey: ['routes', debouncedQuery, mode],
-    queryFn: () => routesApi.search(debouncedQuery, mode === 'ALL' ? undefined : mode),
+    queryKey: ['routes', debouncedQuery, mode, region ?? 'ALL'],
+    queryFn: () => routesApi.search(debouncedQuery, mode === 'ALL' ? undefined : mode, region),
     enabled: searching,
   });
 
@@ -59,6 +67,7 @@ export default function PassengerHome() {
             returnKeyType="search"
           />
           <ModeFilter value={mode} onChange={setMode} />
+          <Chips label="Where" options={REGIONS} value={region} onChange={setRegion} />
 
           {searching ? (
             <Section title="Results">

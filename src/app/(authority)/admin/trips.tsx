@@ -8,7 +8,7 @@ import { useAdminRoutes, useAdminTrips } from '@/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { TripStatus } from '@/types';
-import { countOf, formatClock } from '@/utils/format';
+import { countOf, formatClock, routeLabel, zoneNote } from '@/utils/format';
 
 const STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
   SCHEDULED: { label: 'Scheduled', tone: 'info' },
@@ -35,7 +35,7 @@ export default function TripsScreen() {
 
   const routeOptions = [
     { value: undefined as number | undefined, label: 'All routes' },
-    ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo })),
+    ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) })),
   ];
 
   return (
@@ -58,8 +58,9 @@ export default function TripsScreen() {
             <Card key={t.tripId}>
               <View style={styles.row}>
                 <Text style={[styles.name, { color: c.text }]}>
-                  {formatClock(t.startTime)}
-                  {t.endTime ? ` – ${formatClock(t.endTime)}` : ''} · Route {t.routeNo}
+                  {formatClock(t.startTime, t.timeZone)}
+                  {t.endTime ? ` – ${formatClock(t.endTime, t.timeZone)}` : ''}
+                  {zoneNote(t.timeZone) ? ` ${zoneNote(t.timeZone)}` : ''} · Route {t.routeNo}
                 </Text>
                 <StatusBadge label={STATUS[t.status].label} tone={STATUS[t.status].tone} />
               </View>

@@ -31,7 +31,7 @@ export function TicketCard({ ticket, onPress }: { ticket: Ticket; onPress: () =>
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${ticketTitle(ticket, t)}, ${ticketJourney(ticket, t)}, ${formatFare(ticket.fare)}, ${t(status.label)}`}
+      accessibilityLabel={`${ticketTitle(ticket, t)}, ${ticketJourney(ticket, t)}, ${formatFare(ticket.fare, ticket.currency)}, ${t(status.label)}`}
       onPress={onPress}
       style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
       <View style={styles.row}>
@@ -40,7 +40,7 @@ export function TicketCard({ ticket, onPress }: { ticket: Ticket; onPress: () =>
       </View>
       <Text style={[styles.body, { color: c.text }]}>{ticketJourney(ticket, t)}</Text>
       <Text style={[styles.meta, { color: c.textSecondary }]}>
-        {formatFare(ticket.fare)} · {new Date(ticket.issuedAt).toLocaleDateString()}
+        {formatFare(ticket.fare, ticket.currency)} · {new Date(ticket.issuedAt).toLocaleDateString()}
       </Text>
     </Pressable>
   );

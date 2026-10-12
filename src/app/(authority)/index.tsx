@@ -1,21 +1,31 @@
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { StatTile as Tile } from '@/components/ops/StatTile';
 import { VehicleCard } from '@/components/ops/VehicleCard';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { spacing, typography } from '@/theme';
+import type { Region } from '@/types';
+import { REGION_LABEL } from '@/utils/format';
+
+const REGIONS: { value: Region | undefined; label: string }[] = [
+  { value: undefined, label: 'All' },
+  { value: 'SRI_LANKA', label: REGION_LABEL.SRI_LANKA },
+  { value: 'DUBAI', label: REGION_LABEL.DUBAI },
+];
 
 export default function AuthorityDashboard() {
   const c = useColors();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const ops = useOpsDashboard();
+  const [region, setRegion] = useState<Region | undefined>(undefined);
 
   const signOut = async () => {
     disconnectSocket();
@@ -65,10 +75,11 @@ export default function AuthorityDashboard() {
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
                 Vehicles
               </Text>
-              {d!.vehicles.length === 0 ? (
+              <Chips label="Region" options={REGIONS} value={region} onChange={setRegion} />
+              {d!.vehicles.filter((v) => !region || (v.region ?? 'SRI_LANKA') === region).length === 0 ? (
                 <EmptyState title="No vehicles reporting" message="No vehicle is sending its position right now." />
               ) : (
-                d!.vehicles.map((v) => <VehicleCard key={v.vehicleId} vehicle={v} />)
+                d!.vehicles.filter((v) => !region || (v.region ?? 'SRI_LANKA') === region).map((v) => <VehicleCard key={v.vehicleId} vehicle={v} />)
               )}
             </>
           )}

@@ -5,7 +5,7 @@ import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { typography } from '@/theme';
 import type { Route } from '@/types';
-import { modeLabel } from '@/utils/format';
+import { modeLabel, REGION_LABEL } from '@/utils/format';
 
 type Props = { route: Route; onPress: () => void };
 
@@ -27,6 +27,7 @@ export function RouteCard({ route, onPress }: Props) {
         <Text style={[styles.meta, { color: c.textSecondary }]}>
           {route.origin} → {route.destination}
         </Text>
+        {route.region ? <Text style={[styles.meta, { color: c.textSecondary }]}>{t(REGION_LABEL[route.region])}</Text> : null}
       </Card>
     </Pressable>
   );

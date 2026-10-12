@@ -54,7 +54,7 @@ export default function AdminTicketsScreen() {
             <Card key={t.ticketId}>
               <View style={styles.row}>
                 <Text style={[styles.name, { color: c.text }]}>
-                  #{t.ticketId} · Route {t.routeNo} · {formatFare(t.fare)}
+                  #{t.ticketId} · Route {t.routeNo} · {formatFare(t.fare, t.currency)}
                 </Text>
                 <StatusBadge label={STATUS[t.status].label} tone={STATUS[t.status].tone} />
               </View>

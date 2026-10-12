@@ -15,7 +15,8 @@ const STATUS: Record<TripStatus, { label: string; tone: Tone }> = {
   COMPLETED: { label: 'Completed', tone: 'info' },
 };
 
-export function ArrivalRow({ arrival }: { arrival: Arrival }) {
+/** `timeZone` is the route's: arrival times are shown on the local clock where the route runs. */
+export function ArrivalRow({ arrival, timeZone }: { arrival: Arrival; timeZone?: string }) {
   const c = useColors();
   const t = useT();
   const status = STATUS[arrival.status];
@@ -27,7 +28,7 @@ export function ArrivalRow({ arrival }: { arrival: Arrival }) {
       </View>
       <Text style={[styles.meta, { color: c.textSecondary }]}>
         {t(arrival.scheduled ? 'Arrives about {time} (timetable, no live position yet)' : 'Arrives about {time}', {
-          time: formatClock(arrival.eta),
+          time: formatClock(arrival.eta, timeZone),
         })}
       </Text>
     </Card>

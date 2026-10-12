@@ -21,7 +21,7 @@ const MODES: { value: TransportMode; label: string }[] = [
 
 /** A vehicle can only run on a route of its own kind. */
 const routeOptions = (routes: AdminRoute[], mode: TransportMode) =>
-  routes.filter((r) => r.mode === mode).map((r) => ({ value: r.routeId as number | undefined, label: `${r.routeNo} ${r.name}` }));
+  routes.filter((r) => r.mode === mode).map((r) => ({ value: r.routeId as number | undefined, label: r.name.includes(r.destination) ? `${r.routeNo} ${r.name}` : `${r.routeNo} ${r.name} (to ${r.destination})` }));
 
 function AddVehicle({ routes, onDone }: { routes: AdminRoute[]; onDone: () => void }) {
   const c = useColors();

@@ -2,7 +2,7 @@
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
 import type {
-  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, NewAlert, NewStaffAccount, NewVehicle, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, NewAlert, NewStaffAccount, NewVehicle, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Region, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
 } from '@/types';
 
 import { api } from './client';
@@ -36,8 +36,8 @@ export const userApi = {
 };
 
 export const routesApi = {
-  search: (q?: string, mode?: string): Promise<Route[]> =>
-    env.useMockApi ? mockApi.searchRoutes(q, mode) : get('/routes', { q, mode }),
+  search: (q?: string, mode?: string, region?: Region): Promise<Route[]> =>
+    env.useMockApi ? mockApi.searchRoutes(q, mode, region) : get('/routes', { q, mode, region }),
   detail: (id: number): Promise<RouteDetail> => (env.useMockApi ? mockApi.getRoute(id) : get(`/routes/${id}`)),
   arrivals: (id: number, stopId: number): Promise<Arrival[]> =>
     env.useMockApi ? mockApi.getArrivals(id, stopId) : get(`/routes/${id}/arrivals`, { stopId }),
