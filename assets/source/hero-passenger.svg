@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="144" viewBox="0 0 280 240">
+  <!-- Passenger dashboard hero: a commuter at the stop checks the live map as the bus pulls in.
+       Drawn for a coloured card: the backdrop shapes are translucent white so they take on the card's colour. -->
+  <circle cx="176" cy="128" r="104" fill="#FFFFFF" fill-opacity=".08"/>
+
+  <!-- sky -->
+  <circle cx="240" cy="44" r="22" fill="#FFC857" fill-opacity=".28"/>
+  <circle cx="240" cy="44" r="14" fill="#FFC857"/>
+  <path d="M26 74h46a11 11 0 0 0 0-22 15 15 0 0 0-28-5 10 10 0 0 0-17 9 9 9 0 0 0-1 18z" fill="#FFFFFF" fill-opacity=".3"/>
+  <path d="M206 18v12M200 24h12M268 112v10M263 117h10" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- skyline -->
+  <g fill="#FFFFFF" fill-opacity=".12">
+    <rect x="64" y="104" width="26" height="124" rx="4"/>
+    <rect x="94" y="80" width="30" height="148" rx="4"/>
+    <rect x="128" y="114" width="24" height="114" rx="4"/>
+    <rect x="156" y="90" width="28" height="138" rx="4"/>
+    <rect x="188" y="120" width="24" height="108" rx="4"/>
+    <rect x="248" y="98" width="28" height="130" rx="4"/>
+  </g>
+  <g fill="#FFFFFF" fill-opacity=".16">
+    <rect x="101" y="90" width="6" height="8" rx="1.5"/>
+    <rect x="111" y="90" width="6" height="8" rx="1.5"/>
+    <rect x="101" y="104" width="6" height="8" rx="1.5"/>
+    <rect x="163" y="100" width="6" height="8" rx="1.5"/>
+    <rect x="173" y="100" width="6" height="8" rx="1.5"/>
+    <rect x="173" y="114" width="6" height="8" rx="1.5"/>
+    <rect x="255" y="108" width="6" height="8" rx="1.5"/>
+    <rect x="265" y="122" width="6" height="8" rx="1.5"/>
+  </g>
+
+  <!-- road -->
+  <rect x="0" y="226" width="280" height="14" fill="#FFFFFF" fill-opacity=".16"/>
+  <g fill="#FFFFFF" fill-opacity=".55">
+    <rect x="72" y="233" width="20" height="3" rx="1.5"/>
+    <rect x="170" y="233" width="20" height="3" rx="1.5"/>
+    <rect x="262" y="233" width="18" height="3" rx="1.5"/>
+  </g>
+
+  <!-- live arrival chip and pin over the bus -->
+  <rect x="126" y="52" width="62" height="28" rx="9" fill="#1B2A4A" fill-opacity=".18"/>
+  <rect x="122" y="48" width="62" height="28" rx="9" fill="#FFFFFF"/>
+  <circle cx="136" cy="62" r="5.5" fill="#22C55E"/>
+  <rect x="147" y="55" width="28" height="5" rx="2.5" fill="#1B2A4A"/>
+  <rect x="147" y="64" width="18" height="4.5" rx="2.25" fill="#BFD4FF"/>
+  <path d="M96 108v18" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 7"/>
+  <path d="M96 102c-4-6-18-18-18-32a18 18 0 0 1 36 0c0 14-14 26-18 32z" fill="#FFC857"/>
+  <circle cx="96" cy="70" r="7" fill="#FFFFFF"/>
+
+  <!-- bus -->
+  <path d="M3 166h9M0 182h12M5 198h7" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
+  <rect x="48" y="132" width="84" height="12" rx="5" fill="#D6E4FF"/>
+  <rect x="16" y="140" width="158" height="78" rx="16" fill="#FFFFFF"/>
+  <g fill="#BFD4FF">
+    <rect x="28" y="152" width="26" height="24" rx="5"/>
+    <rect x="60" y="152" width="26" height="24" rx="5"/>
+    <rect x="92" y="152" width="26" height="24" rx="5"/>
+    <rect x="124" y="152" width="18" height="52" rx="4"/>
+    <path d="M150 152h8a10 10 0 0 1 10 10v16h-18z"/>
+  </g>
+  <path d="M33 171l11-14M65 171l11-14M97 171l11-14" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/>
+  <rect x="16" y="186" width="104" height="7" fill="#FFC857"/>
+  <rect x="146" y="186" width="28" height="7" fill="#FFC857"/>
+  <rect x="163" y="197" width="8" height="9" rx="3" fill="#FFC857"/>
+  <rect x="19" y="197" width="6" height="10" rx="2" fill="#FF7A59"/>
+  <circle cx="50" cy="216" r="14" fill="#1B2A4A"/>
+  <circle cx="50" cy="216" r="6" fill="#D6E4FF"/>
+  <circle cx="140" cy="216" r="14" fill="#1B2A4A"/>
+  <circle cx="140" cy="216" r="6" fill="#D6E4FF"/>
+
+  <!-- stop sign -->
+  <rect x="193" y="108" width="5" height="120" rx="2.5" fill="#FFFFFF" fill-opacity=".9"/>
+  <circle cx="195.5" cy="102" r="15" fill="#FFC857"/>
+  <rect x="188" y="94" width="15" height="14" rx="3" fill="#1B2A4A"/>
+  <rect x="190.5" y="97" width="10" height="5" rx="1" fill="#FFC857"/>
+  <circle cx="191.5" cy="105" r="1.4" fill="#FFC857"/>
+  <circle cx="199.5" cy="105" r="1.4" fill="#FFC857"/>
+
+  <!-- commuter with a phone -->
+  <ellipse cx="240" cy="229" rx="24" ry="4" fill="#1B2A4A" fill-opacity=".2"/>
+  <rect x="228" y="186" width="10" height="40" rx="4" fill="#1B2A4A"/>
+  <rect x="242" y="186" width="10" height="40" rx="4" fill="#1B2A4A"/>
+  <rect x="223" y="222" width="16" height="7" rx="3.5" fill="#FFFFFF"/>
+  <rect x="242" y="222" width="16" height="7" rx="3.5" fill="#FFFFFF"/>
+  <rect x="236" y="136" width="8" height="12" rx="3" fill="#E9A57E"/>
+  <path d="M225 196v-32c0-11 7-19 15-19s15 8 15 19v32z" fill="#FF7A59"/>
+  <path d="M234 146l6 9 6-9" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M253 156c3 10 3 20 0 28" fill="none" stroke="#E5603F" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="253" cy="187" r="4.5" fill="#F2B78F"/>
+  <circle cx="240" cy="127" r="13" fill="#F2B78F"/>
+  <path d="M227 128a13 13 0 0 1 26-3c-7 0-13-2-17-7-2 4-5 8-9 10z" fill="#1B2A4A"/>
+  <circle cx="235" cy="130" r="1.6" fill="#1B2A4A"/>
+  <g transform="rotate(-14 241 164)">
+    <rect x="235" y="154" width="12" height="20" rx="3" fill="#1B2A4A"/>
+    <rect x="237" y="157" width="8" height="13" rx="1.5" fill="#8DB4FF"/>
+    <circle cx="241" cy="162" r="2" fill="#FFC857"/>
+  </g>
+  <path d="M228 156c-5 8-5 15 1 18l8-2" fill="none" stroke="#E5603F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="238" cy="171" r="4.5" fill="#F2B78F"/>
+</svg>

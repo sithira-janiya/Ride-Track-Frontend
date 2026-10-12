@@ -8,15 +8,17 @@ import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
 import { RouteCard } from '@/components/routes/RouteCard';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { Button, Card, Chips, DashboardHero, EmptyState, ErrorMessage, Loading, SectionTitle, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useNearbyStops } from '@/hooks/use-nearby-stops';
+import { useAuth } from '@/store/auth';
 import { useFavourites } from '@/store/favourites';
 import { minTouchTarget, spacing, typography } from '@/theme';
 import type { Region } from '@/types';
 import { formatDistance, REGION_LABEL } from '@/utils/format';
+import { firstName, greetingTemplate } from '@/utils/greeting';
 
 const REGIONS: { value: Region | undefined; label: string }[] = [
   { value: undefined, label: 'All places' },
@@ -28,6 +30,7 @@ export default function PassengerHome() {
   const c = useColors();
   const t = useT();
   const router = useRouter();
+  const user = useAuth((s) => s.user);
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<ModeValue>('ALL');
   const [region, setRegion] = useState<Region | undefined>(undefined);
@@ -54,9 +57,14 @@ export default function PassengerHome() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Where to?')}
-          </Text>
+          <DashboardHero
+            tone="passenger"
+            illustration="heroPassenger"
+            eyebrow={greetingTemplate(user?.name)}
+            eyebrowParams={{ name: firstName(user?.name) }}
+            title="Where to?"
+            subtitle="Live buses and trains, with your tickets in your pocket."
+          />
 
           <TextField
             label="Search routes"
@@ -70,7 +78,7 @@ export default function PassengerHome() {
           <Chips label="Where" options={REGIONS} value={region} onChange={setRegion} />
 
           {searching ? (
-            <Section title="Results">
+            <Section title="Results" emoji="🔎">
               {results.isPending ? (
                 <Loading label="Searching routes…" />
               ) : results.isError ? (
@@ -83,7 +91,7 @@ export default function PassengerHome() {
             </Section>
           ) : (
             <>
-              <Section title="Favourite routes">
+              <Section title="Favourite routes" emoji="⭐">
                 {favourites.length === 0 ? (
                   <Text style={[styles.hint, { color: c.textSecondary }]}>
                     {t('Open a route and tap Save to keep it here for quick access.')}
@@ -93,7 +101,7 @@ export default function PassengerHome() {
                 )}
               </Section>
 
-              <Section title="Stops near you">
+              <Section title="Stops near you" emoji="📍">
                 {nearby.permission === 'checking' ? (
                   <Loading label="Checking location…" />
                 ) : nearby.permission === 'denied' ? (
@@ -141,14 +149,10 @@ export default function PassengerHome() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const c = useColors();
-  const t = useT();
+function Section({ title, emoji, children }: { title: string; emoji?: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
-      <Text accessibilityRole="header" style={[styles.sectionTitle, { color: c.text }]}>
-        {t(title)}
-      </Text>
+      <SectionTitle title={title} emoji={emoji} />
       {children}
     </View>
   );
@@ -158,9 +162,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
-  section: { gap: spacing.sm, marginTop: spacing.sm },
-  sectionTitle: { ...typography.title },
+  section: { gap: spacing.sm },
   hint: { ...typography.body },
   stopCard: { minHeight: minTouchTarget },
   stopName: { ...typography.bodyLarge, fontWeight: '600' },

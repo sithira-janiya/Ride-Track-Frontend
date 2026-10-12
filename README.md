@@ -108,6 +108,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - In mock mode the Dubai routes, stops and timetables are the same real data (`src/api/mock-data/dubai-rta.json`, read by `src/api/mock-dubai.ts`); trips, vehicle positions and arrivals are worked out from the timetable as the clock runs.
 
 **Passenger**
+- Home opens with a blue welcome card: a greeting for the time of day with the passenger's first name, "Where to?", and an illustration of a commuter at a stop as the bus pulls in. Section headings have emoji (🔎 Results, ⭐ Favourite routes, 📍 Stops near you).
 - Search routes (debounced, bus/train filter, Sri Lanka/Dubai filter), nearby stops (asks for location; in Dubai it finds the real metro, tram and bus stops), favourite routes.
 - Route detail: ordered stops with fares, upcoming arrivals at a chosen stop.
 - Live map: route line, stops and moving vehicles over WebSocket, with arrival time and occupancy (icon and text). Shows "Live / Reconnecting" and an "out of date" warning after 60 s without updates.
@@ -117,17 +118,18 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out. Saving a new language switches the app to it (see Languages below).
 
 **Staff**
+- Scan tab opens with a teal welcome card (greeting, an illustration of a conductor scanning a ticket) and a label with the current shift ("On shift · 138") or "No shift started".
 - Scan tab: camera permission flow, QR scanning, then a large VALID / INVALID result with the reason (icon, word and colour) and haptic feedback. "Scan next ticket" resets for the next passenger. If a QR will not scan, type the ticket number instead.
 - Passengers tab: set the on-board passenger count for the shift's vehicle (+/- 1 and 5), sent to the server with Save.
 - Shift tab: choose route and trip (and so the vehicle) for the shift; remembered on the device.
 
 **Authority**
-- Dashboard: live tiles (vehicles live, active delays, passengers on board, nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time and occupancy, filterable by region. Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
+- Dashboard: an indigo welcome card (greeting, "Operations", an illustration of the live operations screen) with a "Live · 14:05" label (time of the last update) once data has loaded. Then live tiles, each with an emoji in a tinted bubble (🚌 vehicles live, ⏱️ active delays, 🧍 passengers on board, 👥 nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time and occupancy, filterable by region. Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
 - Fleet tab: pick Sri Lanka or Dubai first (so the map is not framed across both), then filter by route; selecting a card highlights its marker. Route pickers here and on the Alerts, Reports and Trips screens name the direction ("Red to Expo 2020"), since Dubai has four "Red" routes.
 - Reports tab: choose report type (route performance, delays, occupancy), route and period (last 7 or 30 days), then see a bar chart and a table.
 - Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
 - Admin tab (back office, backed by RideTrack-API `/admin/*`):
-  - Overview: today's trips, delays and cancellations, tickets sold and revenue (one tile per currency, never rupees and dirhams added together), plus account, vehicle, route and stop counts.
+  - Overview: a violet welcome card ("Back office", "Admin", an illustration of the account list, gears and a shield), then today's trips, delays and cancellations, tickets sold and revenue (one tile per currency, never rupees and dirhams added together), plus account, vehicle, route and stop counts. Tiles and the Manage rows have emoji icons (🗓️ ⏱️ 🎫 💰 👥 🚫 🚌 🛣️).
   - Accounts: search by name, email or phone, filter by role, page through results. Add a staff (conductor or inspector, optionally on a vehicle) or authority officer account. Disable an account (asks first; the person is signed out at once) or enable it again. You cannot disable your own account.
   - Vehicles: add a bus or train to a route of the same kind, change its capacity or route, take it out of service or return it.
   - Routes: every route, active or not, with its stop and vehicle counts (read only).
@@ -140,7 +142,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
 
-**Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
+**Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). Each role's home screen starts with a welcome card in its own colour (passenger blue, staff teal, authority indigo, admin violet; `heroColors` in `src/theme`) holding a flat illustration drawn for that colour (`DashboardHero` in `src/components/ui`). The card is a deeper shade in dark mode, and the illustrations' backdrop shapes are see-through white, so the same picture fits both. The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
 
 ### Languages (Google Translate)
 
@@ -174,7 +176,7 @@ src/
 ├── config/ theme/ types/ utils/   (utils/fare.ts: fare rule by stop or by zone; utils/format.ts: currency, local time, route labels)
 assets/
 ├── images/               app icon, adaptive icon layers, splash, favicon (PNG, used by app.json)
-│   └── illustrations/    auth-hero, empty-tickets, empty-alerts, empty-routes at @1x/@2x/@3x
+│   └── illustrations/    auth-hero, empty-tickets, empty-alerts, empty-routes, hero-passenger, hero-staff, hero-authority, hero-admin at @1x/@2x/@3x
 ├── source/               SVG sources of the illustrations
 └── expo.icon/            iOS icon (Icon Composer format): pin and bus layers
 scripts/render-assets.js  draws the icon set and renders every SVG above to PNG
@@ -187,6 +189,7 @@ Rules: screens in `app/` stay thin and call hooks and components; all network ca
 Automated tests run with Jest, `jest-expo` and React Native Testing Library (`npm test`). They live next to the code in `__tests__` folders (never inside `src/app/`, where files become routes):
 
 - `src/utils/__tests__/validation.test.ts`: login and register rules, and the admin forms (new staff account, new vehicle).
+- `src/utils/__tests__/greeting.test.ts`: the welcome card greeting (morning, afternoon, evening; first name only, left out when there is none).
 - `src/api/__tests__/admin.test.ts`: the mock admin API: creating accounts (own password, duplicate email), disabling blocks login, role filter, vehicle route rules, out-of-service vehicles drop out of trips, ticket paging.
 - `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
 - `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
@@ -207,7 +210,7 @@ Not automated yet: map screens, the camera scanner, payment in the browser, push
 
 ## Accessibility
 
-Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). The bottom of the login and register screens uses emoji too (👋 … ✨ on login, 🙌 … 🔑 on register, and 🌐 on the Language heading, which also shows on Profile); they sit outside the translated text so translations are unchanged. Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Each tab has an emoji icon beside its label (🏠 🎫 🔔 👤 for passengers, 📷 🧍 🕒 for staff, 📊 🚌 📈 🔔 🛠️ for authority; `src/components/ui/TabEmoji.tsx`). All three roles share one tab bar style from `src/hooks/use-tab-bar-options.ts`, so a change there applies to every role. Emoji ignore the tint colour, so inactive tabs are dimmed, and the emoji are hidden from screen readers because the label already says the same thing.
+Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). The bottom of the login and register screens uses emoji too (👋 … ✨ on login, 🙌 … 🔑 on register, and 🌐 on the Language heading, which also shows on Profile); they sit outside the translated text so translations are unchanged. Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. That includes the white text on the dashboard welcome cards (5.1:1 or more, and 4.6:1 or more where the card's faint bubbles pass under it) and the card-coloured text on their white labels. The welcome card illustrations are hidden from screen readers, and the emoji on section headings, dashboard tiles and admin rows are too, since the text beside them says the same thing. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Each tab has an emoji icon beside its label (🏠 🎫 🔔 👤 for passengers, 📷 🧍 🕒 for staff, 📊 🚌 📈 🔔 🛠️ for authority; `src/components/ui/TabEmoji.tsx`). All three roles share one tab bar style from `src/hooks/use-tab-bar-options.ts`, so a change there applies to every role. Emoji ignore the tint colour, so inactive tabs are dimmed, and the emoji are hidden from screen readers because the label already says the same thing.
 
 ## Known limitations
 
@@ -234,6 +237,7 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
 - Offline route data can be up to 24 hours old; arrivals shown offline are the last ones fetched.
 - Lint reports one existing warning in `src/api/client.ts` (axios import style).
+- The dashboard welcome cards have only been checked in the browser, not on a phone.
 - The new icons and splash have not been seen on a device yet: the splash only shows in a real build (not Expo Go), and the iOS Liquid Glass icon (`assets/expo.icon`) has not been opened in Icon Composer or built for iOS.
 - Unused Expo template images (`expo-badge*`, `expo-logo`, `react-logo*`, `logo-glow`, `tutorial-web`, `tabIcons/`) are still in `assets/images/`.
 

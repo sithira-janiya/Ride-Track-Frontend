@@ -51,7 +51,18 @@ export const darkColors: ThemeColors = {
   onPrimary: '#0B0E14',
 };
 
+/**
+ * Background of each role's dashboard hero card, in light and dark mode. Hero text is white: at least 4.5:1 on each,
+ * also where the card's 7% white bubbles pass under it. The hero illustrations are drawn to sit on these colours.
+ */
+export const heroColors = {
+  passenger: { light: '#0B5FFF', dark: '#1B3F99' },
+  staff: { light: '#0F766E', dark: '#115E59' },
+  authority: { light: '#4338CA', dark: '#312E81' },
+  admin: { light: '#6D28D9', dark: '#4C1D95' },
+} as const;
 
+export type HeroTone = keyof typeof heroColors;
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
 export const radius = { sm: 8, md: 12, lg: 16, pill: 999 } as const;

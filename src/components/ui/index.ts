@@ -9,3 +9,5 @@ export { EmptyState } from './EmptyState';
 export { ErrorMessage } from './ErrorMessage';
 export { LanguagePicker } from './LanguagePicker';
 export { Loading } from './Loading';
+export { DashboardHero, HeroPill } from './DashboardHero';
+export { SectionTitle } from './SectionTitle';

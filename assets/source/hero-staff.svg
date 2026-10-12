@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="144" viewBox="0 0 280 240">
+  <!-- Staff dashboard hero: a conductor on board scans a passenger's QR ticket and gets a green tick.
+       Drawn for a coloured card: the backdrop shapes are translucent white so they take on the card's colour. -->
+  <circle cx="132" cy="134" r="104" fill="#FFFFFF" fill-opacity=".08"/>
+
+  <!-- inside the bus: rail with hand straps, and windows -->
+  <g fill="#FFFFFF" fill-opacity=".1">
+    <rect x="-12" y="58" width="74" height="96" rx="16"/>
+    <rect x="200" y="176" width="92" height="70" rx="16"/>
+  </g>
+  <path d="M0 16h280" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>
+  <g fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="4" stroke-linecap="round">
+    <path d="M34 16v18M160 16v14M254 16v12"/>
+    <circle cx="34" cy="44" r="9"/>
+    <circle cx="160" cy="39" r="8"/>
+  </g>
+  <path d="M24 196v12M18 202h12M188 28v10M183 33h10" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- scan beam -->
+  <path d="M190 120l30-30v78z" fill="#FFFFFF" fill-opacity=".22"/>
+
+  <!-- QR ticket -->
+  <g transform="translate(-12 0) rotate(-8 246 120)">
+    <rect x="222" y="82" width="52" height="76" rx="9" fill="#1B2A4A" fill-opacity=".18" transform="translate(4 4)"/>
+    <rect x="222" y="82" width="52" height="76" rx="9" fill="#FFFFFF"/>
+    <rect x="222" y="138" width="52" height="20" rx="0" fill="#FFC857"/>
+    <path d="M222 138h52v11a9 9 0 0 1-9 9h-34a9 9 0 0 1-9-9z" fill="#FFC857"/>
+    <g fill="#1B2A4A">
+      <rect x="230" y="90" width="12" height="12" rx="2"/>
+      <rect x="254" y="90" width="12" height="12" rx="2"/>
+      <rect x="230" y="114" width="12" height="12" rx="2"/>
+      <rect x="246" y="92" width="4" height="4"/>
+      <rect x="246" y="100" width="4" height="4"/>
+      <rect x="246" y="108" width="4" height="4"/>
+      <rect x="254" y="108" width="4" height="4"/>
+      <rect x="262" y="110" width="4" height="4"/>
+      <rect x="250" y="116" width="4" height="4"/>
+      <rect x="258" y="118" width="4" height="4"/>
+      <rect x="246" y="122" width="4" height="4"/>
+      <rect x="262" y="122" width="4" height="4"/>
+      <rect x="234" y="108" width="4" height="4"/>
+    </g>
+    <g fill="#FFFFFF">
+      <rect x="233" y="93" width="6" height="6" rx="1"/>
+      <rect x="257" y="93" width="6" height="6" rx="1"/>
+      <rect x="233" y="117" width="6" height="6" rx="1"/>
+    </g>
+    <rect x="230" y="144" width="26" height="5" rx="2.5" fill="#1B2A4A"/>
+  </g>
+  <circle cx="254" cy="80" r="15" fill="#22C55E" stroke="#FFFFFF" stroke-width="3.5"/>
+  <path d="M247 80l5 5 9-10" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- conductor -->
+  <path d="M46 240v-50c0-28 22-44 54-44s54 16 54 44v50z" fill="#1B2A4A"/>
+  <path d="M84 147l16 26 16-26z" fill="#FFFFFF"/>
+  <path d="M100 172l-6 7 6 26 6-26z" fill="#FFC857"/>
+  <rect x="118" y="186" width="20" height="12" rx="3" fill="#FFC857"/>
+  <rect x="121" y="190" width="14" height="3" rx="1.5" fill="#1B2A4A"/>
+  <path d="M66 200v40" stroke="#FFFFFF" stroke-opacity=".18" stroke-width="3"/>
+  <rect x="92" y="128" width="16" height="22" rx="6" fill="#A86F4C"/>
+  <circle cx="77" cy="116" r="5.5" fill="#A86F4C"/>
+  <circle cx="123" cy="116" r="5.5" fill="#A86F4C"/>
+  <circle cx="100" cy="114" r="23" fill="#C68B63"/>
+  <circle cx="92" cy="116" r="2.4" fill="#1B2A4A"/>
+  <circle cx="108" cy="116" r="2.4" fill="#1B2A4A"/>
+  <path d="M93 125q7 6 14 0" fill="none" stroke="#1B2A4A" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M77 103c0-18 10-27 23-27s23 9 23 27z" fill="#1B2A4A"/>
+  <path d="M72 101h56a5 5 0 0 1 0 10H72a5 5 0 0 1 0-10z" fill="#2E406B"/>
+  <circle cx="100" cy="90" r="5.5" fill="#FFC857"/>
+
+  <!-- arm raised with the scanner -->
+  <path d="M138 176l34-24" fill="none" stroke="#1B2A4A" stroke-width="18" stroke-linecap="round"/>
+  <path d="M152 166l8-6" stroke="#FFC857" stroke-width="18" stroke-opacity=".9"/>
+  <g transform="rotate(16 182 132)">
+    <rect x="170" y="110" width="24" height="40" rx="6" fill="#FFFFFF"/>
+    <rect x="174" y="116" width="16" height="22" rx="2.5" fill="#99E2D0"/>
+    <path d="M178 127l3 3 6-6" fill="none" stroke="#0F766E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="182" cy="144" r="2.5" fill="#99E2D0"/>
+  </g>
+  <circle cx="176" cy="150" r="9" fill="#C68B63"/>
+</svg>
