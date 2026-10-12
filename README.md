@@ -1,6 +1,6 @@
 # RideTrack Frontend
 
-Mobile app for RideTrack, a public transport (bus and train) tracking and ticketing system. One React Native app serves three kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Staff** (conductor/inspector) and **Authority**.
+Mobile app for RideTrack, a public transport (bus and train) tracking and ticketing system, for Sri Lanka and Dubai. One React Native app serves three kinds of user; the screens shown depend on the logged-in user's role: **Passenger**, **Staff** (conductor/inspector) and **Authority**.
 
 > This file is kept up to date as the app is built. See [Keeping this README current](#keeping-this-readme-current).
 
@@ -44,9 +44,10 @@ The backend lives in the `RideTrack-API` repo (Node, Express, MySQL, Socket.IO).
 
 Notes:
 - The LAN IP changes when you switch networks. If the app shows "Cannot reach RideTrack", update the IP here **and** `PUBLIC_URL` in the backend's `.env` (it is used for payment page links).
-- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `RideTrack-API`.
+- Live vehicles only appear while something sends GPS positions: run `npm run simulate` in `RideTrack-API`. Without it, arrivals show timetable times.
+- `npm run seed` loads both regions. On a database seeded before the Dubai data existed, run `npm run migrate` and then `npm run seed` again: it adds Dubai and keeps the Sri Lanka data.
 - Passengers only receive an alert when they hold a pending or active ticket for that trip.
-- The EAS `development` and `preview` profiles force mock mode; only `production` uses the real API.
+- The EAS `preview` profile forces mock mode; `development` and `production` use the real API. `preview` stays on mock because it is a release build, and Android blocks plain `http://` in release builds, so it cannot reach the API until the API has an HTTPS address.
 
 ### Demo accounts
 
@@ -95,12 +96,19 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | 6 | Passenger: alerts, push registration, profile settings | Built; alerts list, unread badge, banner, and profile save checked in the browser; real push and socket alerts not tested |
 | 7 | Authority: dashboard, live fleet, reports, alerts | Built; dashboard, fleet filter, reports and publishing an alert checked in the browser; map and real-time updates not tested on a device |
 | – | Authority: admin back office (overview, accounts, vehicles, routes, trips, tickets) | Built; every screen checked in the browser against the real backend (create and disable an account, edit a vehicle); not tested on a device |
+| – | Regions: Sri Lanka and Dubai (real RTA routes, stops, fare zones and timetables), times on each route's local clock, fares in LKR or AED | Built; checked in the browser in mock mode (route search by region, Red Line stops, zone fares, Dubai-time arrivals, buying an AED ticket, officer dashboard and trips); the API side is covered by RideTrack-API's tests and a simulator run; not tested on a device or the map |
 | 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
 
 ## Features built so far
 
+**Regions (Sri Lanka and Dubai)**
+- Every route belongs to a region. Sri Lanka has the three Colombo demo routes, with fares in rupees. Dubai has real Dubai RTA data: Metro Red Line (to Expo 2020 and to Life Pharmacy), Metro Green Line, the Dubai Tram and buses C01, 27, 8 and X28, each direction as its own route, with the real stops in order, fare zones, running times between stops and the weekly timetable (from RTA's GTFS feed; see RideTrack-API's README, "Regions and the Dubai data").
+- Times are shown on the route's own clock (`Asia/Colombo` or `Asia/Dubai`). When that differs from the phone's, the route page says "Times shown in Dubai time" (or Sri Lanka time), so a Dubai departure is never read as local time.
+- Fares are in the route's currency: `Rs. 50` in Sri Lanka, `AED 5` in Dubai. Dubai fares follow RTA's zones (Nol Silver): AED 3 within one zone, AED 5 across two, AED 7.50 for three or more. The app works the fare out with the same rule as the server (`src/utils/fare.ts`), and lists the zone fare from the first stop next to each stop.
+- In mock mode the Dubai routes, stops and timetables are the same real data (`src/api/mock-data/dubai-rta.json`, read by `src/api/mock-dubai.ts`); trips, vehicle positions and arrivals are worked out from the timetable as the clock runs.
+
 **Passenger**
-- Search routes (debounced, bus/train filter), nearby stops (asks for location), favourite routes.
+- Search routes (debounced, bus/train filter, Sri Lanka/Dubai filter), nearby stops (asks for location; in Dubai it finds the real metro, tram and bus stops), favourite routes.
 - Route detail: ordered stops with fares, upcoming arrivals at a chosen stop.
 - Live map: route line, stops and moving vehicles over WebSocket, with arrival time and occupancy (icon and text). Shows "Live / Reconnecting" and an "out of date" warning after 60 s without updates.
 - Tickets: pick boarding stop, drop-off stop and trip, see the fare, pay. A pending payment is saved on the device and re-checked when the app resumes, so it is never lost. Ticket list with filters and paging, QR screen with a screen-brightness boost, cancel an unused ticket. Tickets are cached on the device so they still show offline, and cleared on logout.
@@ -114,16 +122,16 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Shift tab: choose route and trip (and so the vehicle) for the shift; remembered on the device.
 
 **Authority**
-- Dashboard: live tiles (vehicles live, active delays, passengers on board, nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time and occupancy. Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
-- Fleet tab: all vehicles on one map, filterable by route; selecting a card highlights its marker.
+- Dashboard: live tiles (vehicles live, active delays, passengers on board, nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time and occupancy, filterable by region. Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
+- Fleet tab: pick Sri Lanka or Dubai first (so the map is not framed across both), then filter by route; selecting a card highlights its marker. Route pickers here and on the Alerts, Reports and Trips screens name the direction ("Red to Expo 2020"), since Dubai has four "Red" routes.
 - Reports tab: choose report type (route performance, delays, occupancy), route and period (last 7 or 30 days), then see a bar chart and a table.
 - Alerts tab: publish a delay, cancellation or route-change alert for a trip, with validation, and review published alerts. In mock mode a published alert also shows up for passengers.
 - Admin tab (back office, backed by RideTrack-API `/admin/*`):
-  - Overview: today's trips, delays and cancellations, tickets sold and revenue, plus account, vehicle, route and stop counts.
+  - Overview: today's trips, delays and cancellations, tickets sold and revenue (one tile per currency, never rupees and dirhams added together), plus account, vehicle, route and stop counts.
   - Accounts: search by name, email or phone, filter by role, page through results. Add a staff (conductor or inspector, optionally on a vehicle) or authority officer account. Disable an account (asks first; the person is signed out at once) or enable it again. You cannot disable your own account.
   - Vehicles: add a bus or train to a route of the same kind, change its capacity or route, take it out of service or return it.
   - Routes: every route, active or not, with its stop and vehicle counts (read only).
-  - Trips: yesterday's, today's or tomorrow's timetable (UTC days), filterable by route, with status and tickets sold.
+  - Trips: yesterday's, today's or tomorrow's timetable (UTC days), filterable by route, with status and tickets sold. Times are in each route's local time, marked "Dubai time" where that differs from the phone.
   - Tickets: every ticket sold, newest first, filterable by status, with passenger, fare and payment status.
   - Admin data is never saved on the device. Opening an admin page directly (web refresh or link) still puts the overview underneath it, so the back arrow works.
 - Log out is at the bottom of the Dashboard.
@@ -156,13 +164,14 @@ src/
 │   ├── (staff)/          scan (index), count, shift tabs
 │   └── (authority)/      dashboard (index), fleet, reports, alerts tabs
 │       └── admin/        Admin tab, a stack: overview (index), users, new-account, vehicles, routes, trips, tickets
-├── api/                  axios client, typed endpoint wrappers, mock API
+├── api/                  axios client, typed endpoint wrappers, mock API (mock-dubai.ts: Dubai from the real timetable)
+│   └── mock-data/        dubai-rta.json: Dubai RTA routes, stops, zones and timetables (generated by RideTrack-API)
 ├── components/           ui/ (shared), auth/, routes/, map/, tickets/, scan/, alerts/, ops/, admin/
 ├── i18n/                 useT() / <T>, Google Translate client (batching, retry)
-├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, ...
+├── hooks/                use-nearby-stops, use-live-vehicles, use-tickets, use-admin, use-tab-bar-options, ...
 ├── store/                Zustand stores: auth, favourites, tickets, shift, alert-banner, language
 ├── socket/               socket.io client
-├── config/ theme/ types/ utils/
+├── config/ theme/ types/ utils/   (utils/fare.ts: fare rule by stop or by zone; utils/format.ts: currency, local time, route labels)
 assets/
 ├── images/               app icon, adaptive icon layers, splash, favicon (PNG, used by app.json)
 │   └── illustrations/    auth-hero, empty-tickets, empty-alerts, empty-routes at @1x/@2x/@3x
@@ -184,24 +193,30 @@ Automated tests run with Jest, `jest-expo` and React Native Testing Library (`np
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
 - `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request, and keeping Google's error message on failure (fetch mocked).
+- `src/api/__tests__/dubai.test.ts`: Dubai routes by region, the Red Line's real stations with zones and running times, arrivals that match the timetable in Dubai time, AED zone fares on a ticket, vehicles placed along the route; plus the fare rule, rupee and dirham formatting, and times on a route's clock.
 
 Not automated yet: map screens, the camera scanner, payment in the browser, push notifications. Those need a device.
 
 ## Release
 
 - Android package: `com.ridetrack.app` (change it in `app.json` before the first store upload; it cannot change afterwards).
-- Build profiles are in `eas.json`: `development` (dev client APK), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
+- Build profiles are in `eas.json`: `development` (dev client APK, real API), `preview` (APK for testers, mock API on) and `production` (AAB for the Play Store, mock API off).
 - To build: `npx eas-cli@latest login`, then `npx eas-cli@latest build --platform android --profile preview`. For production, set `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_SOCKET_URL` as EAS environment variables first.
 - Web (Vercel): `vercel.json` tells Vercel to run `npm install`, then `npx expo export -p web`, and serve `dist/`, with a rewrite so dynamic routes such as `/ticket/123` fall back to the app instead of a 404. The Vercel project's Root Directory is currently `src`, so `src/vercel.json` does the same from there (installs and builds from the repo root, outputs to `src/dist`); delete it once Root Directory is cleared. In the Vercel project, leave Framework Preset as "Other" and add the `EXPO_PUBLIC_*` variables (from `.env.example`) under Settings → Environment Variables. They are baked in at build time, so redeploy after changing them.
 - App icon and splash are RideTrack artwork. The splash is the brand blue (`#0B5FFF`), or `#0B0E14` in dark mode. To change the art, edit `assets/source/*.svg` (illustrations) or the mark in `scripts/render-assets.js` (icons), then run `npm install --no-save @resvg/resvg-js` and `node scripts/render-assets.js` from the project root. It rewrites the PNGs in `assets/images/` and the iOS layers in `assets/expo.icon/Assets/`.
 
 ## Accessibility
 
-Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). The bottom of the login and register screens uses emoji too (👋 … ✨ on login, 🙌 … 🔑 on register, and 🌐 on the Language heading, which also shows on Profile); they sit outside the translated text so translations are unchanged. Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Each tab has an emoji icon beside its label (🏠 🎫 🔔 👤 for passengers, 📷 🧍 🕒 for staff, 📊 🚌 📈 🔔 🛠️ for authority; `src/components/ui/TabEmoji.tsx`). Emoji ignore the tint colour, so inactive tabs are dimmed, and the emoji are hidden from screen readers because the label already says the same thing.
+Body text is at least 16 pt, touch targets are at least 44 px, and status is always shown by icon and text, never colour alone (NFR8). The bottom of the login and register screens uses emoji too (👋 … ✨ on login, 🙌 … 🔑 on register, and 🌐 on the Language heading, which also shows on Profile); they sit outside the translated text so translations are unchanged. Every text and background colour pair in the light and dark themes was checked for a contrast ratio of at least 4.5:1. The very large numerals (scan result, passenger count, dashboard tiles) cap their font scaling at 1.2 to 1.3 times so they cannot overflow. Tab labels are 14 pt, below the 16 pt body size. Each tab has an emoji icon beside its label (🏠 🎫 🔔 👤 for passengers, 📷 🧍 🕒 for staff, 📊 🚌 📈 🔔 🛠️ for authority; `src/components/ui/TabEmoji.tsx`). All three roles share one tab bar style from `src/hooks/use-tab-bar-options.ts`, so a change there applies to every role. Emoji ignore the tint colour, so inactive tabs are dimmed, and the emoji are hidden from screen readers because the label already says the same thing.
 
 ## Known limitations
 
 - Map markers jump between positions instead of animating.
+- Dubai: RTA publishes no open live GPS feed, so Dubai vehicles are simulated (`npm run simulate` on the real backend; computed from the timetable in mock mode). The timetable comes from a GTFS feed valid 29 Aug to 31 Dec 2025; its weekly pattern is repeated every week, so later service changes and public holidays are not reflected. Short workings are left out, and running times are the median for each line. Fares are Nol Silver single-trip prices; Gold class, transfers within 30 minutes and day passes are not modelled.
+- Only a few Dubai bus routes are loaded (C01, 27, 8, X28); the importer in RideTrack-API can add more.
+- With Dubai loaded, a whole day's trips for all routes is more than the 500 the server returns, so the admin Trips list for "All routes" stops part-way through the day. Pick a route to see its full day.
+- Mock mode ships the Dubai data file (60 KB) in every build, because the mock API is bundled whether or not it is used.
+- No Arabic: the language choices are still English, Sinhala and Tamil.
 - The map is native only; the web build shows a notice instead.
 - Android release builds need a Google Maps API key in `app.json`.
 - Checked against the real backend (RideTrack-API): login, routes, arrivals, nearby stops, buying and paying for a ticket, ticket list, `POST /scans`, publishing an alert, `GET /ops/dashboard`, reports and every `/admin/*` endpoint. Not yet checked against it: `POST /vehicles/:id/occupancy` and `PUT /users/me/push-token`.
@@ -212,6 +227,8 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - Translation is machine translation from Google Translate, not reviewed by a Sinhala or Tamil speaker. The first time a screen opens in a new language it shows English for a moment until the translation arrives, and stays English offline until it has been translated once. Real Google translation has not yet been checked with a live API key.
 - The Google Translate API key ships inside the app. Restrict it in Google Cloud Console; a backend proxy would hide it completely.
 - Dates and times still use the device's locale format, not the chosen language.
+- The API is reached over plain `http://` on the local network, so traffic between phone and PC is not encrypted, and the `preview` APK and the HTTPS web site (Vercel) cannot use live data yet. Both need the API behind an HTTPS address.
+- `.env` is git-ignored, so EAS cloud builds do not receive it. Set `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_SOCKET_URL` and `EXPO_PUBLIC_GOOGLE_TRANSLATE_API_KEY` as EAS environment variables for any build that needs them.
 - Push notifications need a development build on Android (Expo Go no longer supports remote push there); the in-app banner and Alerts tab work everywhere. The exact body of `PUT /users/me/push-token` (`{token}`, a native FCM/APNs token) is assumed.
 - Report, dashboard and admin data in mock mode is fake (deterministic numbers and generated trips), and admin changes in mock mode are lost when the app reloads.
 - Not yet done for Phase 8: testing on real Android devices (including a low-end one), airplane-mode checks, a screen reader pass, a usability test with commuters and staff, and the real EAS build.
