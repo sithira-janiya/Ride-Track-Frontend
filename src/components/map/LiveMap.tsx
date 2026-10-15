@@ -40,7 +40,7 @@ export function LiveMap({ stops, vehicles, mode, selectedVehicleId, onSelectVehi
             onPress={() => onSelectVehicle(v.vehicleId)}
             zIndex={10}
             tracksViewChanges>
-            <View style={[styles.vehicle, { backgroundColor: selected ? c.primary : c.background, borderColor: c.primary }]}>
+            <View style={[styles.vehicle, { backgroundColor: selected ? c.primary : c.surface, borderColor: c.primary }]}>
               <Text style={[styles.vehicleText, { color: selected ? c.onPrimary : c.text }]}>
                 {mode === 'TRAIN' ? 'Train' : 'Bus'} {v.regNo ?? v.vehicleId}
               </Text>

@@ -72,11 +72,11 @@ export default function AdminHome() {
           )}
 
           <SectionTitle emoji="🛠️" title="Manage" />
-          <NavRow icon="👥" title="Accounts" detail="Find people, add staff and officers, disable accounts" onPress={() => router.push('/admin/users')} />
-          <NavRow icon="🚌" title="Vehicles" detail="Add buses and trains, change capacity or route, take out of service" onPress={() => router.push('/admin/vehicles')} />
-          <NavRow icon="🛣️" title="Routes" detail="Every route with its stops and vehicles" onPress={() => router.push('/admin/routes')} />
-          <NavRow icon="🗓️" title="Trips" detail="The timetable for any day, with status and tickets sold" onPress={() => router.push('/admin/trips')} />
-          <NavRow icon="🎫" title="Tickets" detail="All tickets sold, with payment status" onPress={() => router.push('/admin/tickets')} />
+          <NavRow tone="admin" icon="👥" title="Accounts" detail="Find people, add staff and officers, disable accounts" onPress={() => router.push('/admin/users')} />
+          <NavRow tone="admin" icon="🚌" title="Vehicles" detail="Add buses and trains, change capacity or route, take out of service" onPress={() => router.push('/admin/vehicles')} />
+          <NavRow tone="admin" icon="🛣️" title="Routes" detail="Every route with its stops and vehicles" onPress={() => router.push('/admin/routes')} />
+          <NavRow tone="admin" icon="🗓️" title="Trips" detail="The timetable for any day, with status and tickets sold" onPress={() => router.push('/admin/trips')} />
+          <NavRow tone="admin" icon="🎫" title="Tickets" detail="All tickets sold, with payment status" onPress={() => router.push('/admin/tickets')} />
         </View>
       </ScrollView>
     </SafeAreaView>

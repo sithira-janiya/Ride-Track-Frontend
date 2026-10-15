@@ -30,7 +30,7 @@ export function Chips<T extends string | number | undefined>({ label, options, v
             accessibilityState={{ selected }}
             accessibilityLabel={text}
             onPress={() => onChange(o.value)}
-            style={[styles.chip, { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border }]}>
+            style={[styles.chip, { backgroundColor: selected ? c.primary : c.surface, borderColor: selected ? c.primary : c.border }]}>
             <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>{text}</Text>
           </Pressable>
         );

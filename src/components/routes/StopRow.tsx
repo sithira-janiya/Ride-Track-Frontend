@@ -20,7 +20,7 @@ export function StopRow({ stop, selected, onPress, currency }: Props) {
       onPress={onPress}
       style={[
         styles.row,
-        { backgroundColor: selected ? c.infoBg : c.background, borderColor: selected ? c.primary : c.border },
+        { backgroundColor: selected ? c.infoBg : c.surface, borderColor: selected ? c.primary : c.border },
       ]}>
       <View style={[styles.dot, { backgroundColor: selected ? c.primary : c.border }]}>
         <Text style={[styles.seq, { color: selected ? c.onPrimary : c.text }]}>{stop.stopSequence}</Text>

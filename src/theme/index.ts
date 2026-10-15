@@ -21,11 +21,12 @@ export const palette = {
   infoBg: '#F0F5FF',
 } as const;
 
+// Light pages are soft grey and cards are white, so cards lift off the page (Figma: Color · Light).
 export const lightColors: ThemeColors = {
   ...palette,
-  background: '#FFFFFF',
-  surface: '#F4F6FA',
-  border: '#D5DAE3',
+  background: '#F4F6FA',
+  surface: '#FFFFFF',
+  border: '#DCE1E9',
   text: '#10151F',
   textSecondary: '#4A5365',
   onPrimary: '#FFFFFF',
@@ -64,8 +65,22 @@ export const heroColors = {
 
 export type HeroTone = keyof typeof heroColors;
 
+/**
+ * Each role's accent on the page: active tab, screen-header eyebrow, admin icons. Light values are the hero colours;
+ * dark values are lighter tints of them that keep at least 4.5:1 on the dark surface.
+ */
+export const roleAccent: Record<HeroTone, { light: string; dark: string }> = {
+  passenger: { light: '#0B5FFF', dark: '#93B4FF' },
+  staff: { light: '#0F766E', dark: '#5EEAD4' },
+  authority: { light: '#4338CA', dark: '#A5B4FC' },
+  admin: { light: '#6D28D9', dark: '#C4B5FD' },
+};
+
+/** Soft shadow under cards in light mode (Figma effect style "Elevation/Card"). Dark mode relies on the border. */
+export const cardShadow = '0px 2px 8px rgba(16, 21, 31, 0.06)';
+
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
-export const radius = { sm: 8, md: 12, lg: 16, pill: 999 } as const;
+export const radius = { sm: 8, md: 12, lg: 16, xl: 24, pill: 999 } as const;
 export const minTouchTarget = 44;
 
 export const typography = {

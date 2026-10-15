@@ -1,24 +1,24 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
-import { Button, Card, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, ScreenHeader } from '@/components/ui';
 import { TicketCard } from '@/components/tickets/TicketCard';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { usePendingPaymentCheck, useTicketList } from '@/hooks/use-tickets';
 import { useTicketCache } from '@/store/tickets';
-import { minTouchTarget, radius, spacing, typography } from '@/theme';
+import { spacing, typography } from '@/theme';
 import type { Ticket } from '@/types';
 
-const FILTERS = [
+const FILTERS: { value: string | undefined; label: string }[] = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'USED', label: 'Used' },
   { value: 'CANCELLED', label: 'Cancelled' },
   { value: undefined, label: 'All' },
-] as const;
+];
 
 export default function TicketsScreen() {
   const c = useColors();
@@ -42,9 +42,7 @@ export default function TicketsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('My tickets')}
-          </Text>
+          <ScreenHeader tone="passenger" title="My tickets" subtitle="Show the QR code to staff when you board." />
 
           {pendingIds.length > 0 ? (
             <Card style={{ borderColor: c.warning, backgroundColor: c.warningBg }}>
@@ -60,22 +58,7 @@ export default function TicketsScreen() {
             </Card>
           ) : null}
 
-          <View accessibilityRole="radiogroup" style={styles.filters}>
-            {FILTERS.map((f) => {
-              const selected = f.value === status;
-              return (
-                <Pressable
-                  key={f.label}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={t(f.label)}
-                  onPress={() => setStatus(f.value)}
-                  style={[styles.chip, { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border }]}>
-                  <Text style={[styles.chipText, { color: selected ? c.onPrimary : c.text }]}>{t(f.label)}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <Chips label="Ticket status" options={FILTERS} value={status} onChange={setStatus} />
 
           {list.isPending ? (
             <Loading label="Loading tickets…" />
@@ -113,10 +96,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: { minHeight: minTouchTarget, justifyContent: 'center', borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: spacing.md },
-  chipText: { ...typography.body, fontWeight: '600' },
   list: { gap: spacing.sm },
 });

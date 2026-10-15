@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { FleetMap } from '@/components/map/FleetMap';
 import { VehicleCard } from '@/components/ops/VehicleCard';
-import { Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Chips, EmptyState, ErrorMessage, Loading, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
-import { spacing, typography } from '@/theme';
+import { spacing } from '@/theme';
 import type { Region } from '@/types';
 import { REGION_LABEL, routeLabel } from '@/utils/format';
 
@@ -29,9 +29,7 @@ export default function FleetScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <View style={styles.top}>
-        <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-          Live fleet
-        </Text>
+        <ScreenHeader tone="authority" title="Live fleet" />
         <Chips
           label="Region"
           value={region}
@@ -81,7 +79,6 @@ export default function FleetScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   top: { padding: spacing.md, gap: spacing.sm },
-  heading: { ...typography.title },
   map: { flex: 3, minHeight: 220 },
   panel: { flex: 2 },
   panelContent: { padding: spacing.md, gap: spacing.sm },

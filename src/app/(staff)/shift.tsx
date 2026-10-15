@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { Button, Card, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
@@ -44,9 +44,7 @@ export default function ShiftScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Shift
-          </Text>
+          <ScreenHeader tone="staff" title="Shift" subtitle="Pick the route and trip you are working on." />
           <Card>
             <Text style={[styles.name, { color: c.text }]}>{user?.name}</Text>
             <Text style={[styles.body, { color: c.textSecondary }]}>{user?.email ?? user?.phone}</Text>
@@ -123,7 +121,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   section: { ...typography.title, marginTop: spacing.sm },
   name: { ...typography.bodyLarge, fontWeight: '700' },
   body: { ...typography.body },

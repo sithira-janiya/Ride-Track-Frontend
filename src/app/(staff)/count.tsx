@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi, vehiclesApi } from '@/api/endpoints';
-import { Button, Card, EmptyState, ErrorMessage, Loading, OccupancyBar } from '@/components/ui';
+import { Button, Card, EmptyState, ErrorMessage, Loading, OccupancyBar, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
@@ -47,9 +47,7 @@ export default function PassengerCountScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Passengers on board
-          </Text>
+          <ScreenHeader tone="staff" title="Passengers on board" />
 
           {!shift ? (
             <EmptyState title="No shift started" message="Choose your route and trip on the Shift tab first." />
@@ -101,7 +99,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   count: { fontSize: 64, lineHeight: 72, fontWeight: '800', textAlign: 'center' },
   of: { ...typography.title },

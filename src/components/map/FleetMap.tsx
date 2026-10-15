@@ -46,7 +46,7 @@ export function FleetMap({ vehicles, selectedId, onSelect }: FleetMapProps) {
             onPress={() => onSelect(v.vehicleId)}
             zIndex={selected ? 20 : 10}
             tracksViewChanges>
-            <View style={[styles.pin, { backgroundColor: selected ? c.primary : c.background, borderColor: c.primary }]}>
+            <View style={[styles.pin, { backgroundColor: selected ? c.primary : c.surface, borderColor: c.primary }]}>
               <Text style={[styles.pinText, { color: selected ? c.onPrimary : c.text }]}>
                 {v.routeNo} · {v.regNo ?? v.vehicleId}
               </Text>

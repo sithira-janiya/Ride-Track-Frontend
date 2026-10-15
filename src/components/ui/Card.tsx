@@ -1,13 +1,14 @@
 import { StyleSheet, View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
 
-import { useColors } from '@/hooks/use-colors';
+import { useCardSurface } from '@/hooks/use-colors';
 import { radius, spacing } from '@/theme';
 
 type Props = ViewProps & { style?: StyleProp<ViewStyle> };
 
+/** White card on the grey page, with a 1px border and a soft shadow in light mode. */
 export function Card({ style, ...rest }: Props) {
-  const c = useColors();
-  return <View {...rest} style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }, style]} />;
+  const surface = useCardSurface();
+  return <View {...rest} style={[styles.card, surface, style]} />;
 }
 
 const styles = StyleSheet.create({

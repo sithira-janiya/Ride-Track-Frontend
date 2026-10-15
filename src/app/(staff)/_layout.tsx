@@ -5,7 +5,7 @@ import { useTabBarOptions } from '@/hooks/use-tab-bar-options';
 
 // Staff screens per docs/08-frontend-react-native.md: Scan · Passenger count · Shift.
 export default function StaffTabs() {
-  const tabBarOptions = useTabBarOptions();
+  const tabBarOptions = useTabBarOptions('staff');
   return (
     <Tabs screenOptions={tabBarOptions}>
       <Tabs.Screen name="index" options={{ title: 'Scan', tabBarIcon: tabEmoji('📷') }} />

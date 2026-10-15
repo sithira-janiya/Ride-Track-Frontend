@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { StatusBadge, type Tone } from '@/components/ui';
-import { useColors } from '@/hooks/use-colors';
+import { useCardSurface, useColors } from '@/hooks/use-colors';
 import { fill, useT, type Translate } from '@/i18n';
 import { minTouchTarget, radius, spacing, typography } from '@/theme';
 import type { Ticket, TicketStatus } from '@/types';
@@ -27,13 +27,14 @@ export function ticketJourney(ticket: Ticket, t: Translate = fill) {
 export function TicketCard({ ticket, onPress }: { ticket: Ticket; onPress: () => void }) {
   const c = useColors();
   const t = useT();
+  const surface = useCardSurface();
   const status = TICKET_STATUS[ticket.status];
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${ticketTitle(ticket, t)}, ${ticketJourney(ticket, t)}, ${formatFare(ticket.fare, ticket.currency)}, ${t(status.label)}`}
       onPress={onPress}
-      style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
+      style={({ pressed }) => [styles.card, surface, { opacity: pressed ? 0.85 : 1 }]}>
       <View style={styles.row}>
         <Text style={[styles.title, { color: c.text }]}>{ticketTitle(ticket, t)}</Text>
         <StatusBadge label={status.label} tone={status.tone} />

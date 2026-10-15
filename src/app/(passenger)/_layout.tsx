@@ -10,7 +10,7 @@ import { useT } from '@/i18n';
 // Passenger tabs per docs/08-frontend-react-native.md: Home · Map · Tickets · Alerts · Profile.
 // Map is not a tab: it opens from a route.
 export default function PassengerTabs() {
-  const tabBarOptions = useTabBarOptions();
+  const tabBarOptions = useTabBarOptions('passenger');
   const t = useT();
   const unread = useUnreadCount();
   useAlertSocket();

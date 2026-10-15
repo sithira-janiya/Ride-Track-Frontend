@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { alertsApi, routesApi } from '@/api/endpoints';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField, type Tone } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge, TextField, type Tone } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useRouteTrips } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
@@ -61,9 +61,7 @@ export default function AuthorityAlertsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Alerts
-          </Text>
+          <ScreenHeader tone="authority" title="Alerts" subtitle="Tell passengers about delays and changes." />
 
           <Card>
             <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
@@ -149,7 +147,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   title: { ...typography.title },
   label: { ...typography.body, fontWeight: '700' },
   body: { ...typography.body },
