@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
+import { AccountBar } from '@/components/auth/AccountBar';
 import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
 import { RouteCard } from '@/components/routes/RouteCard';
 import { Button, Card, Chips, DashboardHero, EmptyState, ErrorMessage, Loading, SectionTitle, TextField } from '@/components/ui';
@@ -58,6 +59,7 @@ export default function PassengerHome() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
+          <AccountBar />
           <DashboardHero
             tone="passenger"
             illustration="heroPassenger"

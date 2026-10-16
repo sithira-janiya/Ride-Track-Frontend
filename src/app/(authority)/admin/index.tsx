@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { NavRow } from '@/components/admin/NavRow';
+import { AccountBar } from '@/components/auth/AccountBar';
 import { StatTile } from '@/components/ops/StatTile';
 import { DashboardHero, ErrorMessage, Loading, SectionTitle } from '@/components/ui';
 import { useAdminOverview } from '@/hooks/use-admin';
@@ -22,6 +23,7 @@ export default function AdminHome() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
+          <AccountBar tone="admin" />
           <DashboardHero
             tone="admin"
             illustration="heroAdmin"
