@@ -11,7 +11,7 @@ import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { AdminRoute, AdminVehicle, TransportMode } from '@/types';
 import { confirmAction } from '@/utils/confirm';
-import { modeLabel } from '@/utils/format';
+import { modeLabel, OPERATOR_LABEL } from '@/utils/format';
 import { vehicleSchema, type VehicleForm } from '@/utils/validation';
 
 const MODES: { value: TransportMode; label: string }[] = [
@@ -21,7 +21,7 @@ const MODES: { value: TransportMode; label: string }[] = [
 
 /** A vehicle can only run on a route of its own kind. */
 const routeOptions = (routes: AdminRoute[], mode: TransportMode) =>
-  routes.filter((r) => r.mode === mode).map((r) => ({ value: r.routeId as number | undefined, label: `${r.routeNo} ${r.name}` }));
+  routes.filter((r) => r.mode === mode).map((r) => ({ value: r.routeId as number | undefined, label: r.name.includes(r.destination) ? `${r.routeNo} ${r.name}` : `${r.routeNo} ${r.name} (to ${r.destination})` }));
 
 function AddVehicle({ routes, onDone }: { routes: AdminRoute[]; onDone: () => void }) {
   const c = useColors();
@@ -122,6 +122,7 @@ function VehicleRow({ vehicle, routes }: { vehicle: AdminVehicle; routes: AdminR
       </View>
       <Text style={[styles.body, { color: c.textSecondary }]}>
         {modeLabel(vehicle.type)} · Route {vehicle.routeNo} · {vehicle.capacity} passengers
+        {vehicle.operator ? ` · ${OPERATOR_LABEL[vehicle.operator]}` : ''}
       </Text>
 
       {editing ? (

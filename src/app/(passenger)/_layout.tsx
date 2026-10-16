@@ -2,14 +2,15 @@ import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 
 import { AlertBanner } from '@/components/alerts/AlertBanner';
+import { tabEmoji } from '@/components/ui/TabEmoji';
 import { useAlertSocket, usePushRegistration, useUnreadCount } from '@/hooks/use-alerts';
-import { useColors } from '@/hooks/use-colors';
+import { useTabBarOptions } from '@/hooks/use-tab-bar-options';
 import { useT } from '@/i18n';
 
 // Passenger tabs per docs/08-frontend-react-native.md: Home · Map · Tickets · Alerts · Profile.
 // Map is not a tab: it opens from a route.
 export default function PassengerTabs() {
-  const c = useColors();
+  const tabBarOptions = useTabBarOptions('passenger');
   const t = useT();
   const unread = useUnreadCount();
   useAlertSocket();
@@ -17,25 +18,19 @@ export default function PassengerTabs() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: c.primary,
-          tabBarInactiveTintColor: c.textSecondary,
-          tabBarStyle: { backgroundColor: c.background, borderTopColor: c.border },
-          tabBarLabelStyle: { fontSize: 14 },
-        }}>
-        <Tabs.Screen name="index" options={{ title: t('Home') }} />
-        <Tabs.Screen name="tickets" options={{ title: t('Tickets') }} />
+      <Tabs screenOptions={tabBarOptions}>
+        <Tabs.Screen name="index" options={{ title: t('Home'), tabBarIcon: tabEmoji('🏠') }} />
+        <Tabs.Screen name="tickets" options={{ title: t('Tickets'), tabBarIcon: tabEmoji('🎫') }} />
         <Tabs.Screen
           name="alerts"
           options={{
             title: t('Alerts'),
+            tabBarIcon: tabEmoji('🔔'),
             tabBarBadge: unread > 0 ? unread : undefined,
             tabBarAccessibilityLabel: unread > 0 ? t('Alerts, {count} unread', { count: unread }) : t('Alerts'),
           }}
         />
-        <Tabs.Screen name="profile" options={{ title: t('Profile') }} />
+        <Tabs.Screen name="profile" options={{ title: t('Profile'), tabBarIcon: tabEmoji('👤') }} />
         {/* pushed from other screens; keep the tab bar but have no tab of their own */}
         <Tabs.Screen name="route/[id]" options={{ href: null }} />
         <Tabs.Screen name="map/[id]" options={{ href: null }} />

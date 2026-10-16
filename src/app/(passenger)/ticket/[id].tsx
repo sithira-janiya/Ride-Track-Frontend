@@ -117,7 +117,7 @@ export default function TicketScreen() {
 
               <Card>
                 <Text style={[styles.body, { color: c.text }]}>{ticketJourney(t, tr)}</Text>
-                <Text style={[styles.body, { color: c.text }]}>{tr('Fare: {amount}', { amount: formatFare(t.fare) })}</Text>
+                <Text style={[styles.body, { color: c.text }]}>{tr('Fare: {amount}', { amount: formatFare(t.fare, t.currency) })}</Text>
                 <Text style={[styles.caption, { color: c.textSecondary }]}>
                   {tr('Bought {date}', { date: new Date(t.issuedAt).toLocaleString() })}
                 </Text>

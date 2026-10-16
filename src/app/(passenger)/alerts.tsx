@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { mockApi } from '@/api/mock';
-import { Button, Card, EmptyState, ErrorMessage, Loading, StatusBadge, type Tone } from '@/components/ui';
+import { Button, Card, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge, type Tone } from '@/components/ui';
 import { env } from '@/config/env';
 import { useAlerts, useMarkRead } from '@/hooks/use-alerts';
 import { useColors } from '@/hooks/use-colors';
@@ -40,9 +40,7 @@ export default function AlertsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Alerts')}
-          </Text>
+          <ScreenHeader tone="passenger" title="Alerts" subtitle="Delays and service changes on your routes." />
 
           {alerts.isPending ? (
             <Loading label="Loading alerts…" />
@@ -104,7 +102,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, flexWrap: 'wrap' },
   body: { ...typography.body },
   caption: { ...typography.caption },

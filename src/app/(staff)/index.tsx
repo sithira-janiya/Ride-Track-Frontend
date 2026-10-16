@@ -7,15 +7,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { errorMessage } from '@/api/client';
 import { scansApi } from '@/api/endpoints';
 import { ScanResultPanel } from '@/components/scan/ScanResultPanel';
-import { Button, ErrorMessage, Loading, TextField } from '@/components/ui';
+import { Button, DashboardHero, ErrorMessage, HeroPill, Loading, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
+import { useAuth } from '@/store/auth';
+import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
 import type { ScanOutcome } from '@/types';
+import { firstName, greetingTemplate } from '@/utils/greeting';
 
 type Phase = { kind: 'scanning' } | { kind: 'checking' } | { kind: 'result'; outcome: ScanOutcome } | { kind: 'error'; message: string };
 
 export default function ScanScreen() {
   const c = useColors();
+  const user = useAuth((s) => s.user);
+  const shift = useShift((s) => s.shift);
   const [permission, requestPermission] = useCameraPermissions();
   const [phase, setPhase] = useState<Phase>({ kind: 'scanning' });
   const [manual, setManual] = useState(false);
@@ -55,9 +60,18 @@ export default function ScanScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Scan ticket
-          </Text>
+          <DashboardHero
+            tone="staff"
+            illustration="heroStaff"
+            eyebrow={greetingTemplate(user?.name)}
+            eyebrowParams={{ name: firstName(user?.name) }}
+            title="Scan ticket">
+            {shift ? (
+              <HeroPill tone="staff" status="success" label="On shift · {route}" params={{ route: shift.routeNo }} />
+            ) : (
+              <HeroPill tone="staff" status="warning" label="No shift started" />
+            )}
+          </DashboardHero>
 
           {phase.kind === 'result' ? (
             <ScanResultPanel outcome={phase.outcome} onNext={reset} />
@@ -120,7 +134,6 @@ const styles = StyleSheet.create({
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
   gap: { gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   camera: { aspectRatio: 1, width: '100%', overflow: 'hidden', borderRadius: 20, borderWidth: 3 },
 });

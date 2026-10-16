@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="144" viewBox="0 0 280 240">
+  <!-- Admin overview hero: a laptop listing accounts with on/off switches, a staff ID card, settings gears and a shield.
+       Drawn for a coloured card: the backdrop shapes are translucent white so they take on the card's colour. -->
+  <circle cx="142" cy="126" r="106" fill="#FFFFFF" fill-opacity=".08"/>
+  <path d="M30 40v12M24 46h12M150 20v10M145 25h10" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- desk -->
+  <rect x="0" y="212" width="280" height="28" fill="#FFFFFF" fill-opacity=".14"/>
+
+  <!-- gears -->
+  <g fill="#FFC857" transform="translate(212 56)">
+    <rect x="-6" y="-31" width="12" height="14" rx="3"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(45)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(90)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(135)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(180)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(225)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(270)"/>
+    <rect x="-6" y="-31" width="12" height="14" rx="3" transform="rotate(315)"/>
+    <circle r="22"/>
+    <circle r="8" fill="#FFFFFF"/>
+  </g>
+  <g fill="#FFFFFF" fill-opacity=".9" transform="translate(252 98) rotate(22)">
+    <rect x="-4" y="-17" width="8" height="9" rx="2"/>
+    <rect x="-4" y="-17" width="8" height="9" rx="2" transform="rotate(60)"/>
+    <rect x="-4" y="-17" width="8" height="9" rx="2" transform="rotate(120)"/>
+    <rect x="-4" y="-17" width="8" height="9" rx="2" transform="rotate(180)"/>
+    <rect x="-4" y="-17" width="8" height="9" rx="2" transform="rotate(240)"/>
+    <rect x="-4" y="-17" width="8" height="9" rx="2" transform="rotate(300)"/>
+    <circle r="12"/>
+    <circle r="4.5" fill="#FFC857"/>
+  </g>
+
+  <!-- laptop with the account list -->
+  <rect x="56" y="92" width="148" height="106" rx="10" fill="#2E1065" fill-opacity=".2" transform="translate(5 6)"/>
+  <rect x="56" y="92" width="148" height="106" rx="10" fill="#FFFFFF"/>
+  <rect x="64" y="100" width="132" height="90" rx="5" fill="#F1EBFF"/>
+  <path d="M38 201h184l-12 11H50z" fill="#DCCFFF"/>
+  <rect x="38" y="194" width="184" height="10" rx="5" fill="#FFFFFF"/>
+  <rect x="112" y="194" width="36" height="4" rx="2" fill="#DCCFFF"/>
+
+  <circle cx="80" cy="118" r="8" fill="#FFC857"/>
+  <circle cx="80" cy="145" r="8" fill="#FF7A59"/>
+  <circle cx="80" cy="172" r="8" fill="#2DD4BF"/>
+  <g fill="#2E1065">
+    <rect x="94" y="111" width="48" height="5" rx="2.5"/>
+    <rect x="94" y="138" width="40" height="5" rx="2.5"/>
+    <rect x="94" y="165" width="52" height="5" rx="2.5"/>
+  </g>
+  <g fill="#C4B5FD">
+    <rect x="94" y="120" width="30" height="4.5" rx="2.25"/>
+    <rect x="94" y="147" width="36" height="4.5" rx="2.25"/>
+    <rect x="94" y="174" width="26" height="4.5" rx="2.25"/>
+  </g>
+  <rect x="160" y="112" width="26" height="13" rx="6.5" fill="#22C55E"/>
+  <circle cx="179.5" cy="118.5" r="4.8" fill="#FFFFFF"/>
+  <rect x="160" y="139" width="26" height="13" rx="6.5" fill="#C4B5FD"/>
+  <circle cx="166.5" cy="145.5" r="4.8" fill="#FFFFFF"/>
+  <rect x="160" y="166" width="26" height="13" rx="6.5" fill="#22C55E"/>
+  <circle cx="179.5" cy="172.5" r="4.8" fill="#FFFFFF"/>
+
+  <!-- staff ID card on a lanyard -->
+  <g transform="rotate(-10 38 136)">
+    <path d="M38 64v34" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/>
+    <rect x="12" y="100" width="54" height="72" rx="9" fill="#2E1065" fill-opacity=".2" transform="translate(4 5)"/>
+    <rect x="12" y="100" width="54" height="72" rx="9" fill="#FFFFFF"/>
+    <rect x="31" y="94" width="14" height="10" rx="3" fill="#FFC857"/>
+    <circle cx="39" cy="126" r="12" fill="#EDE4FF"/>
+    <circle cx="39" cy="122" r="5.5" fill="#A86F4C"/>
+    <path d="M29 135a10 9 0 0 1 20 0z" fill="#7C3AED"/>
+    <rect x="22" y="146" width="34" height="5" rx="2.5" fill="#2E1065"/>
+    <rect x="26" y="156" width="26" height="4.5" rx="2.25" fill="#C4B5FD"/>
+  </g>
+
+  <!-- shield -->
+  <path d="M240 152l26 10v20c0 18-12 28-26 34-14-6-26-16-26-34v-20z" fill="#2E1065" fill-opacity=".2" transform="translate(4 5)"/>
+  <path d="M240 152l26 10v20c0 18-12 28-26 34-14-6-26-16-26-34v-20z" fill="#22C55E"/>
+  <path d="M240 152l26 10v20c0 18-12 28-26 34z" fill="#16A34A"/>
+  <path d="M229 184l8 8 14-15" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

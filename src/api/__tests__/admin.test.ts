@@ -54,10 +54,11 @@ describe('admin panel (mock backend)', () => {
 
   it('adds a vehicle only to a route of the same kind', async () => {
     await expect(mockApi.adminCreateVehicle({ regNo: 'TR-9', type: 'TRAIN', capacity: 400, routeId: 1 })).rejects.toThrow(/cannot run on a bus route/);
+    const before = (await mockApi.adminRoutes()).find((r) => r.routeId === 3)!.vehicles;
     const v = await mockApi.adminCreateVehicle({ regNo: 'NB-9999', type: 'BUS', capacity: 54, routeId: 3 });
     expect(v).toMatchObject({ routeNo: '177', isActive: true });
     await expect(mockApi.adminCreateVehicle({ regNo: 'nb-9999', type: 'BUS', capacity: 54, routeId: 3 })).rejects.toThrow(/already exists/);
-    expect((await mockApi.adminRoutes()).find((r) => r.routeId === 3)?.vehicles).toBe(1);
+    expect((await mockApi.adminRoutes()).find((r) => r.routeId === 3)?.vehicles).toBe(before + 1);
   });
 
   it('takes a vehicle out of service so it no longer runs trips', async () => {

@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { userApi } from '@/api/endpoints';
-import { Button, Card, ErrorMessage, LanguagePicker, TextField } from '@/components/ui';
+import { Button, Card, ErrorMessage, LanguagePicker, ScreenHeader, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { disconnectSocket } from '@/socket';
@@ -54,9 +54,7 @@ export default function PassengerProfile() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            {t('Profile')}
-          </Text>
+          <ScreenHeader tone="passenger" title="Profile" />
           <Text style={[styles.body, { color: c.textSecondary }]}>{user.email ?? user.phone}</Text>
 
           <TextField label="Name" value={name} onChangeText={setName} error={nameError} autoCapitalize="words" />
@@ -102,7 +100,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 560, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   body: { ...typography.body },
   caption: { ...typography.caption },
   label: { ...typography.body, fontWeight: '700' },

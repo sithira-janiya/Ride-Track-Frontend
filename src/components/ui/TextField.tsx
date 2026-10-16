@@ -20,7 +20,7 @@ export function TextField({ label: english, error, placeholder, style, ...rest }
         placeholder={placeholder ? t(placeholder) : undefined}
         style={[
           styles.input,
-          { color: c.text, backgroundColor: c.background, borderColor: error ? c.danger : c.border },
+          { color: c.text, backgroundColor: c.surface, borderColor: error ? c.danger : c.border },
           style,
         ]}
       />

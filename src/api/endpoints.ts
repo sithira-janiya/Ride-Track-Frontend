@@ -1,8 +1,9 @@
 // Typed wrappers over the REST contract in docs/07-api.md. Screens call these, never axios directly.
 // When EXPO_PUBLIC_USE_MOCK_API=true, calls are served by ./mock instead of the network.
 import { env } from '@/config/env';
+import { defaultRegion, inBuildRegions } from '@/config/regions';
 import type {
-  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, NewAlert, NewStaffAccount, NewVehicle, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
+  AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, NewAlert, NewStaffAccount, NewVehicle, OpsDashboard, Report, ReportType, Occupancy, PaymentSession, Region, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, User, VehiclePosition,
 } from '@/types';
 
 import { api } from './client';
@@ -36,8 +37,9 @@ export const userApi = {
 };
 
 export const routesApi = {
-  search: (q?: string, mode?: string): Promise<Route[]> =>
-    env.useMockApi ? mockApi.searchRoutes(q, mode) : get('/routes', { q, mode }),
+  /** With no region given, a one-region build still only asks for its own region's routes. */
+  search: (q?: string, mode?: string, region: Region | undefined = defaultRegion): Promise<Route[]> =>
+    env.useMockApi ? mockApi.searchRoutes(q, mode, region) : get('/routes', { q, mode, region }),
   detail: (id: number): Promise<RouteDetail> => (env.useMockApi ? mockApi.getRoute(id) : get(`/routes/${id}`)),
   arrivals: (id: number, stopId: number): Promise<Arrival[]> =>
     env.useMockApi ? mockApi.getArrivals(id, stopId) : get(`/routes/${id}/arrivals`, { stopId }),
@@ -88,7 +90,8 @@ export const adminApi = {
   createUser: (input: NewStaffAccount): Promise<User> => (env.useMockApi ? mockApi.adminCreateUser(input) : post('/admin/users', input)),
   updateUser: (userId: number, input: { isActive?: boolean; vehicleId?: number | null }): Promise<User> =>
     env.useMockApi ? mockApi.adminUpdateUser(userId, input) : patch(`/admin/users/${userId}`, input),
-  routes: (): Promise<AdminRoute[]> => (env.useMockApi ? mockApi.adminRoutes() : get('/admin/routes')),
+  /** only this build's regions, also when the server holds more */
+  routes: async (): Promise<AdminRoute[]> => (await (env.useMockApi ? mockApi.adminRoutes() : get<AdminRoute[]>('/admin/routes'))).filter((r) => inBuildRegions(r.region)),
   vehicles: (): Promise<AdminVehicle[]> => (env.useMockApi ? mockApi.adminVehicles() : get('/admin/vehicles')),
   createVehicle: (input: NewVehicle): Promise<AdminVehicle> =>
     env.useMockApi ? mockApi.adminCreateVehicle(input) : post('/admin/vehicles', input),

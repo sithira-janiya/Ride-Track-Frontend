@@ -31,7 +31,7 @@ export function ModeFilter({ value, onChange }: Props) {
             onPress={() => onChange(o.value)}
             style={[
               styles.chip,
-              { backgroundColor: selected ? c.primary : c.background, borderColor: selected ? c.primary : c.border },
+              { backgroundColor: selected ? c.primary : c.surface, borderColor: selected ? c.primary : c.border },
             ]}>
             <Text style={[styles.text, { color: selected ? c.onPrimary : c.text }]}>{t(o.label)}</Text>
           </Pressable>

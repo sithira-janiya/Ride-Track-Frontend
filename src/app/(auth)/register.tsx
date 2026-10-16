@@ -105,9 +105,9 @@ export default function RegisterScreen() {
       {formError ? <ErrorMessage message={formError} /> : null}
       <Button title="Create account" onPress={onSubmit} loading={isSubmitting} />
       <Text style={{ ...typography.body, color: c.textSecondary, textAlign: 'center' }}>
-        {t('Already have an account?')}{' '}
+        {'🙌 '}{t('Already have an account?')}{' '}
         <Link href="/login" style={{ color: c.primary, fontWeight: '700' }}>
-          {t('Log in')}
+          {t('Log in')} 🔑
         </Link>
       </Text>
     </AuthScreen>

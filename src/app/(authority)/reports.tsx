@@ -5,10 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { opsApi, routesApi } from '@/api/endpoints';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, ScreenHeader } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { radius, spacing, typography } from '@/theme';
 import type { Report, ReportType } from '@/types';
+import { routeLabel } from '@/utils/format';
 
 const TYPES: { value: ReportType; label: string }[] = [
   { value: 'ROUTE_PERFORMANCE', label: 'Route performance' },
@@ -53,7 +54,7 @@ function ReportTable({ report }: { report: Report }) {
   const c = useColors();
   return (
     <View style={[styles.table, { borderColor: c.border }]}>
-      <View style={[styles.tr, { backgroundColor: c.surface }]}>
+      <View style={[styles.tr, { backgroundColor: c.background }]}>
         <Text style={[styles.th, styles.first, { color: c.text }]}>{report.type === 'DELAYS' ? 'Day' : 'Route'}</Text>
         {report.columns.map((col) => (
           <Text key={col} style={[styles.th, { color: c.text }]}>
@@ -96,9 +97,7 @@ export default function ReportsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Reports
-          </Text>
+          <ScreenHeader tone="authority" title="Reports" subtitle="Ridership, punctuality and sales." />
 
           <Text style={[styles.label, { color: c.text }]}>Report</Text>
           <Chips label="Report type" options={TYPES} value={draft.type} onChange={(type) => setDraft({ ...draft, type })} />
@@ -108,7 +107,8 @@ export default function ReportsScreen() {
             label="Route"
             value={draft.routeId}
             onChange={(routeId) => setDraft({ ...draft, routeId })}
-            options={[{ value: undefined, label: 'All routes' }, ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo }))]}
+            options={[{ value: undefined, label: 'All routes' }, ...(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) }))]}
+            translateOptions={false}
           />
 
           <Text style={[styles.label, { color: c.text }]}>Period</Text>
@@ -145,7 +145,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   title: { ...typography.title },
   label: { ...typography.body, fontWeight: '700' },
   caption: { ...typography.caption },

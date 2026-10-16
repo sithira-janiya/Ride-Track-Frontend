@@ -1,7 +1,51 @@
 {
+  // TypeScript: use the project's own version (node_modules/typescript, 6.0.x) instead of the experimental
+  // TypeScript 7 preview, which disagrees with this project's TypeScript and kept the extension host unresponsive.
+  // VS Code asks once to "Use Workspace Version"; accept it.
+  "js/ts.experimental.useTsgo": false,
+  "typescript.experimental.useTsgo": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  // the project ships its own types; stop the editor downloading @types for every package in node_modules
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.tsserver.maxTsServerMemory": 4096,
+
+  // ESLint 9 flat config (eslint.config.js)
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // the repo has no Prettier config, so Prettier must not rewrap whole files on save
+  "prettier.requireConfig": true,
+
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
+  },
+
+  // keep the file watcher and search away from big generated folders (node_modules alone is ~60,000 files)
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.expo/**": true,
+    "**/dist/**": true,
+    "**/web-build/**": true,
+    "**/android/**": true,
+    "**/ios/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.claude/worktrees/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.expo": true,
+    "**/dist": true,
+    "**/web-build": true,
+    "**/android": true,
+    "**/ios": true,
+    "**/.claude/worktrees": true,
+    "**/package-lock.json": true
+  },
+  "files.exclude": {
+    "**/desktop.ini": true
   }
 }

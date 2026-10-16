@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="144" viewBox="0 0 280 240">
+  <!-- Authority dashboard hero: an operations monitor with the live route map, a delay chart and an occupancy dial.
+       Drawn for a coloured card: the backdrop shapes are translucent white so they take on the card's colour. -->
+  <circle cx="146" cy="122" r="106" fill="#FFFFFF" fill-opacity=".08"/>
+  <path d="M252 20v12M246 26h12M14 112v10M9 117h10" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- desk -->
+  <rect x="0" y="214" width="280" height="26" fill="#FFFFFF" fill-opacity=".14"/>
+
+  <!-- monitor -->
+  <path d="M122 172h32l8 34h-48z" fill="#E6E4FF"/>
+  <rect x="96" y="204" width="84" height="10" rx="5" fill="#FFFFFF"/>
+  <rect x="44" y="50" width="188" height="126" rx="14" fill="#1E1B4B" fill-opacity=".2" transform="translate(5 6)"/>
+  <rect x="44" y="50" width="188" height="126" rx="14" fill="#FFFFFF"/>
+  <rect x="54" y="60" width="168" height="104" rx="7" fill="#EEEDFF"/>
+  <path d="M54 92h168M54 132h168M94 60v104M150 60v104M196 60v104" stroke="#DCD9FF" stroke-width="5"/>
+  <path d="M62 148c26 0 34-46 74-46s52-24 76-30" fill="none" stroke="#4F46E5" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 74c34 4 46 62 96 56s40 12 54 20" fill="none" stroke="#FFB020" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="122" cy="105" r="8" fill="#FFFFFF" stroke="#4F46E5" stroke-width="3.5"/>
+  <circle cx="122" cy="105" r="3" fill="#4F46E5"/>
+  <circle cx="176" cy="132" r="8" fill="#FFFFFF" stroke="#FFB020" stroke-width="3.5"/>
+  <circle cx="176" cy="132" r="3" fill="#FFB020"/>
+  <circle cx="212" cy="72" r="10" fill="#FF7A59" fill-opacity=".25"/>
+  <path d="M212 74c-3-5-12-11-12-20a12 12 0 0 1 24 0c0 9-9 15-12 20z" fill="#FF7A59"/>
+  <circle cx="212" cy="54" r="4.5" fill="#FFFFFF"/>
+
+  <!-- delay chart card -->
+  <rect x="10" y="22" width="70" height="56" rx="11" fill="#1E1B4B" fill-opacity=".2" transform="translate(4 5)"/>
+  <rect x="10" y="22" width="70" height="56" rx="11" fill="#FFFFFF"/>
+  <rect x="20" y="31" width="30" height="5" rx="2.5" fill="#1B2A4A"/>
+  <g fill="#4F46E5">
+    <rect x="20" y="54" width="9" height="14" rx="2.5"/>
+    <rect x="33" y="46" width="9" height="22" rx="2.5"/>
+    <rect x="46" y="50" width="9" height="18" rx="2.5"/>
+  </g>
+  <rect x="59" y="40" width="9" height="28" rx="2.5" fill="#FFB020"/>
+
+  <!-- occupancy dial card -->
+  <rect x="200" y="140" width="70" height="66" rx="12" fill="#1E1B4B" fill-opacity=".2" transform="translate(4 5)"/>
+  <rect x="200" y="140" width="70" height="66" rx="12" fill="#FFFFFF"/>
+  <circle cx="235" cy="173" r="19" fill="none" stroke="#E6E4FF" stroke-width="8"/>
+  <circle cx="235" cy="173" r="19" fill="none" stroke="#22C55E" stroke-width="8" stroke-linecap="round" stroke-dasharray="80 120" transform="rotate(-90 235 173)"/>
+  <circle cx="235" cy="173" r="5" fill="#4F46E5"/>
+
+  <!-- coffee -->
+  <rect x="24" y="190" width="22" height="24" rx="5" fill="#FFC857"/>
+  <path d="M46 196h3a6 6 0 0 1 0 12h-3" fill="none" stroke="#FFC857" stroke-width="4"/>
+  <path d="M31 182c-3-4 3-6 0-10M39 182c-3-4 3-6 0-10" fill="none" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

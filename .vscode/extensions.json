@@ -1,1 +1,5 @@
-{ "recommendations": ["expo.vscode-expo-tools"] }
+{
+  "recommendations": ["expo.vscode-expo-tools", "dbaeumer.vscode-eslint"],
+  // the TypeScript 7 preview and TypeScript nightly replace the project's TypeScript 6 in the editor
+  "unwantedRecommendations": ["typescriptteam.native-preview", "ms-vscode.vscode-typescript-next"]
+}

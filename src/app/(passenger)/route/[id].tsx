@@ -9,11 +9,12 @@ import { routesApi } from '@/api/endpoints';
 import { ArrivalRow } from '@/components/routes/ArrivalRow';
 import { StopRow } from '@/components/routes/StopRow';
 import { Button, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useFavourites } from '@/store/favourites';
 import { spacing, typography } from '@/theme';
-import { modeLabel } from '@/utils/format';
+import { formatFare, modeLabel, REGION_LABEL, zoneNote } from '@/utils/format';
 
 export default function RouteDetailScreen() {
   const c = useColors();
@@ -59,6 +60,14 @@ export default function RouteDetailScreen() {
                   <StatusBadge label={modeLabel(route.data.mode)} tone="info" />
                 </View>
                 <Text style={[styles.sub, { color: c.textSecondary }]}>{route.data.name}</Text>
+                {multiRegion && route.data.region ? (
+                  <Text style={[styles.sub, { color: c.textSecondary }]}>
+                    {t(REGION_LABEL[route.data.region])}
+                    {zoneNote(route.data.timeZone) ? ` · ${t('Times shown in {zone}', { zone: t(zoneNote(route.data.timeZone)!) })}` : ''}
+                  </Text>
+                ) : zoneNote(route.data.timeZone) ? (
+                  <Text style={[styles.sub, { color: c.textSecondary }]}>{t('Times shown in {zone}', { zone: t(zoneNote(route.data.timeZone)!) })}</Text>
+                ) : null}
                 <Button title="Buy a ticket" onPress={() => router.push({ pathname: '/buy/[routeId]', params: { routeId: String(routeId) } })} />
                 <Button title="Track live on map" variant="secondary" onPress={() => router.push({ pathname: '/map/[id]', params: { id: String(routeId) } })} />
                 <Button
@@ -71,10 +80,17 @@ export default function RouteDetailScreen() {
               <Text accessibilityRole="header" style={[styles.section, { color: c.text }]}>
                 {t('Stops and fares')}
               </Text>
-              <Text style={[styles.sub, { color: c.textSecondary }]}>{t('Tap a stop to see upcoming arrivals there.')}</Text>
+              <Text style={[styles.sub, { color: c.textSecondary }]}>
+                {t(route.data.zoneFares ? 'Fares go by the fare zones you travel through. Tap a stop to see upcoming arrivals there.' : 'Tap a stop to see upcoming arrivals there.')}
+              </Text>
+              {route.data.minFare ? (
+                <Text style={[styles.sub, { color: c.textSecondary }]}>
+                  {t('Shorter trips pay the minimum fare of {fare}.', { fare: formatFare(route.data.minFare, route.data.currency) })}
+                </Text>
+              ) : null}
               <View style={styles.list}>
                 {route.data.stops.map((s) => (
-                  <StopRow key={s.stopId} stop={s} selected={s.stopId === selectedStopId} onPress={() => setPickedStopId(s.stopId)} />
+                  <StopRow key={s.stopId} stop={s} currency={route.data.currency} selected={s.stopId === selectedStopId} onPress={() => setPickedStopId(s.stopId)} />
                 ))}
               </View>
 
@@ -92,7 +108,7 @@ export default function RouteDetailScreen() {
                   {[...arrivals.data]
                     .sort((a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime())
                     .map((a) => (
-                      <ArrivalRow key={a.tripId} arrival={a} />
+                      <ArrivalRow key={a.tripId} arrival={a} timeZone={route.data.timeZone} />
                     ))}
                 </View>
               )}

@@ -5,12 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { alertsApi, routesApi } from '@/api/endpoints';
-import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, StatusBadge, TextField, type Tone } from '@/components/ui';
+import { Button, Card, Chips, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge, TextField, type Tone } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useRouteTrips } from '@/hooks/use-ops';
 import { spacing, typography } from '@/theme';
 import type { AlertType } from '@/types';
-import { formatClock } from '@/utils/format';
+import { formatClock, routeLabel } from '@/utils/format';
 
 const TYPES: { value: AlertType; label: string }[] = [
   { value: 'DELAY', label: 'Delay' },
@@ -61,9 +61,7 @@ export default function AuthorityAlertsScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
-          <Text accessibilityRole="header" style={[styles.heading, { color: c.text }]}>
-            Alerts
-          </Text>
+          <ScreenHeader tone="authority" title="Alerts" subtitle="Tell passengers about delays and changes." />
 
           <Card>
             <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
@@ -78,7 +76,8 @@ export default function AuthorityAlertsScreen() {
                 setRouteId(v ?? null);
                 setTripId(null);
               }}
-              options={(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: r.routeNo }))}
+              options={(routes.data ?? []).map((r) => ({ value: r.routeId as number | undefined, label: routeLabel(r) }))}
+              translateOptions={false}
             />
 
             {routeId != null ? (
@@ -93,7 +92,7 @@ export default function AuthorityAlertsScreen() {
                     label="Trip"
                     value={tripId ?? undefined}
                     onChange={(v) => setTripId(v ?? null)}
-                    options={trips.trips.map((t) => ({ value: t.tripId as number | undefined, label: `Trip ${t.tripId} · ${formatClock(t.eta)}` }))}
+                    options={trips.trips.map((t) => ({ value: t.tripId as number | undefined, label: `Trip ${t.tripId} · ${formatClock(t.eta, routes.data?.find((r) => r.routeId === routeId)?.timeZone)}` }))}
                   />
                 )}
               </>
@@ -148,7 +147,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { padding: spacing.lg },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', gap: spacing.md },
-  heading: { ...typography.heading },
   title: { ...typography.title },
   label: { ...typography.body, fontWeight: '700' },
   body: { ...typography.body },

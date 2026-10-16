@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { userApi } from '@/api/endpoints';
 import { LanguagePicker } from '@/components/ui';
 import { illustrations } from '@/components/ui/illustrations';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useAuth } from '@/store/auth';
@@ -30,6 +31,9 @@ export function AuthScreen({ title, subtitle, children }: Props) {
             <Text accessibilityRole="header" style={[styles.brand, { color: c.primary }]}>
               RideTrack
             </Text>
+            {multiRegion ? null : (
+              <Text style={[styles.tagline, { color: c.textSecondary }]}>{t('SLTB, private buses and Sri Lanka Railways in one app.')}</Text>
+            )}
             <Text accessibilityRole="header" style={[styles.title, { color: c.text }]}>
               {t(title)}
             </Text>
@@ -71,6 +75,7 @@ const styles = StyleSheet.create({
   content: { width: '100%', maxWidth: 440, alignSelf: 'center', gap: spacing.sm },
   hero: { width: '100%', height: 140, marginBottom: spacing.sm },
   brand: { ...typography.title },
+  tagline: { ...typography.body },
   title: { ...typography.heading },
   subtitle: { ...typography.body, marginBottom: spacing.sm },
   form: { gap: spacing.md, marginBottom: spacing.md },
