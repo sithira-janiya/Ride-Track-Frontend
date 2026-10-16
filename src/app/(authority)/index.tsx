@@ -3,15 +3,17 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
+import { byOperator, OperatorFilter } from '@/components/ops/OperatorFilter';
 import { StatTile as Tile } from '@/components/ops/StatTile';
 import { VehicleCard } from '@/components/ops/VehicleCard';
 import { Button, Card, Chips, DashboardHero, EmptyState, ErrorMessage, HeroPill, Loading, SectionTitle, StatusBadge } from '@/components/ui';
+import { inBuildRegions, multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { spacing, typography } from '@/theme';
-import type { Region } from '@/types';
+import type { Operator, Region } from '@/types';
 import { formatClock, REGION_LABEL } from '@/utils/format';
 import { firstName, greetingTemplate } from '@/utils/greeting';
 
@@ -27,13 +29,16 @@ export default function AuthorityDashboard() {
   const logout = useAuth((s) => s.logout);
   const ops = useOpsDashboard();
   const [region, setRegion] = useState<Region | undefined>(undefined);
+  const [operator, setOperator] = useState<Operator | undefined>(undefined);
 
   const signOut = async () => {
     disconnectSocket();
     await logout();
   };
 
-  const d = ops.data;
+  // a one-region build leaves out vehicles a shared server reports for other regions
+  const d = ops.data && { ...ops.data, vehicles: ops.data.vehicles.filter((v) => inBuildRegions(v.region)) };
+  const shown = (d?.vehicles ?? []).filter((v) => (!region || (v.region ?? 'SRI_LANKA') === region) && byOperator(operator)(v));
   const pct = d && d.occupancy.totalCapacity > 0 ? Math.round((d.occupancy.totalPassengers / d.occupancy.totalCapacity) * 100) : null;
 
   return (
@@ -90,11 +95,12 @@ export default function AuthorityDashboard() {
               )}
 
               <SectionTitle emoji="🗺️" title="Vehicles" />
-              <Chips label="Region" options={REGIONS} value={region} onChange={setRegion} />
-              {d!.vehicles.filter((v) => !region || (v.region ?? 'SRI_LANKA') === region).length === 0 ? (
+              {multiRegion ? <Chips label="Region" options={REGIONS} value={region} onChange={setRegion} /> : null}
+              <OperatorFilter vehicles={d!.vehicles} value={operator} onChange={setOperator} />
+              {shown.length === 0 ? (
                 <EmptyState title="No vehicles reporting" message="No vehicle is sending its position right now." />
               ) : (
-                d!.vehicles.filter((v) => !region || (v.region ?? 'SRI_LANKA') === region).map((v) => <VehicleCard key={v.vehicleId} vehicle={v} />)
+                shown.map((v) => <VehicleCard key={v.vehicleId} vehicle={v} />)
               )}
             </>
           )}

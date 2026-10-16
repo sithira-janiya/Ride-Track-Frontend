@@ -6,12 +6,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { FleetMap } from '@/components/map/FleetMap';
+import { byOperator, OperatorFilter } from '@/components/ops/OperatorFilter';
 import { VehicleCard } from '@/components/ops/VehicleCard';
 import { Chips, EmptyState, ErrorMessage, Loading, ScreenHeader } from '@/components/ui';
+import { env } from '@/config/env';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useOpsDashboard } from '@/hooks/use-ops';
 import { spacing } from '@/theme';
-import type { Region } from '@/types';
+import type { Operator, Region } from '@/types';
 import { REGION_LABEL, routeLabel } from '@/utils/format';
 
 /** All vehicles on one map, filterable by route (FR9). Shares the dashboard's live data. */
@@ -19,26 +22,38 @@ export default function FleetScreen() {
   const c = useColors();
   const ops = useOpsDashboard();
   const routes = useQuery({ queryKey: ['routes', '', 'ALL'], queryFn: () => routesApi.search() });
-  const [region, setRegion] = useState<Region>('SRI_LANKA');
+  const [region, setRegion] = useState<Region>(env.regions[0]);
+  const [operator, setOperator] = useState<Operator | undefined>(undefined);
   const [routeId, setRouteId] = useState<number | undefined>(undefined);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const vehicles = (ops.data?.vehicles ?? []).filter((v) => (v.region ?? 'SRI_LANKA') === region && (!routeId || v.routeId === routeId));
+  const inRegion = (ops.data?.vehicles ?? []).filter((v) => (v.region ?? 'SRI_LANKA') === region);
+  const vehicles = inRegion.filter((v) => (!routeId || v.routeId === routeId) && byOperator(operator)(v));
   const regionRoutes = (routes.data ?? []).filter((r) => r.region === region);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <View style={styles.top}>
         <ScreenHeader tone="authority" title="Live fleet" />
-        <Chips
-          label="Region"
-          value={region}
+        {multiRegion ? (
+          <Chips
+            label="Region"
+            value={region}
+            onChange={(v) => {
+              setRegion(v);
+              setRouteId(undefined);
+              setSelectedId(null);
+            }}
+            options={env.regions.map((r) => ({ value: r, label: REGION_LABEL[r] }))}
+          />
+        ) : null}
+        <OperatorFilter
+          vehicles={inRegion}
+          value={operator}
           onChange={(v) => {
-            setRegion(v);
-            setRouteId(undefined);
+            setOperator(v);
             setSelectedId(null);
           }}
-          options={(Object.keys(REGION_LABEL) as Region[]).map((r) => ({ value: r, label: REGION_LABEL[r] }))}
         />
         <Chips
           label="Filter by route"

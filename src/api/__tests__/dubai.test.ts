@@ -3,6 +3,9 @@ import { formatClock, formatFare, routeLabel } from '@/utils/format';
 
 import { mockApi } from '../mock';
 
+// Dubai is only in builds that turn it on (EXPO_PUBLIC_REGIONS); this suite runs as such a build.
+jest.mock('@/config/env', () => ({ env: { ...jest.requireActual('@/config/env').env, regions: ['SRI_LANKA', 'DUBAI'] } }));
+
 const redToExpo = async () => (await mockApi.searchRoutes('Expo 2020', 'TRAIN', 'DUBAI')).find((r) => r.origin === 'Centrepoint')!;
 
 describe('Dubai routes (mock backend, real RTA timetable data)', () => {
@@ -11,7 +14,7 @@ describe('Dubai routes (mock backend, real RTA timetable data)', () => {
     expect(new Set(dubai.map((r) => r.routeNo))).toEqual(new Set(['Red', 'Green', 'Tram', 'C01', '27', '8', 'X28']));
     expect(dubai.every((r) => r.timeZone === 'Asia/Dubai' && r.currency === 'AED')).toBe(true);
     const sriLanka = await mockApi.searchRoutes('', undefined, 'SRI_LANKA');
-    expect(sriLanka.map((r) => r.routeNo)).toEqual(['138', 'MAIN', '177']);
+    expect(sriLanka.map((r) => r.routeNo)).toEqual(['138', 'MAIN', '177', '100', '187', '1', '2', 'COAST']);
     expect(sriLanka.every((r) => r.currency === 'LKR' && r.zoneFares === null)).toBe(true);
   });
 

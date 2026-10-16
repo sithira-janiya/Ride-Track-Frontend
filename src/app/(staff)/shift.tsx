@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
 import { Button, Card, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge } from '@/components/ui';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
@@ -75,7 +76,7 @@ export default function ShiftScreen() {
               {routes.data.map((r) => (
                 <Button
                   key={r.routeId}
-                  title={`${r.routeNo} · ${r.name} (${modeLabel(r.mode)}, ${REGION_LABEL[r.region] ?? r.region})`}
+                  title={`${r.routeNo} · ${r.name} (${modeLabel(r.mode)}${multiRegion ? `, ${REGION_LABEL[r.region] ?? r.region}` : ''})`}
                   variant={r.routeId === routeId ? 'primary' : 'secondary'}
                   onPress={() => setRouteId(r.routeId)}
                 />

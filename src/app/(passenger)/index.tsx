@@ -9,6 +9,7 @@ import { routesApi } from '@/api/endpoints';
 import { ModeFilter, type ModeValue } from '@/components/routes/ModeFilter';
 import { RouteCard } from '@/components/routes/RouteCard';
 import { Button, Card, Chips, DashboardHero, EmptyState, ErrorMessage, Loading, SectionTitle, TextField } from '@/components/ui';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { useDebounce } from '@/hooks/use-debounce';
@@ -75,7 +76,7 @@ export default function PassengerHome() {
             returnKeyType="search"
           />
           <ModeFilter value={mode} onChange={setMode} />
-          <Chips label="Where" options={REGIONS} value={region} onChange={setRegion} />
+          {multiRegion ? <Chips label="Where" options={REGIONS} value={region} onChange={setRegion} /> : null}
 
           {searching ? (
             <Section title="Results" emoji="🔎">

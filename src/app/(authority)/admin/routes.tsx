@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { errorMessage } from '@/api/client';
 import { AdminPage } from '@/components/admin/AdminPage';
 import { Card, EmptyState, ErrorMessage, Loading, StatusBadge } from '@/components/ui';
+import { multiRegion } from '@/config/regions';
 import { useAdminRoutes } from '@/hooks/use-admin';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
@@ -31,7 +32,8 @@ export default function RoutesScreen() {
               <StatusBadge label={r.isActive ? 'Active' : 'Inactive'} tone={r.isActive ? 'success' : 'danger'} />
             </View>
             <Text style={[styles.body, { color: c.textSecondary }]}>
-              {modeLabel(r.mode)} · {REGION_LABEL[r.region] ?? r.region} · {r.origin} → {r.destination}
+              {modeLabel(r.mode)}
+              {multiRegion ? ` · ${REGION_LABEL[r.region] ?? r.region}` : ''} · {r.origin} → {r.destination}
             </Text>
             <Text style={[styles.caption, { color: c.textSecondary }]}>
               {countOf(r.stops, 'stop')} · {countOf(r.vehicles, 'vehicle')} in service

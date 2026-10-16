@@ -3,31 +3,19 @@
 import type {
   AdminOverview, AdminRoute, AdminTicketPage, AdminTrip, AdminUser, AdminUserPage, AdminVehicle, Arrival, AuthResult, DelayAlert, FleetVehicle, NewAlert, NewStaffAccount, NewVehicle, Occupancy, OpsDashboard, Report, ReportType, PaymentSession, Role, Route, RouteDetail, ScanOutcome, Stop, Ticket, TicketPage, TicketStatus, TripStatus, User, VehiclePosition,
 } from '@/types';
+import { env } from '@/config/env';
 import { fareBetween } from '@/utils/fare';
 
 import {
   dubaiAdminTrips, dubaiArrivals, dubaiFleet, dubaiOccupancy, dubaiRoutes, dubaiRoutesAtStop, dubaiStops, dubaiStopsFor, dubaiTripRoute, dubaiVehicles, isDubaiRoute, isDubaiTrip,
 } from './mock-dubai';
+import { sriLankaRoutes, sriLankaRouteStops as routeStops, sriLankaStops as allStops, sriLankaVehicles as vehiclesByRoute } from './mock-sri-lanka';
+
+/** Dubai is left out of the data entirely unless this build shows it (EXPO_PUBLIC_REGIONS). */
+const dubaiOn = env.regions.includes('DUBAI');
 
 const delay = <T>(v: T, ms = 300) => new Promise<T>((r) => setTimeout(() => r(v), ms));
 const minsFromNow = (m: number) => new Date(Date.now() + m * 60000).toISOString();
-
-const allStops: Stop[] = [
-  { stopId: 1, name: 'Colombo Fort', latitude: 6.9335, longitude: 79.8501 },
-  { stopId: 2, name: 'Maradana', latitude: 6.9271, longitude: 79.8612 },
-  { stopId: 3, name: 'Borella', latitude: 6.9147, longitude: 79.8777 },
-  { stopId: 4, name: 'Nugegoda', latitude: 6.8649, longitude: 79.8997 },
-  { stopId: 5, name: 'Kottawa', latitude: 6.8419, longitude: 79.9654 },
-  { stopId: 6, name: 'Ragama', latitude: 7.0289, longitude: 79.9219 },
-  { stopId: 7, name: 'Gampaha', latitude: 7.0873, longitude: 79.9925 },
-  { stopId: 8, name: 'Kandy', latitude: 7.2906, longitude: 80.6337 },
-];
-
-// route -> ordered [stopId, fareFromOrigin]
-const routeStops: Record<number, [number, number][]> = {
-  1: [[1, 0], [2, 30], [3, 50], [4, 80], [5, 120]],
-  2: [[1, 0], [2, 60], [6, 140], [7, 190], [8, 520]],
-};
 
 const stopsFor = (routeId: number): Stop[] =>
   (routeStops[routeId] ?? []).map(([stopId, fare], i) => ({
@@ -35,17 +23,6 @@ const stopsFor = (routeId: number): Stop[] =>
     stopSequence: i + 1,
     fareFromOrigin: fare,
   }));
-
-const vehiclesByRoute: Record<
-  number,
-  { vehicleId: number; regNo: string; offsetSec: number; periodSec: number; passengerCount: number; capacity: number }[]
-> = {
-  1: [
-    { vehicleId: 101, regNo: 'NB-1234', offsetSec: 0, periodSec: 240, passengerCount: 28, capacity: 52 },
-    { vehicleId: 102, regNo: 'NB-5678', offsetSec: 120, periodSec: 240, passengerCount: 50, capacity: 52 },
-  ],
-  2: [{ vehicleId: 201, regNo: 'TR-0042', offsetSec: 30, periodSec: 600, passengerCount: 310, capacity: 480 }],
-};
 
 const TICKET_PAGE_SIZE = 8;
 let nextTicketId = 100;
@@ -55,9 +32,9 @@ const tickets: Ticket[] = Array.from({ length: 12 }, (_, i): Ticket => {
   return {
     ticketId: 99 - i,
     tripId: 11,
-    boardStopId: 1,
-    alightStopId: 3,
-    fare: 50,
+    boardStopId: 9,
+    alightStopId: 4,
+    fare: 55,
     currency: 'LKR',
     timeZone: 'Asia/Colombo',
     status,
@@ -65,20 +42,14 @@ const tickets: Ticket[] = Array.from({ length: 12 }, (_, i): Ticket => {
     issuedAt: new Date(Date.now() - (i + 1) * 86400000).toISOString(),
     paymentStatus: status === 'CANCELLED' ? 'REFUNDED' : 'PAID',
     routeNo: '138',
-    boardStopName: 'Colombo Fort',
-    alightStopName: 'Borella',
+    boardStopName: 'Pettah (Central Bus Stand)',
+    alightStopName: 'Nugegoda',
   };
 });
 
-const SRI_LANKA = { region: 'SRI_LANKA', timeZone: 'Asia/Colombo', currency: 'LKR', zoneFares: null } as const;
-const routes: Route[] = [
-  { routeId: 1, routeNo: '138', name: 'Colombo - Kottawa', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kottawa', ...SRI_LANKA },
-  { routeId: 2, routeNo: 'MAIN', name: 'Main Line - Colombo to Kandy', mode: 'TRAIN', origin: 'Colombo Fort', destination: 'Kandy', ...SRI_LANKA },
-  { routeId: 3, routeNo: '177', name: 'Colombo - Kaduwela', mode: 'BUS', origin: 'Colombo Fort', destination: 'Kaduwela', ...SRI_LANKA },
-  ...dubaiRoutes,
-];
+const routes: Route[] = [...sriLankaRoutes, ...(dubaiOn ? dubaiRoutes : [])];
 const routeStopsOf = (routeId: number) => (isDubaiRoute(routeId) ? dubaiStopsFor(routeId) : stopsFor(routeId));
-// Colombo demo trips are routeId * 10 + n; Dubai trip ids carry their route id (see mock-dubai.ts)
+// Sri Lanka demo trips are routeId * 10 + n; Dubai trip ids carry their route id (see mock-dubai.ts)
 const tripRouteId = (tripId: number) => (isDubaiTrip(tripId) ? dubaiTripRoute(tripId) : Math.floor(tripId / 10));
 
 function haversineMeters(aLat: number, aLng: number, bLat: number, bLng: number) {
@@ -90,19 +61,19 @@ function haversineMeters(aLat: number, aLng: number, bLat: number, bLng: number)
 }
 
 const users: User[] = [
-  { userId: 1, name: 'Demo Passenger', email: 'passenger@ridetrack.test', phone: null, role: 'PASSENGER', isActive: true },
-  { userId: 2, name: 'Demo Conductor', email: 'staff@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
-  { userId: 3, name: 'Demo Officer', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
-  { userId: 4, name: 'Demo Inspector', email: 'inspector@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
+  { userId: 1, name: 'Nimal Perera', email: 'passenger@ridetrack.test', phone: null, role: 'PASSENGER', isActive: true },
+  { userId: 2, name: 'Sunil Fernando', email: 'staff@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
+  { userId: 3, name: 'Dilani Jayasinghe', email: 'officer@ridetrack.test', phone: null, role: 'AUTHORITY', isActive: true },
+  { userId: 4, name: 'Ruwan Bandara', email: 'inspector@ridetrack.test', phone: null, role: 'STAFF', isActive: true },
   // logs in with a mobile number instead of an email
-  { userId: 5, name: 'Demo Phone Passenger', email: null, phone: '0771234567', role: 'PASSENGER', isActive: true },
+  { userId: 5, name: 'Kavitha Rajendran', email: null, phone: '0771234567', role: 'PASSENGER', isActive: true },
 ];
 
 // admin-only details per account: staff and officer profile rows, and passwords set by an officer
 type AccountInfo = Pick<AdminUser, 'createdAt' | 'employeeNo' | 'organisation' | 'staffType' | 'vehicleId'>;
 const accountInfo: Record<number, AccountInfo> = {
   2: { createdAt: null, employeeNo: 'C-1001', organisation: 'SLTB Maharagama Depot', staffType: 'CONDUCTOR', vehicleId: 101 },
-  3: { createdAt: null, employeeNo: 'A-2001', organisation: 'NTC Operations', staffType: null, vehicleId: null },
+  3: { createdAt: null, employeeNo: 'A-2001', organisation: 'National Transport Commission', staffType: null, vehicleId: null },
   4: { createdAt: null, employeeNo: 'I-1001', organisation: 'SLTB Maharagama Depot', staffType: 'INSPECTOR', vehicleId: null },
 };
 const passwords: Record<number, string> = {};
@@ -110,9 +81,9 @@ const passwords: Record<number, string> = {};
 const adminVehicles: AdminVehicle[] = [
   ...Object.entries(vehiclesByRoute).flatMap(([routeId, list]) => {
     const route = routes.find((r) => r.routeId === Number(routeId))!;
-    return list.map((v) => ({ vehicleId: v.vehicleId, regNo: v.regNo, type: route.mode, capacity: v.capacity, routeId: route.routeId, routeNo: route.routeNo, isActive: true }));
+    return list.map((v) => ({ vehicleId: v.vehicleId, regNo: v.regNo, type: route.mode, capacity: v.capacity, routeId: route.routeId, routeNo: route.routeNo, isActive: true, operator: v.operator }));
   }),
-  ...dubaiRoutes.flatMap((r) => dubaiFleet(r.routeId).map((v) => ({ ...v, routeNo: r.routeNo, isActive: true }))),
+  ...(dubaiOn ? dubaiRoutes : []).flatMap((r) => dubaiFleet(r.routeId).map((v) => ({ ...v, routeNo: r.routeNo, isActive: true }))),
 ];
 
 const utcDay = (d: Date) => d.toISOString().slice(0, 10);
@@ -171,7 +142,7 @@ export const mockApi = {
   /** Mock ignores the radius and returns the closest stops so the list is never empty during development. */
   nearbyStops: (lat: number, lng: number, limit = 4): Promise<Stop[]> =>
     delay(
-      [...allStops, ...dubaiStops]
+      [...allStops, ...(dubaiOn ? dubaiStops : [])]
         .map((s) => ({
           ...s,
           distanceMeters: Math.round(haversineMeters(lat, lng, s.latitude, s.longitude)),
@@ -222,6 +193,7 @@ export const mockApi = {
           recordedAt: new Date(now).toISOString(),
           passengerCount: v.passengerCount,
           capacity: v.capacity,
+          operator: v.operator,
         };
       }),
     );
@@ -327,7 +299,7 @@ export const mockApi = {
   },
 
   async getDashboard(): Promise<OpsDashboard> {
-    const routeIds = [...Object.keys(vehiclesByRoute).map(Number), ...dubaiRoutes.map((r) => r.routeId)];
+    const routeIds = routes.map((r) => r.routeId);
     const perRoute = await Promise.all(routeIds.map((id) => mockApi.getVehicles(id)));
     const vehicles: FleetVehicle[] = perRoute.flatMap((list, i) => {
       const route = routes.find((r) => r.routeId === routeIds[i])!;
@@ -415,7 +387,7 @@ export const mockApi = {
     const currencies = [...new Set(sold.map((t) => t.currency ?? 'LKR'))];
     return delay({
       users: { total: users.length, passengers: count('PASSENGER'), staff: count('STAFF'), officers: count('AUTHORITY'), disabled: users.filter((u) => !u.isActive).length },
-      fleet: { routes: routes.length, vehicles: adminVehicles.filter((v) => v.isActive).length, stops: allStops.length + dubaiStops.length },
+      fleet: { routes: routes.length, vehicles: adminVehicles.filter((v) => v.isActive).length, stops: allStops.length + (dubaiOn ? dubaiStops.length : 0) },
       tripsToday: {
         total: trips.length,
         ongoing: trips.filter((t) => t.status === 'ONGOING').length,
@@ -518,7 +490,7 @@ export const mockApi = {
     return delay({ ...v });
   },
 
-  /** Colombo: five trips a day per active vehicle, with a few delays and cancellations. Dubai: the real timetable. */
+  /** Sri Lanka: five trips a day per active vehicle, with a few delays and cancellations. Dubai: the real timetable. */
   adminTrips(date: string, routeId?: number): Promise<AdminTrip[]> {
     const dayStart = Date.parse(`${date}T00:00:00Z`);
     const dayKey = Number(date.slice(2).replace(/-/g, ''));
@@ -548,7 +520,7 @@ export const mockApi = {
           };
         }),
       )
-      .concat(dubaiAdminTrips(date, routeId))
+      .concat(dubaiOn ? dubaiAdminTrips(date, routeId) : [])
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
     return delay(trips.slice(0, 500)); // the server caps the list at 500 too
   },
@@ -559,7 +531,7 @@ export const mockApi = {
       total: all.length,
       tickets: all.slice((page - 1) * limit, page * limit).map((t) => ({
         ticketId: t.ticketId,
-        passenger: 'Demo Passenger',
+        passenger: users[0].name,
         tripId: t.tripId,
         routeNo: t.routeNo ?? '',
         fare: t.fare,

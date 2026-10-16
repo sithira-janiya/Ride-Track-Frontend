@@ -1,17 +1,23 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, StatusBadge } from '@/components/ui';
+import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
 import { typography } from '@/theme';
 import type { Route } from '@/types';
-import { modeLabel, REGION_LABEL } from '@/utils/format';
+import { modeLabel, OPERATOR_LABEL, REGION_LABEL } from '@/utils/format';
 
 type Props = { route: Route; onPress: () => void };
 
 export function RouteCard({ route, onPress }: Props) {
   const c = useColors();
   const t = useT();
+  // who runs it ("SLTB · Private"), and where, when this build has more than one region
+  const meta = [
+    ...(multiRegion && route.region ? [t(REGION_LABEL[route.region])] : []),
+    ...(route.operators ?? []).map((o) => t(OPERATOR_LABEL[o])),
+  ].join(' · ');
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,7 +33,7 @@ export function RouteCard({ route, onPress }: Props) {
         <Text style={[styles.meta, { color: c.textSecondary }]}>
           {route.origin} → {route.destination}
         </Text>
-        {route.region ? <Text style={[styles.meta, { color: c.textSecondary }]}>{t(REGION_LABEL[route.region])}</Text> : null}
+        {meta ? <Text style={[styles.meta, { color: c.textSecondary }]}>{meta}</Text> : null}
       </Card>
     </Pressable>
   );

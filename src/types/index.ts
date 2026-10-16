@@ -4,6 +4,8 @@ export type Role = 'PASSENGER' | 'STAFF' | 'AUTHORITY';
 export type TransportMode = 'BUS' | 'TRAIN';
 /** Where a route runs. Sets the time zone its times are shown in and the currency of its fares. */
 export type Region = 'SRI_LANKA' | 'DUBAI';
+/** Who runs a vehicle: the state bus board, a private bus under an NTC route permit, or Sri Lanka Railways. */
+export type Operator = 'SLTB' | 'PRIVATE' | 'SLR';
 export type TripStatus = 'SCHEDULED' | 'ONGOING' | 'DELAYED' | 'CANCELLED' | 'COMPLETED';
 export type TicketStatus = 'PENDING' | 'ACTIVE' | 'USED' | 'EXPIRED' | 'CANCELLED';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
@@ -53,6 +55,10 @@ export interface Route {
   currency: string;
   /** zone fares (Dubai RTA): the fare for a trip touching 1, 2, 3+ zones. Null: fares go by stop. */
   zoneFares: number[] | null;
+  /** lowest fare charged on the route (Sri Lanka buses: the NTC minimum fare). Not sent by every server. */
+  minFare?: number | null;
+  /** who runs it; not sent by every server */
+  operators?: Operator[];
 }
 
 export interface Stop {
@@ -94,6 +100,7 @@ export interface VehiclePosition {
   recordedAt: string;
   passengerCount?: number;
   capacity?: number;
+  operator?: Operator;
 }
 
 export interface Ticket {
@@ -250,6 +257,7 @@ export interface AdminVehicle {
   routeId: number;
   routeNo: string;
   isActive: boolean;
+  operator?: Operator;
 }
 
 export interface NewVehicle {

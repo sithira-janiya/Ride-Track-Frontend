@@ -4,7 +4,7 @@ import { Card, ETAChip, OccupancyBar } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { spacing, typography } from '@/theme';
 import type { FleetVehicle } from '@/types';
-import { modeLabel } from '@/utils/format';
+import { modeLabel, OPERATOR_LABEL } from '@/utils/format';
 
 type Props = { vehicle: FleetVehicle; selected?: boolean; onPress?: () => void };
 
@@ -14,12 +14,13 @@ export function VehicleCard({ vehicle: v, selected, onPress }: Props) {
     <Pressable
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={`${modeLabel(v.mode)} ${v.regNo ?? v.vehicleId} on route ${v.routeNo}${selected ? ', selected' : ''}`}
+      accessibilityLabel={`${modeLabel(v.mode)} ${v.regNo ?? v.vehicleId} on route ${v.routeNo}${v.operator ? `, ${OPERATOR_LABEL[v.operator]}` : ''}${selected ? ', selected' : ''}`}
       onPress={onPress}>
       <Card style={selected ? { borderColor: c.primary, borderWidth: 2 } : undefined}>
         <View style={styles.row}>
           <Text style={[styles.name, { color: c.text }]}>
             {v.regNo ?? `Vehicle ${v.vehicleId}`} · Route {v.routeNo}
+            {v.operator ? ` · ${OPERATOR_LABEL[v.operator]}` : ''}
           </Text>
           <ETAChip eta={v.eta} />
         </View>

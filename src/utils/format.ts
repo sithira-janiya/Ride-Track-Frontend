@@ -1,4 +1,4 @@
-import type { Region, Route } from '@/types';
+import type { Operator, Region, Route } from '@/types';
 
 export function formatDistance(meters: number): string {
   return meters < 1000 ? `${Math.round(meters / 10) * 10} m` : `${(meters / 1000).toFixed(1)} km`;
@@ -22,6 +22,7 @@ export function formatClock(iso: string, timeZone?: string): string {
 }
 
 export const REGION_LABEL: Record<Region, string> = { SRI_LANKA: 'Sri Lanka', DUBAI: 'Dubai' };
+export const OPERATOR_LABEL: Record<Operator, string> = { SLTB: 'SLTB', PRIVATE: 'Private', SLR: 'Sri Lanka Railways' };
 const ZONE_LABEL: Record<string, string> = { 'Asia/Colombo': 'Sri Lanka time', 'Asia/Dubai': 'Dubai time' };
 
 /** "Dubai time" when the route's clock differs from the device's, so nobody reads a Dubai time as their own. */
