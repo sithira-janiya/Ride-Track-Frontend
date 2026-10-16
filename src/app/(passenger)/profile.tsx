@@ -5,10 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { userApi } from '@/api/endpoints';
+import { LogoutButton } from '@/components/auth/LogoutButton';
 import { Button, Card, ErrorMessage, LanguagePicker, ScreenHeader, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
 import { useT } from '@/i18n';
-import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
 import { spacing, typography } from '@/theme';
@@ -18,7 +18,6 @@ export default function PassengerProfile() {
   const t = useT();
   const user = useAuth((s) => s.user)!;
   const setUser = useAuth((s) => s.setUser);
-  const logout = useAuth((s) => s.logout);
 
   const [name, setName] = useState(user.name);
   const currentLanguage = useLanguage((s) => s.language);
@@ -43,11 +42,6 @@ export default function PassengerProfile() {
     }
     setNameError(undefined);
     save.mutate();
-  };
-
-  const signOut = async () => {
-    disconnectSocket();
-    await logout();
   };
 
   return (
@@ -89,7 +83,7 @@ export default function PassengerProfile() {
             </Text>
           ) : null}
           <Button title="Save changes" loading={save.isPending} disabled={!dirty} onPress={submit} />
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <LogoutButton />
         </View>
       </ScrollView>
     </SafeAreaView>

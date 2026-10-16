@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { scansApi } from '@/api/endpoints';
+import { AccountBar } from '@/components/auth/AccountBar';
 import { ScanResultPanel } from '@/components/scan/ScanResultPanel';
 import { Button, DashboardHero, ErrorMessage, HeroPill, Loading, TextField } from '@/components/ui';
 import { useColors } from '@/hooks/use-colors';
@@ -60,6 +61,7 @@ export default function ScanScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.content}>
+          <AccountBar />
           <DashboardHero
             tone="staff"
             illustration="heroStaff"

@@ -5,10 +5,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { errorMessage } from '@/api/client';
 import { routesApi } from '@/api/endpoints';
+import { LogoutButton } from '@/components/auth/LogoutButton';
 import { Button, Card, EmptyState, ErrorMessage, Loading, ScreenHeader, StatusBadge } from '@/components/ui';
 import { multiRegion } from '@/config/regions';
 import { useColors } from '@/hooks/use-colors';
-import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { useShift } from '@/store/shift';
 import { spacing, typography } from '@/theme';
@@ -18,7 +18,6 @@ import { formatClock, modeLabel, REGION_LABEL, zoneNote } from '@/utils/format';
 export default function ShiftScreen() {
   const c = useColors();
   const user = useAuth((s) => s.user);
-  const logout = useAuth((s) => s.logout);
   const { shift, start, end } = useShift();
   const [routeId, setRouteId] = useState<number | null>(null);
 
@@ -35,11 +34,6 @@ export default function ShiftScreen() {
   });
   // a trip with no vehicle yet cannot report passengers
   const assignable = (trips.data ?? []).filter((t) => t.vehicleId != null && t.status !== 'CANCELLED' && t.status !== 'COMPLETED');
-
-  const signOut = async () => {
-    disconnectSocket();
-    await logout();
-  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
@@ -111,7 +105,7 @@ export default function ShiftScreen() {
             </>
           ) : null}
 
-          <Button title="Log out" variant="secondary" onPress={signOut} />
+          <LogoutButton />
         </View>
       </ScrollView>
     </SafeAreaView>

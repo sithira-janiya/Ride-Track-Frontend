@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { useAlertBanner } from '@/store/alert-banner';
+import { useShift } from '@/store/shift';
 import { useTicketCache } from '@/store/tickets';
 import type { AuthResult, AuthTokens, User } from '@/types';
 import { getItem, removeItem, setItem } from '@/utils/secure-storage';
@@ -63,9 +65,13 @@ export const useAuth = create<AuthState>((set, get) => {
       await persist();
     },
 
+    // Everything here belongs to the account, not the device, so the next person to log in on it starts clean.
+    // The root layout also reacts to the sign-out: it closes the live socket and drops cached account data.
     logout: async () => {
       set({ user: null, accessToken: null, refreshToken: null });
-      useTicketCache.getState().reset(); // tickets belong to the account, not the device
+      useTicketCache.getState().reset();
+      useShift.getState().end();
+      useAlertBanner.getState().dismiss();
       await removeItem(KEY);
     },
   };

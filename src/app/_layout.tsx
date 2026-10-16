@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
 
 import { BootLoader } from '@/components/loading/BootLoader';
+import { disconnectSocket } from '@/socket';
 import { useAuth } from '@/store/auth';
 import { useLanguage } from '@/store/language';
 
@@ -57,6 +58,19 @@ export default function RootLayout() {
     if (useLanguage.persist.hasHydrated()) apply();
     return useLanguage.persist.onFinishHydration(apply);
   }, [userLanguage]);
+
+  // On every sign-out (the Log out button, or a session that could not be refreshed): close the live socket and drop
+  // cached account data (tickets, alerts, profile, dashboards, admin lists) so the next person on this device never
+  // sees it. Public routes and timetables stay cached for offline use.
+  useEffect(
+    () =>
+      useAuth.subscribe((state, prev) => {
+        if (!prev.user || state.user) return;
+        disconnectSocket();
+        queryClient.removeQueries({ predicate: (q) => !OFFLINE_KEYS.includes(String(q.queryKey[0])) });
+      }),
+    [queryClient],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setMinTimeShown(true), bootTimeLeft());

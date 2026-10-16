@@ -4,7 +4,124 @@ Mobile app for RideTrack, a public transport (bus and train) tracking and ticket
 
 The app also has a Dubai region (real RTA data). It is hidden unless a build turns it on with `EXPO_PUBLIC_REGIONS=SRI_LANKA,DUBAI` (see Regions under [Features built so far](#features-built-so-far)).
 
+**Want to try it?** Log in with the [demo accounts for the 3 roles](#demo-logins-for-the-3-roles) on the live web demo at https://ride-track-frontend-src.vercel.app (password `Password1!`).
+
 > This file is kept up to date as the app is built. See [Keeping this README current](#keeping-this-readme-current).
+
+## Demo logins for the 3 roles
+
+Every demo account uses the password **`Password1!`**. The role decides which app you get: the bottom tab bar, the colours and the screens are different for each role.
+
+### Where to try it
+
+| Where | How | Data |
+|---|---|---|
+| Live web demo | Open **https://ride-track-frontend-src.vercel.app** in any browser (a phone browser works too) | Built-in mock data, nothing to install. The live site is built from the `main` branch, so features that are only on other branches may be missing there. |
+| Your computer, web | `npm start`, then press `w` (opens http://localhost:8081) | Mock data by default (`EXPO_PUBLIC_USE_MOCK_API=true`) |
+| Your phone, Expo Go | `npm start`, then scan the QR code with Expo Go (phone and computer on the same Wi-Fi) | Same as above; the camera scanner and live map only work here |
+| Real backend | Set `EXPO_PUBLIC_USE_MOCK_API=false` (see [Running against the real backend](#running-against-the-real-backend-ridetrack-api)) | RideTrack-API's seeded accounts (see [Mock and real backend accounts](#mock-and-real-backend-accounts)) |
+
+### The accounts
+
+| Role | Log in with | Password | Who you are (mock data) | Tabs you get |
+|---|---|---|---|---|
+| **Passenger** | `passenger@ridetrack.test` | `Password1!` | Nimal Perera | Home · Tickets · Alerts · Profile |
+| Passenger (mobile number) | `0771234567` | `Password1!` | Kavitha Rajendran | Home · Tickets · Alerts · Profile |
+| **Staff**: conductor | `staff@ridetrack.test` | `Password1!` | Sunil Fernando, conductor C-1001, SLTB Maharagama Depot, bus NB-1234 on route 138 | Scan · Passengers · Shift |
+| Staff: inspector | `inspector@ridetrack.test` | `Password1!` | Ruwan Bandara, inspector I-1001, SLTB Maharagama Depot (no bus assigned) | Scan · Passengers · Shift |
+| **Authority** | `officer@ridetrack.test` | `Password1!` | Dilani Jayasinghe, National Transport Commission | Home (dashboard) · Fleet · Reports · Alerts · Admin |
+
+Type the login exactly as shown, in lower case. The mobile-number passenger and the inspector exist in mock mode only.
+
+**Logging out** works the same for every role. Each role's home screen (passenger **Home**, staff **Scan**, authority **Home** and the **Admin** overview) starts with your name and a **Log out** button. It is also at the bottom of **Profile** (passenger), **Shift** (staff) and **Home** (authority). The app asks before logging you out; staff are told their shift will end.
+
+### Passenger: what to try
+
+The passenger app is for people who ride: find a route, see when the next bus or train comes, buy a ticket and show its QR code.
+
+1. Log in as `passenger@ridetrack.test`. Home greets Nimal and opens with "Where to?".
+2. Type `138` in **Search routes** and open route **138** (Pettah - Kottawa). You see every stop with its fare from the start; tap a stop for its next arrivals. **Save** adds the route to Favourite routes on Home. **Track live on map** works in Expo Go (the web shows a notice instead of the map).
+3. Tap **Buy a ticket**, then:
+   1. *Where do you board?* **Pettah (Central Bus Stand)**
+   2. *Where do you get off?* **Nugegoda** (Rs. 55)
+   3. *Which trip?* pick any time, then tap **Pay Rs. 55**.
+
+   In mock mode the payment goes through straight away and the ticket opens with its QR code and **Ticket number 100**. Tickets bought after that get 101, 102 and so on; the numbering starts again at 100 when the page reloads.
+4. **Tickets**: filter Active, Used, Cancelled or All. Open a ticket to see its QR code (screen brightness goes up on a phone) or to cancel it.
+5. **Alerts**: two unread alerts are waiting (route 138 running late, Main Line trains skipping Maradana); the number on the tab shows how many are unread.
+6. **Profile**: change your name (**Save changes**), pick English, සිංහල or தமிழ் (needs the Google Translate key, see [Languages](#languages-google-translate)), and log out.
+
+Registering a new account on the login screen always creates a passenger.
+
+### Staff: what to try
+
+The staff app is for conductors and inspectors on board: check tickets and keep the passenger count up to date.
+
+1. Log in as `staff@ridetrack.test`. The **Scan** tab says "No shift started".
+2. **Shift**: pick a route, then a trip that has a vehicle. The card now says "On shift".
+3. **Scan**: on a phone, point the camera at a passenger's QR code. In a browser (or if a code will not scan), tap **Type ticket number instead**, enter the number and tap **Check ticket**:
+   - a paid, unused ticket: **✓ VALID**, "Ticket accepted. Let the passenger board."
+   - the same ticket again: **✕ INVALID**, "This ticket has already been scanned."
+   - a number that does not exist: **✕ INVALID**, "Ticket not found. This is not a RideTrack ticket."
+
+   Tap **Scan next ticket** to carry on.
+4. **Passengers**: update how many people are on board your vehicle; the occupancy bar and the officers' dashboard follow it.
+5. Tap **Log out** at the top of **Scan** (or at the bottom of **Shift**). The app asks first and says your shift will end.
+
+### Authority: what to try
+
+The authority app is for Ministry and NTC officers: watch the whole network, publish service alerts, run reports and manage the system.
+
+1. Log in as `officer@ridetrack.test`. **Home** is the live dashboard: vehicles running, active delays, passengers on board and how full the seats are, then every vehicle with its route, arrival time and how full it is. Filter the vehicles by operator (SLTB, Private, Sri Lanka Railways).
+2. **Fleet**: every vehicle on one map (in Expo Go), with a filter by route.
+3. **Reports**: pick a report type (**Route performance**, **Delays** or **Occupancy**), all routes or one, and **Last 7 days** or **Last 30 days**, then tap **Generate report**.
+4. **Alerts**: choose a route and a trip, an alert type (**Delay**, **Cancellation** or **Route change**), write the **Message to passengers** (and the delay in minutes if you like), then tap **Publish alert**. In mock mode it appears in the passenger's Alerts tab in the same session.
+5. **Admin** (the back office):
+   - **Accounts**: find anyone, add a staff member or officer with their own first password, disable an account.
+   - **Vehicles**: add buses and trains, change capacity or route, take one out of service.
+   - **Routes**, **Trips** and **Tickets**: every route with its stops, the timetable for any day, and every ticket sold with its payment status.
+
+### A full journey across the 3 roles (about 5 minutes)
+
+Do this in **one browser tab without reloading**: in mock mode the demo data lives in memory, so a reload starts it fresh.
+
+1. **Passenger** (`passenger@ridetrack.test`): buy a route 138 ticket from Pettah to Nugegoda. Note the ticket number (100 on a fresh page). Tap **Log out** at the top of **Home** and confirm.
+2. **Staff** (`staff@ridetrack.test`): **Scan** → **Type ticket number instead** → `100` → **✓ VALID**. Check it again to see it rejected as already scanned. **Log out** (top of **Scan**).
+3. **Authority** (`officer@ridetrack.test`): **Alerts** → publish a delay on route 138; **Admin** → **Tickets** lists the ticket you bought. **Log out** (top of **Home**).
+4. **Passenger** again: **Tickets** → **Used** now shows the scanned ticket, and **Alerts** shows the officer's alert.
+
+### Mock and real backend accounts
+
+| | Mock mode (the default, and the live demo) | Real backend (`npm run seed` in RideTrack-API) |
+|---|---|---|
+| Password | `Password1!` | `Password1!` |
+| Passenger | `passenger@ridetrack.test` (Nimal Perera), `0771234567` (Kavitha Rajendran) | `passenger@ridetrack.test` (Demo Passenger) |
+| Staff | `staff@ridetrack.test` (Sunil Fernando, conductor), `inspector@ridetrack.test` (Ruwan Bandara) | `staff@ridetrack.test` (Demo Conductor, ST-001, Demo Transport Co., vehicle 101) |
+| Authority | `officer@ridetrack.test` (Dilani Jayasinghe) | `officer@ridetrack.test` (Demo Officer, Transport Authority, AU-001) |
+| Defined in | `src/api/mock.ts` (`users`, `MOCK_PASSWORD`) | `scripts/seed.js` in RideTrack-API |
+
+- Outside production the backend seed also creates `admin@ridetrack.test` with the `ADMIN` role. The app has no admin-only screens: use `officer@ridetrack.test`, whose **Admin** tab is the back office.
+- The same list is in `.env.example` for quick reference; the app does not read it from there.
+- These are demo passwords. Never seed them into a real deployment.
+
+### Login rules
+
+- The login field takes an email or a mobile number. Only the mobile-number passenger has a phone number; log in to the others with the email.
+- A wrong email or password gives one message, "Invalid email/phone or password.", so it does not reveal which accounts exist. A disabled account gets the same message.
+- Registering needs a password of at least 8 characters with a letter and a number, and always creates a **Passenger**. Staff and officer accounts are created by an officer in **Admin** → **Accounts**, each with its own first password.
+- In mock mode, registered and admin-created accounts live in memory and disappear when the page reloads. On the real backend they are saved in MySQL.
+- The session is kept on the device (secure storage), so reopening the app goes straight back to your role's home screen until you log out.
+- Logging out clears everything that belongs to the account from the device: the saved session, the ticket cache and any payment still being checked, a staff shift, the alert banner, and cached tickets, alerts, profile, dashboards and admin lists. Public routes and timetables stay cached for offline use. The next person who logs in on the same device starts clean.
+
+### If a login does not work
+
+| What you see | Why, and what to do |
+|---|---|
+| "Invalid email/phone or password." | Check the login is typed exactly as in the table, in lower case, and the password is `Password1!` (capital P, ending in `1!`). |
+| "Cannot reach RideTrack" | The app is set to the real backend (`EXPO_PUBLIC_USE_MOCK_API=false`) and cannot reach it. Start RideTrack-API, or check the IP in `.env`, or switch back to mock mode; then restart with `npx expo start -c`. |
+| The staff scan says "Ticket not found" for a ticket you just bought | The page was reloaded between buying and scanning, which resets the mock data. Buy the ticket again and scan it in the same tab. |
+| The phone number or the inspector is rejected | They exist in mock mode only, not on the real backend. |
+| You land on the wrong app | You are still logged in as someone else: the name at the top of the home screen says who. Tap **Log out** there and log in again. |
 
 ## Tech stack
 
@@ -58,24 +175,7 @@ Notes:
 
 ### Demo accounts
 
-All use the password `Password1!`. The names are the mock-mode ones; the real backend's seed has its own.
-
-| Role | Email | Name (mock mode) | Lands on |
-|---|---|---|---|
-| Passenger | `passenger@ridetrack.test` | Nimal Perera | Passenger tabs (home, tickets, alerts, profile) |
-| Passenger (mobile number) | `0771234567` (mock mode only) | Kavitha Rajendran | Passenger tabs |
-| Staff (conductor) | `staff@ridetrack.test` | Sunil Fernando, SLTB Maharagama Depot, bus NB-1234 on route 138 | Staff tabs (scan, passengers, shift) |
-| Staff (inspector) | `inspector@ridetrack.test` (mock mode only) | Ruwan Bandara | Staff tabs |
-| Authority | `officer@ridetrack.test` | Dilani Jayasinghe, National Transport Commission | Authority tabs (dashboard, fleet, reports, alerts) |
-
-Notes:
-- The same list is in `.env.example` for quick reference; the app does not read it from there.
-- In mock mode these accounts are defined in `src/api/mock.ts` (`users` and `MOCK_PASSWORD`). On the real backend the passenger, staff and officer accounts and password are created by `npm run seed` in `RideTrack-API`; the mobile-number passenger and the inspector exist only in mock mode.
-- The login field accepts an email or a mobile number. Only the mobile-number passenger has a phone number; log in to the others with the email.
-- Registering in the app always creates a **Passenger**. Staff and Authority accounts cannot be self-registered.
-- In mock mode, registered accounts live in memory only and disappear when the app reloads. On the real backend they are saved in MySQL.
-- A wrong email or wrong password gives the same error, "Invalid email/phone or password."
-- Passwords need at least 8 characters with a letter and a number when registering.
+The logins for every role, what each one can do and a step-by-step tour are in [Demo logins for the 3 roles](#demo-logins-for-the-3-roles).
 
 ### Useful commands
 
@@ -107,6 +207,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 | – | Sri Lanka focus for a Ministry of Transport demo: eight real Sri Lankan routes (SLTB and private buses 138, 177, 100, 187, 1 and 2; Main Line and Coastal Line trains), SLTB / private / railway operator on routes and vehicles with an operator filter for officers, NTC minimum bus fare, Dubai hidden behind `EXPO_PUBLIC_REGIONS` | Built; checked in the browser in mock mode at phone size (sign-in tagline, passenger home without a region picker, bus search, route 138 stops and fares, officer dashboard with the operator filter); unit tests cover the network, the minimum fare, the hidden Dubai data and the setting. Not checked against the real backend (its seed does not have the new routes) or on a device |
 | – | Design: Figma design system and screens for every role, applied to the app (grey page with white cards, role-coloured tab bar and screen headers) | Built; checked in the browser at phone size in light and dark mode (sign-in, passenger home and tickets, authority dashboard and reports, admin overview); not tested on a device |
 | – | Loading animation: a looping street scene (RideTrack bus, tuk-tuk, car, train, Colombo skyline) on app start, on the web while the bundle downloads, and in every in-screen loading state | Built; checked in the browser at phone size in light and dark mode, with reduced motion, and through the hand-off from the web boot screen to the app (logged out and logged in); not tested on a device |
+| – | Log out for every role: account bar with name and Log out on every role's home screen, confirmation, and clearing all account data from the device | Built; checked in the browser at phone size in light and dark mode for passenger, staff (with a shift running) and officer, including cancelling, and a reload after logging out stays on the login screen; unit tests cover the store and the button; not tested on a device |
 | 8 | Quality and release | In progress: contrast audit, automated tests and build config done; device, offline and usability testing and the real build still to do |
 
 ## Features built so far
@@ -136,13 +237,14 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
 - Tickets: pick boarding stop, drop-off stop and trip, see the fare, pay. A pending payment is saved on the device and re-checked when the app resumes, so it is never lost. Ticket list with filters and paging, QR screen with a screen-brightness boost, cancel an unused ticket. Tickets are cached on the device so they still show offline, and cleared on logout.
 
 - Alerts tab: delay, cancellation and route-change alerts with unread highlighting, a tab badge with the unread count, "Mark as read" and "Mark all as read". A banner slides in over any screen when the server sends `alert:new`. The device is registered for push notifications on login (skipped in mock mode, on web, and when notifications are off). In mock mode a "Demo: simulate a new alert" button stands in for the server.
-- Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out. Saving a new language switches the app to it (see Languages below).
+- Profile: edit name, choose language (English, Sinhala, Tamil) and turn alert notifications on or off. Also has Log out (as does the account bar at the top of Home). Saving a new language switches the app to it (see Languages below).
 
 **Staff**
 - Scan tab opens with a teal welcome card (greeting, an illustration of a conductor scanning a ticket) and a label with the current shift ("On shift · 138") or "No shift started".
 - Scan tab: camera permission flow, QR scanning, then a large VALID / INVALID result with the reason (icon, word and colour) and haptic feedback. "Scan next ticket" resets for the next passenger. If a QR will not scan, type the ticket number instead.
 - Passengers tab: set the on-board passenger count for the shift's vehicle (+/- 1 and 5), sent to the server with Save.
-- Shift tab: choose route and trip (and so the vehicle) for the shift; remembered on the device.
+- Shift tab: choose route and trip (and so the vehicle) for the shift; remembered on the device until the shift ends or the staff member logs out.
+- Log out is at the top of the Scan tab (account bar) and at the bottom of the Shift tab.
 
 **Authority**
 - Dashboard: an indigo welcome card (greeting, "Operations", an illustration of the live operations screen) with a "Live · 14:05" label (time of the last update) once data has loaded. Then live tiles, each with an emoji in a tinted bubble (🚌 vehicles live, ⏱️ active delays, 🧍 passengers on board, 👥 nearly-full vehicles), active delays and cancellations, and every vehicle with arrival time, occupancy and operator, filterable by operator (and by region when Dubai is on). Refreshes on the server's `ops:update` event (polls every few seconds in mock mode).
@@ -157,7 +259,7 @@ Phases follow [`docs/11-frontend-tasks.md`](../RideTrack%20Development/docs/11-f
   - Trips: yesterday's, today's or tomorrow's timetable (UTC days), filterable by route, with status and tickets sold. Times are in each route's local time, marked "Dubai time" where that differs from the phone.
   - Tickets: every ticket sold, newest first, filterable by status, with passenger, fare and payment status.
   - Admin data is never saved on the device. Opening an admin page directly (web refresh or link) still puts the overview underneath it, so the back arrow works.
-- Log out is at the bottom of the Dashboard.
+- Log out is at the top of the Dashboard and of the Admin overview (account bar), and at the bottom of the Dashboard.
 
 **Offline routes and timetables**: routes, route detail, stop arrivals and nearby stops are saved on the device for 24 hours (`src/app/_layout.tsx`), so they still show without signal. Alerts, tickets and live vehicle positions are not saved here (tickets have their own cache).
 
@@ -173,6 +275,8 @@ What the design changed in the app:
 - The admin Manage rows use the admin violet. The passenger ticket filters use the shared `Chips` component. The authority dashboard tab is labelled "Home" so all five tabs fit a 375px phone.
 
 **Auth**: email or phone login, register, session restored on app start, role decides which screens appear. The login and register screens have a language picker too.
+
+**Logging out (every role)**: one shared log out for passengers, staff and officers (`useLogout` in `src/hooks/use-logout.ts`, `LogoutButton` and `AccountBar` in `src/components/auth/`). Every role's home screen starts with an account bar: the person's initial in their role colour, their name, role and email or phone, and a **Log out** button. Profile, Shift and the authority Dashboard keep a full-width **Log out** at the bottom. Before logging out the app asks for confirmation (the browser dialog on the web), and adds what will be lost: a staff member's shift, or a ticket payment still being confirmed. Logging out (and a session that ends because its token could not be refreshed) clears the account's data: the auth store resets the session, the ticket cache, the shift and the alert banner (`src/store/auth.ts`); the root layout closes the live socket and removes cached account queries, keeping only public routes and timetables (`src/app/_layout.tsx`). The route guard then shows the login screen.
 
 **Artwork**: RideTrack's own app icon (a bus inside a map pin, in the brand blue), Android adaptive and themed icons, splash screen, web favicon and iOS Liquid Glass icon layers. Flat illustrations show on the login and register screens and on the empty states for no tickets, no alerts (passenger and authority) and no routes or nearby stops (`EmptyState`'s `illustration` prop). Each role's home screen starts with a welcome card in its own colour (passenger blue, staff teal, authority indigo, admin violet; `heroColors` in `src/theme`) holding a flat illustration drawn for that colour (`DashboardHero` in `src/components/ui`). The card is a deeper shade in dark mode, and the illustrations' backdrop shapes are see-through white, so the same picture fits both. The art is original; Pinterest searches for transit app icons and flat transport illustrations were used only as style references. Illustrations are decorative and hidden from screen readers.
 
@@ -232,6 +336,8 @@ Automated tests run with Jest, `jest-expo` and React Native Testing Library (`np
 - `src/api/__tests__/admin.test.ts`: the mock admin API: creating accounts (own password, duplicate email), disabling blocks login, role filter, vehicle route rules, out-of-service vehicles drop out of trips, ticket paging.
 - `src/__tests__/login.test.tsx`: the login screen (empty fields, wrong password, success).
 - `src/components/scan/__tests__/ScanResultPanel.test.tsx`: VALID / INVALID result, icon and text, reset.
+- `src/store/__tests__/auth-logout.test.ts`: logging out clears the account, its tickets and pending payments, the staff shift and the alert banner, and removes the saved session.
+- `src/components/auth/__tests__/LogoutButton.test.tsx`: each role logs out after confirming, cancelling keeps you logged in, staff are warned their shift will end, and the account bar shows who is logged in.
 - `src/api/__tests__/ticket-flow.test.ts`: buy, pay, QR, scan once, cancel and history against the mock backend.
 - `src/i18n/__tests__/use-t.test.ts`: English fallback, stored translations, placeholder filling and lost-placeholder fallback.
 - `src/i18n/__tests__/google-translate.test.ts`: batching and de-duplicating strings into one Google Translate request, and keeping Google's error message on failure (fetch mocked).
@@ -288,6 +394,7 @@ Body text is at least 16 pt, touch targets are at least 44 px, and status is alw
 - The new icons and splash have not been seen on a device yet: the splash only shows in a real build (not Expo Go), and the iOS Liquid Glass icon (`assets/expo.icon`) has not been opened in Icon Composer or built for iOS.
 - The Figma file is on the Starter plan, which allows only 3 pages and one variable mode, so light and dark colours are two separate collections and every screen is drawn in light mode only. Some small details in the Figma screens still differ from the app: the icon bubbles on stat tiles, nav rows and admin avatars show the full colour instead of the 14% tint the app uses, the "LKR 1.07M" tile value and the long vehicle buttons on Admin / Vehicles overflow, and Sinhala labels read "Sinhala" because Figma has no Sinhala font installed. The app follows the intended design.
 - The redesigned tab bar, cards and screen headers have only been checked in the browser, not on a phone.
+- Logging out only ends the session on the device. RideTrack-API has no logout endpoint for app users (only for its admin site) and no way to remove a push token, so the refresh token stays valid on the server until it expires, and the phone's push token stays linked to the account until someone else registers it.
 - The loading animation has only been checked in the browser. On a phone the native driver runs it; how smooth it is on a low-end Android, and the iOS splash fade into the start-up loader, still need checking on a device. On the web boot screen the tuk-tuk, car and train timings assume a scene about 400 px wide (CSS cannot read the width), so on a wider screen they cross a little faster.
 - Unused Expo template images (`expo-badge*`, `expo-logo`, `react-logo*`, `logo-glow`, `tutorial-web`, `tabIcons/`) are still in `assets/images/`.
 
